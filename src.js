@@ -109,15 +109,19 @@ v2.path = {
     return parts.filter(p => p).join('/')
   },
   resolve(x, ...then) {
-    const parts = x.split('/')
+    const p = /^(?:\w+:)?\//.exec(x)
+    const prefix = p ? p[0] : ''
+    const rx = x.slice(prefix.length)
+    const parts = rx ? rx.split('/') : []
     for (const y of then) {
+      if (y[0] === '/') parts.length = 0
       for (const t of y.split('/')) {
         if (t === '.') continue
         else if (t === '..') parts.pop()
-        else parts.push(t)
+        else if (t) parts.push(t)
       }
     }
-    return parts.join('/')
+    return prefix + parts.join('/')
   }
 }
 
