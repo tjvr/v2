@@ -96,9 +96,12 @@ v2.iter = {
 }
 v2.path = {
   dirname(x) {
-    const i = x.lastIndexOf('/')
-    if (i === -1) return x
-    return x.slice(0, i)
+    const p = /^(?:\w+:)?\//.exec(x)
+    const prefix = p ? p[0] : ''
+    const rx = x.slice(prefix.length)
+    const i = rx.lastIndexOf('/')
+    if (i === -1) return prefix
+    return prefix + rx.slice(0, i)
   },
   basename(x) {
     const i = x.lastIndexOf('/')
