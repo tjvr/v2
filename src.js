@@ -199,6 +199,16 @@ v2.request = function requestXHR(method, url, options) {
   }
   if (options.as) xhr.responseType = options.as
   if (options.type) xhr.overrideMimeType(options.type)
+  let hash = ''
+  const i = url.indexOf('#')
+  if (i !== -1) {
+    hash = url.slice(i + 1)
+    url = url.slice(0, i)
+  }
+  if (options.query) {
+    url += (url.includes('?') ? '&' : '?') + Object.keys(options.query).map(k => `${encodeURIComponent(k)}=${encodeURIComponent(options.query[k])}`).join('&')
+  }
+  if (hash) url += '#' + hash
   xhr.open(method, url, true)
   xhr.send()
 
@@ -609,9 +619,27 @@ v2.DynamicTreeItem = class DynamicTreeItem extends v2.View {
     this.add(item, this.container, before.el)
   }
 
-  toggle() {
-    if (this.isExpanded) this.collapse()
-    else this.expand()
+  toggle(recursive) {
+    if (this.isExpanded)
+      if (recursive) this.collapseRecursive()
+      else this.collapse()
+    else
+      if (recursive) this.expandRecursive()
+      else this.expand()
+  }
+  expandRecursive(set) {
+    if (!set) set = new Set
+    if (set.has(this.model)) return
+    set.add(this.model)
+    this.expand()
+    for (const c of this.items) c.expandRecursive(set)
+  }
+  collapseRecursive(set) {
+    if (!set) set = new Set
+    if (set.has(this.model)) return
+    set.add(this.model)
+    this.collapse()
+    for (const c of this.items) c.collapseRecursive(set)
   }
   expand() {
     if (this.isExpanded) return
@@ -661,7 +689,7 @@ v2.DynamicTree = class DynamicTree extends v2.DynamicTreeItem {
   _mouseDown(e) {
     if (h.nearest('.v2-tree-item-disclosure', e.target)) {
       const item = h.nearest('.v2-dynamic-tree-item', e.target)
-      if (item) item.view.toggle()
+      if (item) item.view.toggle(e.metaKey || e.ctrlKey)
       return
     }
   }
