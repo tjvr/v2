@@ -1253,8 +1253,8 @@ v2.Menu = class Menu extends v2.View {
     if (!el) return
     const t = el.view.target
     const a = el.view.action
-    if (typeof a === 'function') a()
-    else if (t && a) t[a]()
+    if (typeof a === 'function') a(e)
+    else if (t && a) t[a](e)
     this.app.hideMenus()
   }
 
@@ -1284,7 +1284,14 @@ v2.MenuItem = class MenuItem extends v2.View {
   }
 
   get title() {return this._title}
-  set title(value) {this.el.textContent = this._title = value}
+  set title(value) {
+    this._title = value
+    if (typeof value === 'string') this.el.textContent = value
+    else {
+      h.removeChildren(this.el)
+      h.add(this.el, value)
+    }
+  }
 
   set spec(value) {
     if (Array.isArray(value)) {
