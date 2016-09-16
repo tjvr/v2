@@ -1235,6 +1235,12 @@ v2.Menu = class Menu extends v2.View {
 
   show(app, x, y) {
     app.addMenu(this)
+    const bb = this.el.getBoundingClientRect()
+    const w = Math.ceil(bb.width), h = Math.ceil(bb.height)
+    if (x > innerWidth - w) x -= w
+    if (y > innerHeight - h) y -= h
+    x = Math.max(0, x)
+    y = Math.max(0, y)
     this.el.style.transform = `translate(${x}px, ${y}px)`
     this.el.addEventListener('click', this._click)
   }
