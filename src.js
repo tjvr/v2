@@ -21,6 +21,13 @@ Object.assign(h, {
       el = el.parentNode
     }
   },
+  contains(p, c) {
+    while (c) {
+      if (c === p) return true
+      c = c.parentNode
+    }
+    return false
+  },
 
   createElement(sel) {
     const parts = (sel || '').split(/([#.])/)
