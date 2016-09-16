@@ -173,7 +173,7 @@ v2.model = function model(o, ...args) {
         const oldValue = this[_name]
         if (oldValue === value) return
         this[_name] = value
-        this.emit(event, {name, value, oldValue})
+        this.emit(event, {target: this, name, value, oldValue})
       },
     })
   }
@@ -269,6 +269,12 @@ v2.View = class View {
     this._activate()
     return this
   }
+  unmount() {
+    if (this.parent) throw new Error("Can't unmount non-root view")
+    this.el.parentNode.removeChild(this)
+    this._deactivate()
+    return this
+  }
   add(child, mount, before) {
     if (child.parent) child._removeStructural()
 
@@ -305,14 +311,14 @@ v2.View = class View {
     this.isLive = false
     for (const c of this.children) c._deactivate()
     if (this._onDeactivate) this._onDeactivate()
-    this.emit('deactivate')
+    this.emit('deactivate', {target: this})
   }
   _activate() {
     if (this.isLive) return
     this.isLive = true
     for (const c of this.children) c._activate()
     if (this._onActivate) this._onActivate()
-    this.emit('activate')
+    this.emit('activate', {target: this})
   }
 }
 v2.emitter(v2.View.prototype)
@@ -510,11 +516,11 @@ v2.CyNode = class CyNode {
   add(node) {
     const index = this.children.length
     this.children.push(node)
-    this.emit('child inserted', {node, index})
+    this.emit('child inserted', {target: this, node, index})
   }
   insert(node, index) {
     this.children.splice(index, 0, node)
-    this.emit('child inserted', {node, index})
+    this.emit('child inserted', {target: this, node, index})
   }
   removeAt(index) {
     const child = this.children[index]
@@ -522,7 +528,7 @@ v2.CyNode = class CyNode {
     this.children.splice(index, 1)
     child._removed()
     // TODO set parent on acyclic nodes
-    this.emit('child removed', {index})
+    this.emit('child removed', {target: this, index})
   }
   _moveTo(parent) {}
   _removed() {}
