@@ -28,6 +28,7 @@ Object.assign(h, {
     }
     return false
   },
+  root(p) {return p.parentNode ? h.root(p.parentNode) : p},
 
   createElement(sel) {
     const parts = (sel || '').split(/([#.])/)
