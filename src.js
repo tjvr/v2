@@ -350,7 +350,7 @@ v2.App = class App extends v2.View {
     this._menus = new Set
     this._cursorEl = h('.v2-app-cursor')
     this._contextMenu = this._contextMenu.bind(this)
-    this._mouseDown = this._mouseDown.bind(this)
+    this._appMouseDown = this._appMouseDown.bind(this)
   }
   build() {
     return h('.v2-view.v2-app')
@@ -359,21 +359,22 @@ v2.App = class App extends v2.View {
 
   _onActivate() {
     document.addEventListener('contextmenu', this._contextMenu)
-    document.addEventListener('mousedown', this._mouseDown, true)
+    document.addEventListener('mousedown', this._appMouseDown, true)
   }
   _onDeactivate() {
     document.removeEventListener('contextmenu', this._contextMenu)
-    document.removeEventListener('mousedown', this._mouseDown, true)
+    document.removeEventListener('mousedown', this._appMouseDown, true)
   }
   _contextMenu(e) {
     e.preventDefault()
   }
-  _mouseDown(e) {
+  _appMouseDown(e) {
     const m = h.nearest('.v2-menu', e.target)
     if (m) return
     else this.hideMenus()
   }
 
+  get hasMenus() {return this._menus.size > 0}
   addMenu(m) {
     this._menus.add(m)
     this.add(m)
