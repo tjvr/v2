@@ -82,6 +82,10 @@ const v2 = {}
 v2.immediate = function immediate(fn) {v2._nextPromise.next(fn)}
 v2._nextPromise = Promise.resolve()
 
+v2.escapeEntities = function escapeEntities(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;')
+}
+
 v2.iter = {
   first(xs) {
     if (Array.isArray(xs)) return xs[0]
