@@ -142,15 +142,17 @@ v2.emitter = function emitter(o) {
       const l = m.get(e)
       if (l) l.push(fn)
       else m.set(e, [fn])
+      return this
     },
     unlisten(e, fn) {
       const m = this._listeners
-      if (!m) return
+      if (!m) return this
       const l = m.get(e)
-      if (!l) return
+      if (!l) return this
       const i = l.indexOf(fn)
-      if (i === -1) return
+      if (i === -1) return this
       l.splice(i, 1)
+      return this
     },
     listeners(e) {
       const m = this._listeners
@@ -163,6 +165,7 @@ v2.emitter = function emitter(o) {
       if (!l) return
       const p = Promise.resolve(arg)
       for (const fn of l) p.then(fn)
+      return this
     },
   })
 }
