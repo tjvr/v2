@@ -1259,8 +1259,13 @@ v2.Menu = class Menu extends v2.View {
   }
 
   set spec(value) {
-    for (const [title, spec] of value) {
-      this.add(new v2.MenuItem({title, spec}))
+    for (const x of value) if (x) {
+      if (x === '-') {
+        this.el.appendChild(h('.v2-menu-separator'))
+      } else {
+        const [title, spec] = x
+        this.add(new v2.MenuItem({title, spec}))
+      }
     }
   }
 }

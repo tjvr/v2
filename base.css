@@ -148,6 +148,7 @@ body {
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 100;
   flex-direction: column;
   background: #333;
   color: #fff;
@@ -159,4 +160,9 @@ body {
 }
 .v2-menu > .v2-menu-item:hover {
   background: #555;
+}
+.v2-menu-separator {
+  border-top: 1px solid;
+  margin: .25rem 0;
+  opacity: .3;
 }
