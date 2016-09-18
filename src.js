@@ -95,6 +95,21 @@ v2.escapeEntities = function escapeEntities(s) {
 }
 v2.ucfirst = function ucfirst(x) {return x[0].toUpperCase() + x.slice(1)}
 
+v2.monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+v2.shortMonthNames = v2.monthNames.map(x => x.slice(0, 3))
+v2.todayFormatDate = function todayFormatDate(d, short) {
+  const now = new Date()
+  if (now.getFullYear() === d.getFullYear() &&
+    now.getMonth() === d.getMonth()) {
+    if (now.getDate() === d.getDate()) return 'Today'
+    if (now.getDate() === d.getDate() + 1) return 'Yesterday'
+  }
+  return d.getDate() + (short ? v2.shortMonthNames : v2.monthNames)[d.getMonth()] + d.getDate()
+}
+v2.formatTimeHM = function formatTimeHM(d) {
+  return (''+d.getHours()).padStart(2, '0') + ':' + (''+d.getMinutes()).padStart(2, '0')
+}
+
 v2.iter = {
   first(xs) {
     if (Array.isArray(xs)) return xs[0]
