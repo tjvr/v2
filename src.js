@@ -708,6 +708,7 @@ v2.DynamicTree = class DynamicTree extends v2.DynamicTreeItem {
     super.init()
     this.tree = this
     this.isExpanded = true
+    this._placeholder = null
     this._template = content => h('.v2-tree-item-label', content)
   }
 
@@ -727,6 +728,23 @@ v2.DynamicTree = class DynamicTree extends v2.DynamicTreeItem {
   set template(value) {
     this._template = value
     this._reload()
+  }
+  _reload() {
+    if (this._placeholder && this.items && !this.items.length) {
+      h.removeChildren(this.container)
+    }
+    super._reload()
+    if (this._placeholder && this.items && !this.items.length) {
+      h.add(this.container, this._placeholder)
+    }
+  }
+  get placeholder() {return this._placeholder}
+  set placeholder(value) {
+    this._placeholder = value
+    if (this.items && !this.items.length) {
+      h.removeChildren(this.container)
+      if (value) h.add(this.container, value)
+    }
   }
 }
 
