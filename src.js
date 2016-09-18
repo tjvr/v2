@@ -1243,8 +1243,9 @@ v2.Menu = class Menu extends v2.View {
     app.addMenu(this)
     const bb = this.el.getBoundingClientRect()
     const w = Math.ceil(bb.width), h = Math.ceil(bb.height)
-    if (x > innerWidth - w) x -= w
-    if (y > innerHeight - h) y -= h
+    ++x, ++y
+    if (x > innerWidth - w) x -= w + 1
+    if (y > innerHeight - h) y -= h + 1
     x = Math.max(0, x)
     y = Math.max(0, y)
     this.el.style.transform = `translate(${x}px, ${y}px)`
