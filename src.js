@@ -600,13 +600,17 @@ v2.DynamicTreeItem = class DynamicTreeItem extends v2.View {
   build() {
     return h('.v2-dynamic-tree-item',
       this._label = h('.v2-dynamic-tree-item-label',
-        h('.v2-tree-item-disclosure')),
+        this._disclosure = h('.v2-tree-item-disclosure')),
       this.container = h('.v2-dynamic-tree-item-container'))
   }
 
   get model() {return this._model}
   set model(value) {
-    if (this._content) this._label.removeChild(this._content)
+    if (this._content) {
+      while (this._label.childNodes.length > 1) {
+        this._label.removeChild(this._label.lastChild)
+      }
+    }
     if (this._model) {
       this._model.unlisten('child inserted', this._childInserted)
       this._model.unlisten('child removed', this._childRemoved)
@@ -615,7 +619,9 @@ v2.DynamicTreeItem = class DynamicTreeItem extends v2.View {
     value.on('child inserted', this._childInserted)
     value.on('child removed', this._childRemoved)
     if (this._label) {
-      this._label.appendChild(this._content = this.tree.template(value.data))
+      h.pushView(this)
+      h.add(this._label, this._content = this.tree.template(value.data))
+      h.popView()
       this._updateEmpty()
     }
     this._reload(this.tree !== this)
@@ -690,7 +696,7 @@ v2.DynamicTreeItem = class DynamicTreeItem extends v2.View {
   _reload(suppress) {
     if (!this._model) return
     const expanded = this.isExpanded
-    this.removeChildren()
+    if (this.items) for (const i of this.items) i.remove()
     this.items = null
     this.isExpanded = false
     if (expanded && !suppress) this.expand()
