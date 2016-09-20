@@ -195,6 +195,7 @@ v2.emitter = function emitter(o) {
 }
 v2.model = function model(o, ...args) {
   function def(name) {
+    props.push(name)
     const _name = `_${name}`
     const event = `${name} changed`
     Object.defineProperty(o, name, {
@@ -204,7 +205,9 @@ v2.model = function model(o, ...args) {
         const oldValue = this[_name]
         if (oldValue === value) return
         this[_name] = value
-        this.emit(event, {target: this, name, value, oldValue})
+        const e = {target: this, name, value, oldValue}
+        this.emit(event, e)
+        this.emit('change', e)
       },
     })
   }
@@ -215,8 +218,23 @@ v2.model = function model(o, ...args) {
       a.forEach(add)
     }
   }
+  const props = []
   v2.emitter(o)
   add(args)
+  Object.assign(o, {
+    dataProperties: (o.dataProperties || []).concat(props),
+    sendAllProperties(fn) {
+      for (const name of this.dataProperties) {
+        fn({target: this, name, value: this[name], oldValue: null})
+      }
+      return this
+    },
+    toJSON() {
+      const o = {}
+      for (const k of this.dataProperties) o[k] = this[k]
+      return o
+    },
+  })
 }
 
 v2.request = function requestXHR(method, url, options) {
