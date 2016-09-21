@@ -1546,7 +1546,7 @@ v2.Collection = class Collection extends v2.View {
     this.Item = this.constructor.Item
   }
   build() {
-    return h('.v2-view.v2-collection', {onscroll: '_scroll', onmousedown: '_mouseDown'},
+    return h('.v2-view.v2-collection', {tabIndex: 0, onscroll: '_scroll', onmousedown: '_mouseDown', onkeydown: '_keyDown'},
       this._overflow = h('.v2-collection-overflow'))
   }
 
@@ -1557,6 +1557,21 @@ v2.Collection = class Collection extends v2.View {
     if (this.isLive) this._reflow()
   }
 
+  _keyDown(e) {
+    if (e.key === 'ArrowLeft') {
+      this.selectLeft()
+    } else if (e.key === 'ArrowRight') {
+      this.selectRight()
+    } else if (e.key === 'ArrowUp') {
+      this.selectUp()
+    } else if (e.key === 'ArrowDown') {
+      this.selectDown()
+    } else {
+      return
+    }
+    e.preventDefault()
+    e.stopPropagation()
+  }
   _mouseDown(e) {
     const item = h.nearest('.v2-collection-item', e.target)
     if (item) {
@@ -1571,19 +1586,62 @@ v2.Collection = class Collection extends v2.View {
       this.clearSelection()
     }
   }
+
+  focus() {this.el.focus()}
+  selectLeft(add) {
+    let i = v2.iter.last(this._selection)
+    if (i == null) return this.selectFirst()
+    const first = (i / this.itemsPerLine | 0) * this.itemsPerLine
+    if (i === first) return
+    while (!this._model.get(--i)) if (i <= first) return
+    this.select(i, add)
+  }
+  selectRight(add) {
+    let i = v2.iter.last(this._selection)
+    if (i == null) return this.selectFirst()
+    const last = (i / this.itemsPerLine + 1 | 0) * this.itemsPerLine - 1
+    if (i === last) return
+    while (!this._model.get(++i)) if (i >= last) return
+    this.select(i, add)
+  }
+  selectUp(add) {
+    let i = v2.iter.last(this._selection)
+    if (i == null) return this.selectFirst()
+    const start = i % this.itemsPerLine
+    if (i === start) return
+    while (!this._model.get(i -= this.itemsPerLine)) if (i <= start) return
+    this.select(i, add)
+  }
+  selectDown(add) {
+    let i = v2.iter.last(this._selection)
+    if (i == null) return this.selectFirst()
+    const end = this._model.length - (this._model.length - i) % this.itemsPerLine
+    if (i === end) return
+    while (!this._model.get(i += this.itemsPerLine)) if (i >= end) return
+    this.select(i, add)
+  }
+  selectFirst() {
+    let j = 0
+    for (; !this._model.get(j); ++j) {
+      if (j >= this._model.length) return
+    }
+    return this.select(j)
+  }
   toggleSelect(i) {
     if (this._selection.has(i)) {
       this.deselect(i)
     } else {
       this.select(i, true)
     }
+    return this
   }
   deselect(i) {
     this._selection.delete(i)
     const item = this.itemAtIndex(i)
     if (item) item.selected = false
+    return this
   }
-  select(i, add) {this.selectRange(i, i, add)}
+  select(i, add) {return this.selectRange(i, i, add)}
   selectRange(i, j, add) {
     if (i > j) [i, j] = [j, i]
     if (!add) this.clearSelection()
@@ -1592,6 +1650,7 @@ v2.Collection = class Collection extends v2.View {
       const item = this.itemAtIndex(k)
       if (item) item.selected = true
     }
+    return this
   }
   clearSelection() {
     for (const i of this._selection) {
@@ -1599,11 +1658,16 @@ v2.Collection = class Collection extends v2.View {
       if (item) item.selected = false
     }
     this._selection.clear()
+    return this
   }
   itemAtIndex(i) {
     const m = this.model.get(i)
     if (!m) return null
     return this._cache.get(m)
+  }
+
+  get selectedItems() {
+    return Array.from(this._selection).map(i => this._model.get(i))
   }
 
   resize() {
@@ -1618,6 +1682,12 @@ v2.Collection = class Collection extends v2.View {
   _onDeactivate() {this._bb = null}
 
   _reflow() {
+    if (!this._model) {
+      this._unused.push(...this._cache.values())
+      this._cache.clear()
+      for (const unused of this._unused) unused.visible = false
+      return
+    }
     const perLine = this.itemsPerLine = Math.floor(this._bb.width / this._tileWidth)
     const startLine = Math.floor(this._scrollY / this._tileHeight)
     const endLine = Math.floor((this._scrollY + this._bb.height) / this._tileHeight) + 1
@@ -1648,9 +1718,7 @@ v2.Collection = class Collection extends v2.View {
       ++x
       if (x === perLine) x = 0, ++y
     }
-    for (const unused of this._unused) {
-      unused.visible = false
-    }
+    for (const unused of this._unused) unused.visible = false
     this._overflow.style.height = Math.ceil(this._model.length / perLine) * this._tileHeight + 'px'
   }
   _dequeue(i) {
