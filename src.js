@@ -79,8 +79,16 @@ Object.assign(h, {
 
 const v2 = {}
 
-v2.immediate = function immediate(fn) {v2._nextPromise.next(fn)}
+v2.immediate = function immediate(fn) {v2._nextPromise.then(fn)}
 v2._nextPromise = Promise.resolve()
+
+v2.debounce = function debounce(ms, fn) {
+  let timeout
+  return function() {
+    clearTimeout(timeout)
+    timeout = setTimeout(fn, ms)
+  }
+}
 
 v2.escapeEntities = function escapeEntities(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;')
@@ -780,6 +788,7 @@ v2.List = class List {
     this._changes.push({event, arg})
   }
   _sendChanges() {
+    this._immediate = false
     if (this._lengthChange) {
       this.emit('length change', this._lengthChange)
     }
