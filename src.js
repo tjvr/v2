@@ -121,6 +121,14 @@ v2.iter = {
     for (const x of xs) z = x
     return z
   },
+  *slice(xs, start, end) {
+    if (!Array.isArray(xs)) throw new Error('unimplemented')
+    if (start === undefined) start = 0
+    else if (start < 0) start += array.length
+    if (end === undefined) end = array.length
+    else if (end < 0) end += array.length
+    for (let i = start; i < end; ++i) yield array[i]
+  }
 }
 v2.path = {
   dirname(x) {
@@ -160,15 +168,15 @@ v2.path = {
 }
 
 v2.emitter = function emitter(o) {
-  Object.assign(o, {
-    on(e, fn) {
+  Object.defineProperties(o, {
+    on: {value: function on(e, fn) {
       const m = this._listeners || (this._listeners = new Map)
       const l = m.get(e)
       if (l) l.push(fn)
       else m.set(e, [fn])
       return this
-    },
-    unlisten(e, fn) {
+    }},
+    unlisten: {value: function unlisten(e, fn) {
       const m = this._listeners
       if (!m) return this
       const l = m.get(e)
@@ -177,12 +185,12 @@ v2.emitter = function emitter(o) {
       if (i === -1) return this
       l.splice(i, 1)
       return this
-    },
-    listeners(e) {
+    }},
+    listeners: {value: function listeners(e) {
       const m = this._listeners
       return m ? m.get(e) || [] : []
-    },
-    emit(e, arg) {
+    }},
+    emit: {value: function emit(e, arg) {
       const m = this._listeners
       if (!m) return
       const l = m.get(e)
@@ -190,51 +198,154 @@ v2.emitter = function emitter(o) {
       const p = Promise.resolve(arg)
       for (const fn of l) p.then(fn)
       return this
+    }},
+  })
+}
+v2.watchableProperty = function watchableProperty(o, name) {
+  const _name = `_${name}`
+  const event = `${name} change`
+  Object.defineProperty(o, name, {
+    enumerable: true,
+    get() {return this[_name]},
+    set(value) {
+      const oldValue = this[_name]
+      if (oldValue === value) return
+      this[_name] = value
+      const e = {target: this, name, value, oldValue}
+      this.emit(event, e)
+      this.emit('change', e)
     },
   })
 }
-v2.model = function model(o, ...args) {
-  function def(name) {
-    props.push(name)
-    const _name = `_${name}`
-    const event = `${name} changed`
-    Object.defineProperty(o, name, {
-      enumerable: true,
-      get() {return this[_name]},
-      set(value) {
-        const oldValue = this[_name]
-        if (oldValue === value) return
-        this[_name] = value
-        const e = {target: this, name, value, oldValue}
-        this.emit(event, e)
-        this.emit('change', e)
-      },
-    })
+v2.Model = class Model {
+  constructor(o) {if (o) Object.assign(this, o)}
+  sendAllProperties(fn) {
+    for (const name of this.dataProperties) {
+      fn({target: this, name, value: this[name], oldValue: null})
+    }
+    return this
   }
-  function add(a) {
-    if (typeof a === 'string') {
-      a.split(/\s*,\s*/).forEach(def)
-    } else if (Array.isArray(a)) {
-      a.forEach(add)
+  toJSON() {
+    const o = {}
+    for (const k of this.dataProperties) o[k] = this[k]
+    return o
+  }
+
+  static _property(name) {
+    this.dataProperties.push(name)
+    v2.watchableProperty(this.prototype, name)
+  }
+  static properties(...args) {
+    for (const a of args) {
+      if (typeof a === 'string') {
+        a.split(/\s*,\s*/).forEach(this._property, this)
+      } else if (Array.isArray(a)) {
+        a.forEach(this.properties)
+      }
     }
   }
-  const props = []
-  v2.emitter(o)
-  add(args)
-  Object.assign(o, {
-    dataProperties: (o.dataProperties || []).concat(props),
-    sendAllProperties(fn) {
-      for (const name of this.dataProperties) {
-        fn({target: this, name, value: this[name], oldValue: null})
-      }
-      return this
-    },
-    toJSON() {
-      const o = {}
-      for (const k of this.dataProperties) o[k] = this[k]
-      return o
-    },
-  })
+  static get dataProperties() {
+    if (Object.prototype.hasOwnProperty.call(this.prototype, 'dataProperties')) {
+      return this.prototype.dataProperties
+    }
+    return this.prototype.dataProperties = (this.prototype.dataProperties || []).slice()
+  }
+}
+v2.emitter(v2.Model.prototype)
+
+v2.bind = function bind(a, aPath, b, bPath) {
+  if (typeof aPath === 'string') aPath = aPath.split('.')
+  if (typeof bPath === 'string') bPath = bPath.split('.')
+  return new v2.bind.Binding(new v2.bind.Side(a, aPath), new v2.bind.Side(b, bPath))
+}
+v2.watch = function watch(a, aPath, fn) {
+  if (typeof aPath === 'string') aPath = aPath.split('.')
+  const w = new v2.bind.Watcher(a, aPath)
+  if (fn) w.on('change', fn)
+  return w
+}
+v2.bind.Binding = class Binding {
+  constructor(a, b) {
+    this.a = a
+    this.b = b
+    a.other = b
+    b.other = a
+    a.update()
+  }
+  detach() {
+    this.a.detach()
+    this.b.detach()
+  }
+}
+v2.bind.Side = class Side {
+  constructor(target, path) {
+    this.target = target
+    this.path = path
+    this.intermediates = []
+    this.other = null
+    this._reflectChange = this._reflectChange.bind(this)
+
+    for (let x = target, i = 0, l = path.length; x && i < l - 1;) {
+      const name = path[i++]
+      this.intermediates.push(x)
+      x.on(`${name} change`, this._reflectChange)
+      x = x[name]
+    }
+  }
+
+  detach() {
+    for (const [i, x] of this.intermediates.entries()) {
+      x.unlisten(`${this.path[i]} change`, this._reflectChange)
+    }
+  }
+
+  get isIncomplete() {return this.intermediates.length < this.path.length}
+
+  get value() {
+    if (this.isIncomplete) return null
+    return v2.iter.last(this.intermediates)[v2.iter.last(this.path)]
+  }
+  set value(value) {
+    if (this.isIncomplete) return
+    v2.iter.last(this.intermediates)[v2.iter.last(this.path)] = value
+  }
+
+  update() {
+    if (this.isIncomplete) return
+    const value = this.other.value
+    if (!value) return
+    const object = v2.iter.last(this.intermediates)
+    const name = v2.iter.last(this.path)
+    if (object[name] !== value) object[name] = value
+  }
+
+  _reflectChange(e) {
+    const i = this.intermediates.indexOf(e.target)
+    if (i === -1) return
+    // console.log('reflect change in', object, name)
+
+    for (let j = i + 1; j < this.intermediates.length; ++j) {
+      this.intermediates[j].unlisten(`${this.path[j]} change`, this._reflectChange)
+    }
+    this.intermediates.length = i + 1
+
+    for (let x = e.target, j = i, l = this.path.length; j < l - 1;) {
+      const name = this.path[j++]
+      x = x[name]
+      if (!x) break
+      this.intermediates.push(x)
+      x.on(`${name} change`, this._reflectChange)
+    }
+    this._changed()
+  }
+  _changed() {
+    if (this.other) this.other.update()
+  }
+}
+v2.bind.Watcher = class Watcher extends v2.bind.Side {
+  _changed() {
+    this.emit('change', {target: this, value: this.value})
+  }
 }
 
 v2.request = function requestXHR(method, url, options) {
@@ -557,9 +668,142 @@ v2.Split = class Split extends v2.View {
   }
 }
 
-v2.CyNode = class CyNode {
+v2.List = class List {
+  constructor(data) {
+    this._data = data || []
+    this._changes = []
+    this._immediate = false
+    this._lengthChange = null
+    this._sendChanges = () => this._sendChanges()
+  }
+
+  get data() {return this._data.slice()}
+  set data(xs) {
+    const old = this._data
+    this._data = xs
+    this._splice(0, xs.length, old.slice())
+  }
+
+  get length() {return this._data.length}
+  set length(value) {
+    const l = this._data.length
+    this._data.length = value
+    const nl = this._data.length
+    this._splice(l, nl - l, [])
+  }
+  get(i) {return this._data[this._index(i)]}
+  set(i, value) {
+    i = this._index(i)
+    const oldValue = this._data[i]
+    this._data[i] = value
+    this._replaced(i, [oldValue])
+    return this
+  }
+  fill(value, start, end) {
+    start = start == null ? 0 : this._index(start)
+    end = end == null ? this.length : this._index(end)
+    const original = this._data.slice(start, end)
+    this._data.fill(value, start, end)
+    this._replaced(start, original)
+    return this
+  }
+  copyWithin(target, start, end) {
+    target = this._index(target)
+    start = start == null ? 0 : this._index(start)
+    end = end == null ? this.length : this._index(end)
+    const targetLength = Math.min(end - start, this.length - target)
+    const original = this._data.slice(target, target + targetLength)
+    this._data.copyWithin(target, start, end)
+    this._splice(target, original)
+    return this
+  }
+  _index(i) {
+    const length = this.length
+    i = i | 0
+    if (i < 0) i += length
+    return i < 0 ? 0 : i > length ? length : i
+  }
+
+  push(...xs) {
+    const l = this.length
+    this._data.push(...xs)
+    this._splice(l, xs.length, [])
+  }
+  pop() {
+    const x = this._data.pop()
+    this._splice(this.length, 0, [x])
+    return x
+  }
+  unshift(...xs) {
+    this._data.unshift(...xs)
+    this._splice(0, xs.length, [])
+  }
+  shift() {
+    const x = this._data.shift()
+    this._splice(0, 0, [x])
+    return x
+  }
+  splice(i, remove, ...add) {
+    const removed = this._data.splice(i, remove, add)
+    this._splice(i, add.length, removed.slice())
+    return removed
+  }
+  reverse() {
+    const original = this._data.slice()
+    this._data.reverse()
+    this._splice(0, this.length, original)
+    return this
+  }
+  sort(fn) {
+    const original = this._data.slice()
+    this._data.sort(fn)
+    this._replaced(0, original)
+    return this
+  }
+
+  _splice(i, added, removed) {
+    if (added === removed.length) {
+      this._replaced(i, values)
+    } else {
+      this._changed('splice', {target: this, index: i, added, removed})
+      const c = this._lengthChange, l = this.length
+      if (c) c.value = l
+      else this._lengthChange = {target: this, name: 'length', value: l, oldValue: l - added + removed.length}
+    }
+  }
+  _replaced(i, oldValues) {
+    const data = this._data
+    for (let j = i, l = i + oldValues.length; j < l; ++j) {
+      while (j < l && oldValues[j] === data[j]) ++j
+      const start = j
+      while (j < l && oldValues[j] !== data[j]) ++j
+      if (start < j) this._changed('replace', {target: this, start, end: j, oldValues: oldValues.slice(start - i, j - i)})
+    }
+  }
+  _changed(event, arg) {
+    if (!this._immediate) {
+      v2.immediate(this._sendChanges)
+      this._immediate = true
+    }
+    this._changes.push({event, arg})
+  }
+  _sendChanges() {
+    if (this._lengthChange) {
+      this.emit('length change', this._lengthChange)
+    }
+    this.emit('change', this._changes.slice())
+    this._changes.length = 0
+  }
+
+  [Symbol.iterator]() {return this._data[Symbol.iterator]()}
+  forEach(fn, self) {this._data.forEach(fn, self)}
+
+}
+v2.emitter(v2.List)
+
+v2.CyNode = class CyNode extends v2.Model {
   constructor(data, children) {
-    this._data = data || null
+    super({data})
     this.children = children || []
   }
 
@@ -586,7 +830,7 @@ v2.CyNode = class CyNode {
   get firstChild() {return this.children[0]}
   get lastChild() {return this.children[this.children.length - 1]}
 }
-v2.model(v2.CyNode.prototype, 'data')
+v2.CyNode.properties('data')
 
 v2.Node = class Node extends v2.CyNode {
   constructor(data, children) {
@@ -1220,11 +1464,11 @@ v2.Tree._Item = class _Item extends v2.View {
   set model(value) {
     if (this._model === value) return
     if (this._model) {
-      this._model.node.unlisten('data changed', this._dataChanged)
+      this._model.node.unlisten('data change', this._dataChanged)
     }
     if (this._model = value) {
       this._update()
-      value.node.on('data changed', this._dataChanged)
+      value.node.on('data change', this._dataChanged)
     }
   }
 
@@ -1281,6 +1525,205 @@ v2.Tree._EditItem = class _EditItem extends v2.Tree._Item {
 
   get text() {return this._text}
   set text(value) {this._labelEl.value = this._text = value}
+}
+
+v2.Collection = class Collection extends v2.View {
+  // TODO support collections containing multiple identical items
+  init() {
+    this._tileWidth = 200
+    this._tileHeight = 275
+    this._stretchTiles = true
+    this._items = []
+    this._cache = new Map
+    this._unused = []
+    this._bb = null
+    this._model = null
+    this._scrollY = 0
+    this._selection = new Set
+    this.Item = this.constructor.Item
+  }
+  build() {
+    return h('.v2-view.v2-collection', {onscroll: '_scroll', onmousedown: '_mouseDown'},
+      this._overflow = h('.v2-collection-overflow'))
+  }
+
+  get model() {return this._model}
+  set model(value) {
+    if (this._model === value) return
+    this._model = value
+    if (this.isLive) this._reflow()
+  }
+
+  _mouseDown(e) {
+    const item = h.nearest('.v2-collection-item', e.target)
+    if (item) {
+      if (e.shiftKey && this._selection.size) {
+        this.selectRange(v2.iter.last(this._selection), item.view.index, true)
+      } else if (e.metaKey || e.ctrlKey) {
+        this.toggleSelect(item.view.index)
+      } else {
+        this.select(item.view.index)
+      }
+    } else {
+      this.clearSelection()
+    }
+  }
+  toggleSelect(i) {
+    if (this._selection.has(i)) {
+      this.deselect(i)
+    } else {
+      this.select(i, true)
+    }
+  }
+  deselect(i) {
+    this._selection.delete(i)
+    const item = this.itemAtIndex(i)
+    if (item) item.selected = false
+  }
+  select(i, add) {this.selectRange(i, i, add)}
+  selectRange(i, j, add) {
+    if (i > j) [i, j] = [j, i]
+    if (!add) this.clearSelection()
+    for (let k = i; k <= j; ++k) {
+      this._selection.add(k)
+      const item = this.itemAtIndex(k)
+      if (item) item.selected = true
+    }
+  }
+  clearSelection() {
+    for (const i of this._selection) {
+      const item = this.itemAtIndex(i)
+      if (item) item.selected = false
+    }
+    this._selection.clear()
+  }
+  itemAtIndex(i) {
+    const m = this.model.get(i)
+    if (!m) return null
+    return this._cache.get(m)
+  }
+
+  resize() {
+    this._bb = this.el.getBoundingClientRect()
+    this._scroll()
+  }
+  _scroll() {
+    this._scrollY = this.el.scrollTop
+    this._reflow()
+  }
+  _onActivate() {this.resize()}
+  _onDeactivate() {this._bb = null}
+
+  _reflow() {
+    const perLine = Math.floor(this._bb.width / this._tileWidth)
+    const startLine = Math.floor(this._scrollY / this._tileHeight)
+    const endLine = Math.floor((this._scrollY + this._bb.height) / this._tileHeight) + 1
+    const j = Math.min(this._model.length, endLine * perLine)
+    const unused = new Map(this._cache)
+    for (let i = startLine * perLine; i < j; ++i) {
+      unused.delete(this._model.get(i))
+    }
+    for (const [k, v] of unused) {
+      this._cache.delete(k)
+      this._unused.push(v)
+    }
+    const distWidth = this._bb.width / perLine
+    for (let x = 0, y = startLine, i = startLine * perLine; i < j; ++i) {
+      const view = this._dequeue(i)
+      if (!view) continue
+      view.index = i
+      view.selected = this._selection.has(i)
+      if (this._stretchTiles) {
+        const realX = x * distWidth | 0
+        const realWidth = ((x + 1) * distWidth | 0) - realX
+        view.setSize(realWidth, this._tileHeight)
+        view.setPosition(realX, y * this._tileHeight)
+      } else {
+        view.setPosition(x * this._tileWidth, y * this._tileHeight)
+      }
+      // TODO _stretchTiles
+      ++x
+      if (x === perLine) x = 0, ++y
+    }
+    for (const unused of this._unused) {
+      unused.visible = false
+    }
+    this._overflow.style.height = Math.ceil(this._model.length / perLine) * this._tileHeight + 'px'
+  }
+  _dequeue(i) {
+    const m = this._model.get(i)
+    if (!m) return null
+    const item = this._cache.get(m)
+    if (item) return /*console.log(item, item.visible) || */item
+    let unused = this._unused.pop()
+    if (!unused) {
+      this.add(unused = new this.Item())
+      unused.setSize(this._tileWidth, this._tileHeight)
+    } else {
+      unused.visible = true
+    }
+    unused.model = m
+    this._cache.set(m, unused)
+    return unused
+  }
+}
+v2.Collection.Item = class Item extends v2.View {
+  init() {
+    this.index = null
+    this._selected = false
+    this._visible = true
+    this._model = null
+    this._width = null
+    this._height = null
+    this._x = null
+    this._y = null
+    this._changed = e => this._changed(e)
+  }
+  build() {
+    return h('.v2-collection-item')
+  }
+
+  get selected() {return this._selected}
+  set selected(value) {
+    value = !!value
+    if (this._selected === value) return
+    this._selected = value
+    this.el.classList.toggle('v2-collection-item-selected', value)
+  }
+
+  setPosition(x, y) {
+    if (this._x !== x || this._y !== y) {
+      this.el.style.transform = `translate(${this._x = x}px, ${this._y = y}px)`
+    }
+  }
+  setSize(width, height) {
+    if (this._width !== width) {
+      this.el.style.width = `${this._width = width}px`
+    }
+    if (this._height !== height) {
+      this.el.style.height = `${this._height = height}px`
+    }
+  }
+
+  get visible() {return this._visible}
+  set visible(value) {
+    value = !!value
+    if (this._visible === value) return
+    this._visible = value
+    this.el.style.visibility = value ? 'visible' : 'hidden'
+  }
+
+  get model() {return this._model}
+  set model(value) {
+    if (this._model === value) return
+    if (this._model) this._model.unlisten('change', this._changed)
+    if (this._model = value) {
+      this._model.on('change', this._changed)
+      this._update()
+    }
+  }
+  _changed() {this._update()}
+  _update() {}
 }
 
 v2.Menu = class Menu extends v2.View {

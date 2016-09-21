@@ -64,10 +64,29 @@ body {
   padding-left: 1rem;
 }
 
+.v2-collection {
+  position: relative;
+  overflow: auto;
+  outline: 0;
+  display: block;
+}
+.v2-collection-overflow {
+}
+.v2-collection-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+}
+.v2-collection-item-selected {
+  background: rgba(0,0,0,.1);
+}
+
 .v2-tree {
   position: relative;
   overflow: auto;
   outline: 0;
+  display: block;
 }
 .v2-tree-overflow {
 }
