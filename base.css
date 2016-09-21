@@ -65,7 +65,6 @@ body {
 }
 
 .v2-collection {
-  position: relative;
   overflow: auto;
   outline: 0;
   display: block;

@@ -894,13 +894,15 @@ v2.DynamicTreeItem = class DynamicTreeItem extends v2.View {
       this._model.unlisten('child removed', this._childRemoved)
     }
     this._model = value
-    value.on('child inserted', this._childInserted)
-    value.on('child removed', this._childRemoved)
-    if (this._label) {
-      h.pushView(this)
-      h.add(this._label, this._content = this.tree.template(value.data))
-      h.popView()
-      this._updateEmpty()
+    if (value) {
+      value.on('child inserted', this._childInserted)
+      value.on('child removed', this._childRemoved)
+      if (this._label) {
+        h.pushView(this)
+        h.add(this._label, this._content = this.tree.template(value.data))
+        h.popView()
+        this._updateEmpty()
+      }
     }
     this._reload(this.tree !== this)
   }
@@ -972,10 +974,10 @@ v2.DynamicTreeItem = class DynamicTreeItem extends v2.View {
   }
 
   _reload(suppress) {
-    if (!this._model) return
-    const expanded = this.isExpanded
     if (this.items) for (const i of this.items) i.remove()
     this.items = null
+    if (!this._model) return
+    const expanded = this.isExpanded
     this.isExpanded = false
     if (expanded && !suppress) this.expand()
   }
@@ -1533,6 +1535,7 @@ v2.Collection = class Collection extends v2.View {
     this._tileWidth = 200
     this._tileHeight = 275
     this._stretchTiles = true
+    this.itemsPerLine = 1
     this._items = []
     this._cache = new Map
     this._unused = []
@@ -1615,7 +1618,7 @@ v2.Collection = class Collection extends v2.View {
   _onDeactivate() {this._bb = null}
 
   _reflow() {
-    const perLine = Math.floor(this._bb.width / this._tileWidth)
+    const perLine = this.itemsPerLine = Math.floor(this._bb.width / this._tileWidth)
     const startLine = Math.floor(this._scrollY / this._tileHeight)
     const endLine = Math.floor((this._scrollY + this._bb.height) / this._tileHeight) + 1
     const j = Math.min(this._model.length, endLine * perLine)
