@@ -109,6 +109,9 @@ v2.todayFormatDate = function todayFormatDate(d, short) {
 v2.formatTimeHM = function formatTimeHM(d) {
   return (''+d.getHours()).padStart(2, '0') + ':' + (''+d.getMinutes()).padStart(2, '0')
 }
+v2.formatList = function formatList(items) {
+  return items.length <= 2 ? items.join(' and ') : items.slice(0, -1).join(', ') + ', and ' + items[items.length - 1]
+}
 
 v2.iter = {
   first(xs) {
