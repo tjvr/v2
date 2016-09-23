@@ -679,7 +679,7 @@ v2.List = class List {
     this._changes = []
     this._immediate = false
     this._lengthChange = null
-    this._sendChanges = () => this._sendChanges()
+    this._sendChanges = this._sendChanges.bind(this)
   }
 
   get data() {return this._data.slice()}
@@ -1764,7 +1764,7 @@ v2.Collection.Item = class Item extends v2.View {
     this._height = null
     this._x = null
     this._y = null
-    this._changed = e => this._changed(e)
+    this._changed = this._changed.bind(this)
   }
   build() {
     return h('.v2-collection-item')
