@@ -201,8 +201,7 @@ v2.emitter = function emitter(o) {
       if (!m) return
       const l = m.get(e)
       if (!l) return
-      const p = Promise.resolve(arg)
-      for (const fn of l) p.then(fn)
+      for (const fn of l) fn(arg)
       return this
     }},
   })
