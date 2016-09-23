@@ -82,7 +82,7 @@ Object.assign(h, {
 
 const v2 = {}
 
-v2.immediate = function immediate(fn) {v2._nextPromise.then(fn)}
+v2.immediate = function immediate(fn) {return v2._nextPromise.then(fn)}
 v2._nextPromise = Promise.resolve()
 
 v2.debounce = function debounce(ms, fn) {
