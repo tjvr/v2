@@ -1800,15 +1800,25 @@ v2.Collection.Item = class Item extends v2.View {
     this.el.style.visibility = value ? 'visible' : 'hidden'
   }
 
+  _onActivate() {
+    if (this._model) {
+      this._update()
+      this._listen()
+    }
+  }
+  _onDeactivate() {this._unlisten()}
+
   get model() {return this._model}
   set model(value) {
     if (this._model === value) return
-    if (this._model) this._model.unlisten('change', this._changed)
-    if (this._model = value) {
-      this._model.on('change', this._changed)
+    if (this._model) this._unlisten()
+    if ((this._model = value) && this.isLive) {
       this._update()
+      this._listen()
     }
   }
+  _unlisten() {this._model.unlisten('change', this._changed)}
+  _listen() {this._model.on('change', this._changed)}
   _changed() {this._update()}
   _update() {}
 }
