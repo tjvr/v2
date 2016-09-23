@@ -880,6 +880,7 @@ v2.DynamicTreeItem = class DynamicTreeItem extends v2.View {
     this._content = null
     this._childRemoved = this._childRemoved.bind(this)
     this._childInserted = this._childInserted.bind(this)
+    this._needsReload = false
   }
 
   build() {
@@ -891,6 +892,7 @@ v2.DynamicTreeItem = class DynamicTreeItem extends v2.View {
 
   get model() {return this._model}
   set model(value) {
+    if (this._model === value) return
     if (this._content) {
       while (this._label.childNodes.length > 1) {
         this._label.removeChild(this._label.lastChild)
@@ -911,7 +913,15 @@ v2.DynamicTreeItem = class DynamicTreeItem extends v2.View {
         this._updateEmpty()
       }
     }
-    this._reload(this.tree !== this)
+    if (this.isLive) this._reload(this.tree !== this)
+    else this._needsReload = true
+  }
+
+  _onActivate() {
+    if (this._needsReload) {
+      this._needsReload = false
+      this._reload()
+    }
   }
 
   _updateEmpty() {
