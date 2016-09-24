@@ -1562,9 +1562,11 @@ v2.Collection = class Collection extends v2.View {
     this.Item = this.constructor.Item
   }
   build() {
-    return h('.v2-view.v2-collection', {tabIndex: 0, onscroll: '_scroll', onmousedown: '_mouseDown', onkeydown: '_keyDown'},
+    return h('.v2-view.v2-collection', {tabIndex: 0, onscroll: '_scroll', onmousedown: '_mouseDown', onkeydown: '_keyDown', ondblclick: '_dblclick'},
       this._overflow = h('.v2-collection-overflow'))
   }
+  menu() {}
+  dblclick() {}
 
   get model() {return this._model}
   set model(value) {
@@ -1590,17 +1592,28 @@ v2.Collection = class Collection extends v2.View {
   }
   _mouseDown(e) {
     const item = h.nearest('.v2-collection-item', e.target)
+    const i = item && item.view.index
+    if (e.button === 2) {
+      if (!item) return
+      const m = this.menu && this.menu(this._selection.has(i) ? this.selectedItems : [this._model.get(i)])
+      if (m) m.show(this.app, e.clientX, e.clientY)
+      return
+    }
     if (item) {
-      if (e.shiftKey && this._selection.size) {
-        this.selectRange(v2.iter.last(this._selection), item.view.index, true)
-      } else if (e.metaKey || e.ctrlKey) {
-        this.toggleSelect(item.view.index)
+      if (e.metaKey || e.ctrlKey) {
+        this.toggleSelect(i)
+      } else if (e.shiftKey && this._selection.size) {
+        this.selectRange(v2.iter.last(this._selection), i, true)
       } else {
-        this.select(item.view.index)
+        this.select(i)
       }
     } else {
       this.clearSelection()
     }
+  }
+  _dblclick(e) {
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return
+    this.dblclick(this.selectedItems)
   }
 
   focus() {this.el.focus()}
