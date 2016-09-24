@@ -85,6 +85,14 @@ const v2 = {}
 v2.immediate = function immediate(fn) {return v2._nextPromise.then(fn)}
 v2._nextPromise = Promise.resolve()
 
+v2.toJSON = function toJSON(o, inPlace) {
+  if (!o || typeof o !== 'object') return o
+  if (o.toJSON) return v2.toJSON(o.toJSON(), true)
+  const result = inPlace ? o : Array.isArray(o) ? [] : {}
+  for (const k in o) result[k] = toJSON(o[k])
+  return result
+}
+
 v2.debounce = function debounce(ms, fn) {
   let timeout
   return function() {
