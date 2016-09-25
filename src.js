@@ -1604,7 +1604,10 @@ v2.Collection = class Collection extends v2.View {
     if (e.button === 2) {
       if (!item) return
       const m = this.menu && this.menu(this._selection.has(i) ? this.selectedItems : [this._model.get(i)])
-      if (m) m.show(this.app, e.clientX, e.clientY)
+      if (m) {
+        if (m.then) m.then(m => m.show(this.app, e.clientX, e.clientY))
+        else m.show(this.app, e.clientX, e.clientY)
+      }
       return
     }
     if (item) {
