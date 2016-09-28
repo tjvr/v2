@@ -772,7 +772,7 @@ v2.List = class List {
     return x
   }
   splice(i, remove, ...add) {
-    const removed = this._data.splice(i, remove, add)
+    const removed = this._data.splice(i, remove, ...add)
     this._splice(i, add.length, removed.slice())
     return removed
   }
