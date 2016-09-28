@@ -1849,8 +1849,7 @@ v2.Collection = class Collection extends v2.View {
     const item = h.nearest('.v2-collection-item', e.target)
     const i = item && item.view.index
     if (e.button === 2) {
-      if (!item) return
-      const m = this.menu && this.menu(this._selection.has(i) ? this.selectedItems : [this._model.get(i)])
+      const m = this.menu && this.menu(item ? this._selection.has(i) ? this.selectedItems : [this._model.get(i)] : [])
       if (m) {
         if (m.then) m.then(m => m.show(this.app, e.clientX, e.clientY))
         else m.show(this.app, e.clientX, e.clientY)
