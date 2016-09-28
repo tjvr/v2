@@ -1913,6 +1913,9 @@ v2.Collection = class Collection extends v2.View {
     }
     return this.select(j)
   }
+  selectAll() {
+    if (this.model.length) this.selectRange(0, this.model.length - 1)
+  }
   toggleSelect(i) {
     if (this._selection.has(i)) {
       this.deselect(i)
