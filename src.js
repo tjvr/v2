@@ -1783,6 +1783,32 @@ v2.Collection = class Collection extends v2.View {
   menu() {}
   dblclick() {}
 
+  showMenu(items, x, y) {
+    if (!items) items = this.selectedItems
+    if (!Array.isArray(items)) items = [items]
+    const m = this.menu && this.menu(items)
+    if (!m) return
+    const done = m => {
+      if (x == null) {
+        for (const item of this._cache.values()) {
+          if (item.selected) {
+            const bb = item.el.getBoundingClientRect()
+            x = bb.left
+            y = bb.top
+            break
+          }
+        }
+        if (x == null) {
+          x = this._bb.left
+          y = this._bb.top
+        }
+      }
+      m.show(this.app, x, y)
+    }
+    if (m.then) return m.then(done)
+    else done(m)
+  }
+
   get model() {return this._model}
   set model(value) {
     if (this._model === value) return
