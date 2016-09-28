@@ -89,7 +89,11 @@ v2.toJSON = function toJSON(o, inPlace) {
   if (!o || typeof o !== 'object') return o
   if (o.toJSON) return v2.toJSON(o.toJSON(), true)
   const result = inPlace ? o : Array.isArray(o) ? [] : {}
-  for (const k in o) result[k] = toJSON(o[k])
+  for (const k in o) {
+    const v = toJSON(o[k])
+    if (v !== undefined) result[k] = v
+    else if (inPlace) delete result[k]
+  }
   return result
 }
 
