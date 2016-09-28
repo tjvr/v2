@@ -1765,7 +1765,6 @@ v2.Collection = class Collection extends v2.View {
     this._tileHeight = 275
     this._stretchTiles = true
     this.itemsPerLine = 1
-    this._items = []
     this._cache = new Map
     this._unused = []
     this._bb = null
