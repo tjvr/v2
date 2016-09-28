@@ -856,9 +856,8 @@ v2.List = class List {
   join(sep) {return this._data.join(sep)}
   toLocaleString() {return this._data.toLocaleString()}
   toString() {return this._data.toString()}
-
 }
-v2.emitter(v2.List)
+v2.emitter(v2.List.prototype)
 
 v2.CyNode = class CyNode extends v2.Model {
   constructor(data, children) {
