@@ -790,37 +790,47 @@ v2.List = class List {
   }
 
   _splice(i, added, removed) {
-    if (added === removed.length) {
-      this._replaced(i, values)
-    } else {
-      this._changed('splice', {target: this, index: i, added, removed})
+    const d = this._data
+    for (let j = i, k = 0;;) {
+      for (let m = k; m < removed.length; ++m) {
+        for (let l = j; l < i + added; ++l) {
+          if (removed[m] === d[l]) {
+            this._rawSplice(j, l - j, removed.slice(k, m))
+            j = l + 1
+            k = m + 1
+            while (k < removed.length && j < i + added && removed[k] === d[j]) {++k, ++j}
+            continue
+          }
+        }
+      }
+      this._rawSplice(j, i + added - j, removed.slice(k))
+      break
+    }
+    if (added !== removed.length) {
       const c = this._lengthChange, l = this.length
       if (c) c.value = l
       else this._lengthChange = {target: this, name: 'length', value: l, oldValue: l - added + removed.length}
     }
   }
-  _replaced(i, oldValues) {
-    const data = this._data
-    for (let j = i, l = i + oldValues.length; j < l; ++j) {
-      while (j < l && oldValues[j] === data[j]) ++j
-      const start = j
-      while (j < l && oldValues[j] !== data[j]) ++j
-      if (start < j) this._changed('replace', {target: this, start, end: j, oldValues: oldValues.slice(start - i, j - i)})
-    }
+  _rawSplice(i, added, removed) {
+    this._changed(added === removed.length ?
+      {type: 'replace', start: i, end: i + added, oldValues: removed} :
+      {type: 'splice', index: i, added, removed})
   }
-  _changed(event, arg) {
+  _replaced(i, oldValues) {this._splice(i, oldValues.length, oldValues)}
+  _changed(data) {
     if (!this._immediate) {
       v2.immediate(this._sendChanges)
       this._immediate = true
     }
-    this._changes.push({event, arg})
+    this._changes.push(data)
   }
   _sendChanges() {
     this._immediate = false
     if (this._lengthChange) {
       this.emit('length change', this._lengthChange)
     }
-    this.emit('change', this._changes.slice())
+    this.emit('change', {target: this, changes: this._changes.slice()})
     this._changes.length = 0
   }
 
