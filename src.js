@@ -2100,7 +2100,9 @@ v2.Collection.Item = class Item extends v2.View {
   set visible(value) {
     value = !!value
     if (this._visible === value) return
-    this._visible = value
+    if (!(this._visible = value)) {
+      this.setPosition(0, 0)
+    }
     this.el.style.visibility = value ? 'visible' : 'hidden'
   }
 
