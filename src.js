@@ -2077,7 +2077,7 @@ v2.Collection.Item = class Item extends v2.View {
       this._listen()
     }
   }
-  _onDeactivate() {this._unlisten()}
+  _onDeactivate() {if (this._model) this._unlisten()}
 
   get model() {return this._model}
   set model(value) {
