@@ -1773,6 +1773,8 @@ v2.Collection = class Collection extends v2.View {
     this._scrollY = 0
     this._selection = new Set
     this.Item = this.constructor.Item
+    this._reflow = this._reflow.bind(this)
+    this._changed = this._changed.bind(this)
   }
   build() {
     return h('.v2-view.v2-collection', {tabIndex: 0, onscroll: '_scroll', onmousedown: '_mouseDown', onkeydown: '_keyDown', ondblclick: '_dblclick'},
@@ -1784,8 +1786,48 @@ v2.Collection = class Collection extends v2.View {
   get model() {return this._model}
   set model(value) {
     if (this._model === value) return
+    if (this._model && this.isLive) this._unlisten()
     this._model = value
-    if (this.isLive) this._reflow()
+    if (this.isLive) {
+      if (this._model) this._listen()
+      this._reflow()
+    }
+  }
+  _onActivate() {
+    this.resize()
+    if (this._model) this._listen()
+  }
+  _onDeactivate() {
+    this._bb = null
+    if (this._model) this._unlisten()
+  }
+  _listen() {this._model.on('change', this._changed)}
+  _unlisten() {this._model.unlisten('change', this._changed)}
+  _changed(e) {
+    const selection = Array.from(this._selection)
+    for (const c of e.changes) {
+      if (c.type === 'splice') {
+        const rend = c.index + c.removed.length
+        for (let i = c.index; i < rend; ++i) {
+          const k = selection.indexOf(i)
+          if (k !== -1) selection.splice(k, 1)
+        }
+        const d = c.added - c.removed.length
+        if (d) {
+          const l = selection.length
+          for (let i = 0; i < l; ++i) {
+            if (selection[i] >= rend) selection[i] += d
+          }
+        }
+      } else if (c.type !== 'replace') {
+        for (let i = c.start; i < c.end; ++i) {
+          const k = selection.indexOf(i)
+          if (k !== -1) selection.splice(k, 1)
+        }
+      }
+    }
+    this._selection = new Set(selection)
+    this._reflow()
   }
 
   _keyDown(e) {
@@ -1923,8 +1965,6 @@ v2.Collection = class Collection extends v2.View {
     this._scrollY = this.el.scrollTop
     this._reflow()
   }
-  _onActivate() {this.resize()}
-  _onDeactivate() {this._bb = null}
 
   _reflow() {
     if (!this._model) {
