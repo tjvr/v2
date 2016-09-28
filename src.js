@@ -193,7 +193,14 @@ v2.path = {
       }
     }
     return prefix + parts.join('/')
-  }
+  },
+  ext(s) {
+    const i = s.lastIndexOf('/')
+    if (i !== -1) s = s.slice(i + 1)
+    const j = s.lastIndexOf('.')
+    if (j !== -1) s = s.slice(j + 1)
+    return s
+  },
 }
 
 v2.emitter = function emitter(o) {
