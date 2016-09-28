@@ -105,6 +105,17 @@ v2.debounce = function debounce(ms, fn) {
   }
 }
 
+v2.chooseFile = function chooseFile(accept, options) {
+  if (!options) options = {}
+  const i = h('input', {type: 'file', accept, multiple: !!options.multiple})
+  return new Promise((resolve, reject) => {
+    i.onchange = e =>
+      i.files.length === 0 ? reject(new Error('No files selected')) :
+      resolve(options.multiple ? Array.from(i.files) : i.files[0])
+    i.click()
+  })
+}
+
 v2.escapeEntities = function escapeEntities(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;')
 }
