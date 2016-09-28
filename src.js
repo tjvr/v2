@@ -2008,8 +2008,9 @@ v2.Collection = class Collection extends v2.View {
       return
     }
     const perLine = this.itemsPerLine = Math.floor(this._bb.width / this._tileWidth)
-    const startLine = Math.floor(this._scrollY / this._tileHeight)
-    const endLine = Math.floor((this._scrollY + this._bb.height) / this._tileHeight) + 1
+    const buffer = 4
+    const startLine = Math.max(0, Math.floor(this._scrollY / this._tileHeight) - buffer)
+    const endLine = Math.floor((this._scrollY + this._bb.height) / this._tileHeight) + 1 + buffer
     const j = Math.min(this._model.length, endLine * perLine)
     const unused = new Map(this._cache)
     for (let i = startLine * perLine; i < j; ++i) {
