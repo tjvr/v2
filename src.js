@@ -835,7 +835,27 @@ v2.List = class List {
   }
 
   [Symbol.iterator]() {return this._data[Symbol.iterator]()}
+  entries() {return this._data.entries()}
+  values() {return this._data.values()}
+  keys() {return this._data.keys()}
+
   forEach(fn, self) {this._data.forEach(fn, self)}
+  map(fn, self) {return this._data.map(fn, self)}
+  filter(fn, self) {return this._data.filter(fn, self)}
+  some(fn, self) {return this._data.some(fn, self)}
+  every(fn, self) {return this._data.every(fn, self)}
+  reduce(fn, start) {return this._data.reduce(fn, start)}
+  reduceRight(fn, start) {return this._data.reduceRight(fn, start)}
+
+  includes(x) {return this._data.includes(x)}
+  indexOf(x) {return this._data.indexOf(x)}
+  lastIndexOf(x) {return this._data.lastIndexOf(x)}
+  find(fn, self) {return this._data.find(fn, self)}
+  findIndex(fn, self) {return this._data.findIndex(fn, self)}
+
+  join(sep) {return this._data.join(sep)}
+  toLocaleString() {return this._data.toLocaleString()}
+  toString() {return this._data.toString()}
 
 }
 v2.emitter(v2.List)
