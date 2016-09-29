@@ -70,6 +70,7 @@ body {
   display: block;
 }
 .v2-collection-overflow {
+  width: 0;
 }
 .v2-collection-item {
   position: absolute;
