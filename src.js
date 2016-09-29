@@ -2079,7 +2079,7 @@ v2.Collection.Item = class Item extends v2.View {
 
   setPosition(x, y) {
     if (this._x !== x || this._y !== y) {
-      this.el.style.transform = `translate(${this._x = x}px, ${this._y = y}px)`
+      this.el.style.transform = `translate3d(${this._x = x}px, ${this._y = y}px,0)`
     }
   }
   setSize(width, height) {
