@@ -89,6 +89,7 @@ body {
   display: block;
 }
 .v2-tree-overflow {
+  width: 0;
 }
 .v2-tree-item {
   position: absolute;
