@@ -1828,6 +1828,7 @@ v2.Collection = class Collection extends v2.View {
     }
   }
   _onActivate() {
+    this._selection.clear()
     this.resize()
     if (this._model) this._listen()
   }
