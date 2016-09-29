@@ -820,6 +820,7 @@ v2.List = class List {
     }
   }
   _rawSplice(i, added, removed) {
+    if (added === 0 && removed.length === 0) return
     this._changed(added === removed.length ?
       {type: 'replace', start: i, end: i + added, oldValues: removed} :
       {type: 'splice', index: i, added, removed})
