@@ -995,6 +995,7 @@ v2.FilteredList = class FilteredList {
     this._updateAll()
   }
 
+  resort() {this._updateAll()}
   _updateAll() {
     const old = this._data.slice()
     if (!this._model) {
