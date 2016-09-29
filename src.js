@@ -1772,7 +1772,7 @@ v2.Collection = class Collection extends v2.View {
   init() {
     this._tileWidth = 200
     this._tileHeight = 275
-    this._stretchTiles = true
+    this._justifyTiles = true
     this.itemsPerLine = 1
     this._cache = new Map
     this._unused = []
@@ -2023,21 +2023,13 @@ v2.Collection = class Collection extends v2.View {
       this._cache.delete(k)
       this._unused.push(v)
     }
-    const distWidth = this._bb.width / perLine
+    const distWidth = this._tileWidth + (this._bb.width - this._tileWidth * perLine) / (perLine - 1)
     for (let x = 0, y = startLine, i = startLine * perLine; i < j; ++i) {
       const view = this._dequeue(i)
       if (!view) continue
       view.index = i
       view.selected = this._selection.has(i)
-      if (this._stretchTiles) {
-        const realX = x * distWidth | 0
-        const realWidth = ((x + 1) * distWidth | 0) - realX
-        view.setSize(realWidth, this._tileHeight)
-        view.setPosition(realX, y * this._tileHeight)
-      } else {
-        view.setPosition(x * this._tileWidth, y * this._tileHeight)
-      }
-      // TODO _stretchTiles
+      view.setPosition(this._justifyTiles ? x * distWidth | 0 : x * this._tileWidth, y * this._tileHeight)
       ++x
       if (x === perLine) x = 0, ++y
     }
