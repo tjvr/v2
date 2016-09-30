@@ -467,7 +467,7 @@ v2.View = class View {
   }
   unmount() {
     if (this.parent) throw new Error("Can't unmount non-root view")
-    this.el.parentNode.removeChild(this)
+    this.el.parentNode.removeChild(this.el)
     this._deactivate()
     return this
   }
