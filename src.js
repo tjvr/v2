@@ -723,9 +723,11 @@ v2.List = class List {
   get length() {return this._data.length}
   set length(value) {
     const l = this._data.length
+    const original = this._data.slice()
     this._data.length = value
     const nl = this._data.length
-    this._splice(l, nl - l, [])
+    if (l < nl) this._splice(l, nl - l, [])
+    else if (l > nl) this._splice(nl, 0, original.slice(nl))
   }
   get(i) {return this._data[this._index(i)]}
   set(i, value) {
