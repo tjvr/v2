@@ -158,6 +158,7 @@ v2.iter = {
     else if (end < 0) end += array.length
     for (let i = start; i < end; ++i) yield array[i]
   },
+  *map(xs, fn) {for (const x of xs) yield fn(x)},
 }
 v2.path = {
   dirname(x) {
