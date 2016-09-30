@@ -157,7 +157,7 @@ v2.iter = {
     if (end === undefined) end = array.length
     else if (end < 0) end += array.length
     for (let i = start; i < end; ++i) yield array[i]
-  }
+  },
 }
 v2.path = {
   dirname(x) {
