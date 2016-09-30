@@ -867,6 +867,7 @@ v2.List = class List {
   join(sep) {return this._data.join(sep)}
   toLocaleString() {return this._data.toLocaleString()}
   toString() {return this._data.toString()}
+  toJSON() {return this._data}
 }
 v2.emitter(v2.List.prototype)
 
