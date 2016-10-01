@@ -2169,6 +2169,7 @@ v2.Menu = class Menu extends v2.View {
     const t = el.view.target
     const a = el.view.action
     if (typeof a === 'function') a(e)
+    else if (typeof t === 'function') t(a, e)
     else if (t && a) t[a](e)
     this.app.hideMenus()
   }
