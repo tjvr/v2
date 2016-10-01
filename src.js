@@ -99,9 +99,20 @@ v2.toJSON = function toJSON(o, inPlace) {
 
 v2.debounce = function debounce(ms, fn) {
   let timeout
-  return function() {
+  return () => {
     clearTimeout(timeout)
     timeout = setTimeout(fn, ms)
+  }
+}
+v2.throttleImmediate = function throttleImmediate(fn) {
+  let set
+  return () => {
+    if (set) return
+    set = true
+    v2.immediate(() => {
+      set = false
+      fn()
+    })
   }
 }
 
