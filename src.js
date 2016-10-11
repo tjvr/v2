@@ -278,16 +278,18 @@ v2.Model = class Model {
     return o
   }
 
-  static _property(name) {
+  static _property(name, opts) {
     this.dataProperties.push(name)
-    v2.watchableProperty(this.prototype, name)
+    v2.watchableProperty(this.prototype, name, opts)
   }
   static properties(...args) {
     for (const a of args) {
       if (typeof a === 'string') {
-        a.split(/\s*,\s*/).forEach(this._property, this)
+        for (const k of a.split(/\s*,\s*/)) this._property(k)
       } else if (Array.isArray(a)) {
         a.forEach(this.properties)
+      } else if (typeof a === 'object') {
+        for (const k in a) this._property(k, a[k])
       }
     }
   }
