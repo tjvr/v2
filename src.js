@@ -248,12 +248,12 @@ v2.emitter = function emitter(o) {
     }},
   })
 }
-v2.watchableProperty = function watchableProperty(o, name) {
+v2.watchableProperty = function watchableProperty(o, name, get) {
   const _name = `_${name}`
   const event = `${name} change`
   Object.defineProperty(o, name, {
     enumerable: true,
-    get() {return this[_name]},
+    get: get || function get() {return this[_name]},
     set(value) {
       const oldValue = this[_name]
       if (oldValue === value) return
