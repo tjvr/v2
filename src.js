@@ -2171,7 +2171,9 @@ v2.Menu = class Menu extends v2.View {
     if (typeof a === 'function') a(e)
     else if (typeof t === 'function') t(a, e)
     else if (t && a) t[a](e)
-    this.app.hideMenus()
+    const app = this.app
+    if (app) app.hideMenus()
+    else this.hide()
   }
 
   set spec(value) {
