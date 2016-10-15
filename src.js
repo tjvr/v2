@@ -126,6 +126,17 @@ v2.chooseFile = function chooseFile(accept, options) {
     i.click()
   })
 }
+v2.saveFile = function saveFile(data, name, options) {
+  if (!options) options = {}
+  if (typeof data === 'string') data = new Blob([data], {type: options.type})
+  const a = h('a', {
+    download: name || '',
+    type: data.type || options.type || '',
+    href: URL.createObjectURL(data),
+  })
+  a.click()
+  requestIdleCallback(() => URL.revokeObjectURL(a.href))
+}
 
 v2.escapeEntities = function escapeEntities(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;')
