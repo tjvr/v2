@@ -150,6 +150,17 @@ v2.formatTimeHM = function formatTimeHM(d) {
 v2.formatList = function formatList(items) {
   return items.length <= 2 ? items.join(' and ') : items.slice(0, -1).join(', ') + ', and ' + items[items.length - 1]
 }
+v2.formatBytes = function formatBytes(b, opts) {
+  if (!opts) opts = {}
+  if (b < 1024) return b + ' B'
+  const l = 'KMGTPEZY'
+  let k = 0, n = 1024
+  while (k < l.length - 1 && b >= n * 1024) {
+    ++k
+    n *= 1024
+  }
+  return (b < n * 16 ? Math.round(b / n * 10) / 10 : Math.round(b / n)) + ' ' + l.charAt(k) + (opts.si === false ? '' : 'i') + 'B'
+}
 
 v2.iter = {
   first(xs) {
