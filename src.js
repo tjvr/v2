@@ -233,8 +233,7 @@ v2.path = {
     const i = s.lastIndexOf('/')
     if (i !== -1) s = s.slice(i + 1)
     const j = s.lastIndexOf('.')
-    if (j !== -1) s = s.slice(j + 1)
-    return s
+    return j === -1 ? '' : s.slice(j + 1)
   },
 }
 
