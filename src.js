@@ -1945,6 +1945,7 @@ v2.Collection = class Collection extends v2.View {
     if (i === first) return
     while (!this._model.get(--i)) if (i <= first) return
     this.select(i, add)
+    this.scrollToIndexIfNecessary(i)
   }
   selectRight(add) {
     let i = v2.iter.last(this._selection)
@@ -1953,6 +1954,7 @@ v2.Collection = class Collection extends v2.View {
     if (i === last) return
     while (!this._model.get(++i)) if (i >= last) return
     this.select(i, add)
+    this.scrollToIndexIfNecessary(i)
   }
   selectUp(add) {
     let i = v2.iter.last(this._selection)
@@ -1961,6 +1963,7 @@ v2.Collection = class Collection extends v2.View {
     if (i === start) return
     while (!this._model.get(i -= this.itemsPerLine)) if (i <= start) return
     this.select(i, add)
+    this.scrollToIndexIfNecessary(i)
   }
   selectDown(add) {
     let i = v2.iter.last(this._selection)
@@ -1969,13 +1972,16 @@ v2.Collection = class Collection extends v2.View {
     if (i === end) return
     while (!this._model.get(i += this.itemsPerLine)) if (i >= end) return
     this.select(i, add)
+    this.scrollToIndexIfNecessary(i)
   }
   selectFirst() {
     let j = 0
     for (; !this._model.get(j); ++j) {
       if (j >= this._model.length) return
     }
-    return this.select(j)
+    this.scrollToIndexIfNecessary(j)
+    this.select(j)
+    return this
   }
   selectAll() {
     if (this.model.length) this.selectRange(0, this.model.length - 1)
@@ -2004,6 +2010,14 @@ v2.Collection = class Collection extends v2.View {
       if (item) item.selected = true
     }
     return this
+  }
+  scrollToIndexIfNecessary(i) {
+    if (!this.isLive) return
+    const y0 = Math.floor(i / this.itemsPerLine) * this._tileHeight
+    const y1 = y0 + this._tileHeight
+    const y = this._scrollY, yh = y + this._bb.height
+    if (y0 < y) this.el.scrollTop += y0 - y
+    else if (y1 >= yh) this.el.scrollTop += y1 - yh
   }
   clearSelection() {
     for (const i of this._selection) {
