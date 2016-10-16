@@ -159,27 +159,32 @@ for (const t of v2.runtime.types) {
   v2.runtime[`is${v2.ucfirst(t)}`] = v2.runtime.type === t
 }
 
-v2.chooseFile = function chooseFile(accept, options) {
-  if (!options) options = {}
-  const i = h('input', {type: 'file', accept, multiple: !!options.multiple})
-  return new Promise((resolve, reject) => {
-    i.onchange = e =>
-      i.files.length === 0 ? reject(new Error('No files selected')) :
-      resolve(options.multiple ? Array.from(i.files) : i.files[0])
-    i.click()
-  })
+v2.runtime.web = {
+  chooseFile(accept, options) {
+    if (!options) options = {}
+    const i = h('input', {type: 'file', accept, multiple: !!options.multiple})
+    return new Promise((resolve, reject) => {
+      i.onchange = e =>
+        i.files.length === 0 ? reject(new Error('No files selected')) :
+        resolve(options.multiple ? Array.from(i.files) : i.files[0])
+      i.click()
+    })
+  },
+  saveFile(data, name, options) {
+    if (!options) options = {}
+    if (typeof data === 'string') data = new Blob([data], {type: options.type})
+    const a = h('a', {
+      download: name || '',
+      type: data.type || options.type || '',
+      href: URL.createObjectURL(data),
+    })
+    a.click()
+    requestIdleCallback(() => URL.revokeObjectURL(a.href))
+  },
 }
-v2.saveFile = function saveFile(data, name, options) {
-  if (!options) options = {}
-  if (typeof data === 'string') data = new Blob([data], {type: options.type})
-  const a = h('a', {
-    download: name || '',
-    type: data.type || options.type || '',
-    href: URL.createObjectURL(data),
-  })
-  a.click()
-  requestIdleCallback(() => URL.revokeObjectURL(a.href))
-}
+
+v2.chooseFile = v2.runtime.web.chooseFile
+v2.saveFile = v2.runtime.web.saveFile
 
 v2.iter = {
   first(xs) {
