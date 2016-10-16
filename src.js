@@ -228,11 +228,11 @@ if (window.JSZip) v2.fs.zip = function zip(root) {
   .then(() => zip)
 }
 
-v2.runtime = {
+v2.rt = {
   types: ['chrome', 'web'],
   type: window.chrome && chrome.app && chrome.app.runtime ? 'chrome' : 'web',
 }
-v2.runtime.web = {
+v2.rt.web = {
   chooseFile(accept, options) {
     if (!options) options = {}
     const i = h('input', {type: 'file', accept, multiple: !!options.multiple})
@@ -255,19 +255,19 @@ v2.runtime.web = {
     requestIdleCallback(() => URL.revokeObjectURL(a.href))
   },
 }
-v2.runtime.chrome = {
+v2.rt.chrome = {
   _callback(fn, ...args) {
     return new Promise((r, j) => fn(...args, x => chrome.runtime.lastError ? j(chrome.runtime.lastError) : r(x)))
   },
-  hasPermission(info) {return v2.runtime.chrome._callback(chrome.permissions.contains, info)},
-  restoreEntry(id) {return v2.runtime.chrome._callback(chrome.fileSystem.restoreEntry, id)},
-  chooseEntry(options) {return v2.runtime.chrome._callback(chrome.fileSystem.chooseEntry, options)},
+  hasPermission(info) {return v2.rt.chrome._callback(chrome.permissions.contains, info)},
+  restoreEntry(id) {return v2.rt.chrome._callback(chrome.fileSystem.restoreEntry, id)},
+  chooseEntry(options) {return v2.rt.chrome._callback(chrome.fileSystem.chooseEntry, options)},
   chooseFile(type, options) {
     if (!options) options = {}
-    return v2.runtime.chrome.chooseEntry({
+    return v2.rt.chrome.chooseEntry({
       type: 'openFile',
       acceptsMultiple: !!options.multiple,
-      accepts: options.accepts && [v2.runtime.chrome._parseAccepts(options.accepts)],
+      accepts: options.accepts && [v2.rt.chrome._parseAccepts(options.accepts)],
     }).then(entry => Array.isArray(entry) ?
       Promise.all(entry.map(v2.fs.file)) : v2.fs.file(entry))
   },
@@ -282,7 +282,7 @@ v2.runtime.chrome = {
   saveFile(data, name, options) {
     if (!options) options = {}
     data = v2.asBlob(data, options)
-    return v2.runtime.chrome.hasPermission({permissions: ['fileSystem.write']}).then(r => !r ? v2.runtime.web.saveFile(data, name, options) : v2.runtime.chrome.chooseEntry({
+    return v2.rt.chrome.hasPermission({permissions: ['fileSystem.write']}).then(r => !r ? v2.rt.web.saveFile(data, name, options) : v2.rt.chrome.chooseEntry({
       type: 'saveFile',
       suggestedName: name,
       accepts: [{
@@ -296,13 +296,13 @@ v2.runtime.chrome = {
     })))
   },
 }
-for (const t of v2.runtime.types) {
-  v2.runtime[`is${v2.ucfirst(t)}`] = v2.runtime.type === t
+for (const t of v2.rt.types) {
+  v2.rt[`is${v2.ucfirst(t)}`] = v2.rt.type === t
 }
-v2.runtime.current = v2.runtime[v2.runtime.type] || {}
+v2.rt.current = v2.rt[v2.rt.type] || {}
 
-v2.chooseFile = v2.runtime.current.chooseFile || v2.runtime.web.chooseFile
-v2.saveFile = v2.runtime.current.saveFile || v2.runtime.web.saveFile
+v2.chooseFile = v2.rt.current.chooseFile || v2.rt.web.chooseFile
+v2.saveFile = v2.rt.current.saveFile || v2.rt.web.saveFile
 
 v2.iter = {
   first(xs) {
