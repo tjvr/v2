@@ -173,6 +173,42 @@ v2.asBlob = function asBlob(data, options) {
   return data
 }
 
+v2.fs = {
+  readDirectory(dir, fn) {
+    const r = dir.createReader()
+    const promises = []
+    return new Promise(function loop(resolve, reject) {
+      r.readEntries(es => {
+        if (!es.length) return resolve(Promise.all(promises))
+        promises.push(...es.map(fn))
+        loop(resolve, reject)
+      }, e => reject(e))
+    })
+  },
+  recurse(dir, fn) {
+    return function loop(entry) {
+      const r = fn(entry)
+      return entry.isDirectory ? Promise.all([r, v2.fs.readDirectory(entry, loop)]) : r
+    }(dir)
+  },
+  createWriter(entry) {return new Promise((r, j) => entry.createWriter(r, j))},
+
+  file(entry) {return v2.fs._file(entry).then(v2.fs._adoptFile)},
+  _file(entry) {return new Promise((r, j) => entry.file(r, j))},
+  _adoptFile(f) {return f instanceof File ? f : new File([f], f.name, f)},
+
+  getFile(entry, path, options) {return new Promise((r, j) => entry.getFile(path, options || {}, r, j))},
+  getDirectory(entry, path, options) {return new Promise((r, j) => entry.getDirectory(path, options || {}, r, j))},
+  zip(root) {
+    if (!root.isDirectory) throw new Error('Root zip entry must be a directory')
+    const i = root.fullPath.length + 1
+    const zip = new JSZip()
+    return v2.fs.recurse(root, e =>
+      e.isFile && v2.fs.file(e).then(f => zip.file(e.fullPath.slice(i), f)))
+    .then(() => zip)
+  },
+}
+
 v2.runtime = {
   types: ['chrome', 'web'],
   type: window.chrome && chrome.app && chrome.app.runtime ? 'chrome' : 'web',
