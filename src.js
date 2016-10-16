@@ -173,12 +173,12 @@ v2.formatBytes = function formatBytes(b, opts) {
   return (b < n * 16 ? Math.round(b / n * 10) / 10 : Math.round(b / n)) + ' ' + l.charAt(k) + (opts.si === false ? '' : 'i') + 'B'
 }
 
-v2.rt = {
+v2.runtime = {
   types: ['chrome', 'web'],
   type: window.chrome && chrome.app && chrome.app.runtime ? 'chrome' : 'web',
 }
-for (const t of v2.rt.types) {
-  v2.rt[`is${v2.ucfirst(t)}`] = v2.rt.type === t
+for (const t of v2.runtime.types) {
+  v2.runtime[`is${v2.ucfirst(t)}`] = v2.runtime.type === t
 }
 
 v2.iter = {
