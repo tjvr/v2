@@ -736,6 +736,12 @@ v2.View = class View {
   build() {
     return h('.v2-view')
   }
+  assemble(fn) {
+    h.pushView(this)
+    const result = fn()
+    h.popView()
+    return result
+  }
 
   set(p) {
     Object.assign(this, p)
