@@ -263,7 +263,7 @@ v2.runtime.chrome = {
   saveFile(data, name, options) {
     if (!options) options = {}
     data = v2.asBlob(data, options)
-    return v2.runtime.chrome.hasPermission('fileSystem.write').then(r => !r ? v2.runtime.web.saveFile(data, name, options) : v2.runtime.chrome.chooseEntry({
+    return v2.runtime.chrome.hasPermission({permissions: ['fileSystem.write']}).then(r => !r ? v2.runtime.web.saveFile(data, name, options) : v2.runtime.chrome.chooseEntry({
       type: 'saveFile',
       suggestedName: name,
       accepts: [{
