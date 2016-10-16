@@ -155,10 +155,6 @@ v2.runtime = {
   types: ['chrome', 'web'],
   type: window.chrome && chrome.app && chrome.app.runtime ? 'chrome' : 'web',
 }
-for (const t of v2.runtime.types) {
-  v2.runtime[`is${v2.ucfirst(t)}`] = v2.runtime.type === t
-}
-
 v2.runtime.web = {
   chooseFile(accept, options) {
     if (!options) options = {}
@@ -182,6 +178,10 @@ v2.runtime.web = {
     requestIdleCallback(() => URL.revokeObjectURL(a.href))
   },
 }
+for (const t of v2.runtime.types) {
+  v2.runtime[`is${v2.ucfirst(t)}`] = v2.runtime.type === t
+}
+v2.runtime.current = v2.runtime
 
 v2.chooseFile = v2.runtime.web.chooseFile
 v2.saveFile = v2.runtime.web.saveFile
