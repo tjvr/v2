@@ -181,7 +181,7 @@ v2.runtime.web = {
 for (const t of v2.runtime.types) {
   v2.runtime[`is${v2.ucfirst(t)}`] = v2.runtime.type === t
 }
-v2.runtime.current = v2.runtime
+v2.runtime.current = v2.runtime[v2.runtime.type]
 
 v2.chooseFile = v2.runtime.current.chooseFile
 v2.saveFile = v2.runtime.current.saveFile
