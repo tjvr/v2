@@ -240,6 +240,7 @@ v2.runtime.chrome = {
   _callback(fn, ...args) {
     return new Promise((r, j) => fn(...args, x => chrome.runtime.lastError ? j(chrome.runtime.lastError) : r(x)))
   },
+  hasPermission(name) {return v2.runtime.chrome._callback(chrome.permissions.contains)},
   restoreEntry(id) {return v2.runtime.chrome._callback(chrome.fileSystem.restoreEntry, id)},
   chooseEntry(options) {return v2.runtime.chrome._callback(chrome.fileSystem.chooseEntry, options)},
   chooseFile(type, options) {
@@ -262,7 +263,7 @@ v2.runtime.chrome = {
   saveFile(data, name, options) {
     if (!options) options = {}
     data = v2.asBlob(data, options)
-    return v2.runtime.chrome.chooseEntry({
+    return v2.runtime.chrome.hasPermission('fileSystem.write').then(r => !r ? v2.runtime.web.saveFile(data, name, options) : v2.runtime.chrome.chooseEntry({
       type: 'saveFile',
       suggestedName: name,
       accepts: [{
@@ -273,7 +274,7 @@ v2.runtime.chrome = {
       w.onwrite = r
       w.onerror = j
       w.write(data)
-    }))
+    })))
   },
 }
 for (const t of v2.runtime.types) {
