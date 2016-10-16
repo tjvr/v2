@@ -82,6 +82,25 @@ Object.assign(h, {
 
 const v2 = {}
 
+v2.enum = function enum_(o) {
+  class Enum {
+    constructor(name, props) {
+      this.name = name
+      Object.assign(this, props)
+    }
+    toJSON() {return this.name}
+  }
+  if (typeof o === 'string') o = o.split(/\s*,\s*/)
+  if (Array.isArray(o)) {
+    for (const k of o) Enum[k] = new Enum(k)
+  } else {
+    for (const k of Object.keys(o)) {
+      Enum[k] = new Enum(k, o[k])
+    }
+  }
+  return Enum
+}
+
 v2.immediate = function immediate(fn) {return v2._nextPromise.then(fn)}
 v2._nextPromise = Promise.resolve()
 
