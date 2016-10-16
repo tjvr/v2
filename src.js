@@ -240,7 +240,7 @@ v2.runtime.chrome = {
   _callback(fn, ...args) {
     return new Promise((r, j) => fn(...args, x => chrome.runtime.lastError ? j(chrome.runtime.lastError) : r(x)))
   },
-  hasPermission(name) {return v2.runtime.chrome._callback(chrome.permissions.contains)},
+  hasPermission(info) {return v2.runtime.chrome._callback(chrome.permissions.contains, info)},
   restoreEntry(id) {return v2.runtime.chrome._callback(chrome.fileSystem.restoreEntry, id)},
   chooseEntry(options) {return v2.runtime.chrome._callback(chrome.fileSystem.chooseEntry, options)},
   chooseFile(type, options) {
