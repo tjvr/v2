@@ -199,14 +199,14 @@ v2.fs = {
 
   getFile(entry, path, options) {return new Promise((r, j) => entry.getFile(path, options || {}, r, j))},
   getDirectory(entry, path, options) {return new Promise((r, j) => entry.getDirectory(path, options || {}, r, j))},
-  zip(root) {
-    if (!root.isDirectory) throw new Error('Root zip entry must be a directory')
-    const i = root.fullPath.length + 1
-    const zip = new JSZip()
-    return v2.fs.recurse(root, e =>
-      e.isFile && v2.fs.file(e).then(f => zip.file(e.fullPath.slice(i), f)))
-    .then(() => zip)
-  },
+}
+if (window.JSZip) v2.fs.zip = function zip(root) {
+  if (!root.isDirectory) throw new Error('Root zip entry must be a directory')
+  const i = root.fullPath.length + 1
+  const zip = new JSZip()
+  return v2.fs.recurse(root, e =>
+    e.isFile && v2.fs.file(e).then(f => zip.file(e.fullPath.slice(i), f)))
+  .then(() => zip)
 }
 
 v2.runtime = {
