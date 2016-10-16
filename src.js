@@ -240,16 +240,16 @@ v2.runtime.chrome = {
   _callback(fn, ...args) {
     return new Promise((r, j) => fn(...args, x => chrome.runtime.lastError ? j(chrome.runtime.lastError) : r(x)))
   },
-  restoreEntry(id) {return tr.chrome._callback(chrome.fileSystem.restoreEntry, id)},
-  chooseEntry(options) {return tr.chrome._callback(chrome.fileSystem.chooseEntry, options)},
+  restoreEntry(id) {return v2.runtime.chrome._callback(chrome.fileSystem.restoreEntry, id)},
+  chooseEntry(options) {return v2.runtime.chrome._callback(chrome.fileSystem.chooseEntry, options)},
   chooseFile(type, options) {
     if (!options) options = {}
-    return tr.chrome.chooseEntry({
+    return v2.runtime.chrome.chooseEntry({
       type: 'openFile',
       acceptsMultiple: !!options.multiple,
-      accepts: options.accepts && [tr.chrome._parseAccepts(options.accepts)],
+      accepts: options.accepts && [v2.runtime.chrome._parseAccepts(options.accepts)],
     }).then(entry => Array.isArray(entry) ?
-      Promise.all(entry.map(tr.fs.file)) : tr.fs.file(entry))
+      Promise.all(entry.map(v2.fs.file)) : v2.fs.file(entry))
   },
   _parseAccepts(str) {
     const mimeTypes = [], extensions = []
@@ -262,14 +262,14 @@ v2.runtime.chrome = {
   saveFile(data, name, options) {
     if (!options) options = {}
     data = v2.asBlob(data, options)
-    return tr.chrome.chooseEntry({
+    return v2.runtime.chrome.chooseEntry({
       type: 'saveFile',
       suggestedName: name,
       accepts: [{
         mimeTypes: [options.type || data.type],
         extensions: [v2.path.ext(name)],
       }],
-    }).then(e => tr.fs.createWriter(e)).then(w => new Promise((r, j) => {
+    }).then(e => v2.fs.createWriter(e)).then(w => new Promise((r, j) => {
       w.onwrite = r
       w.onerror = j
       w.write(data)
