@@ -178,6 +178,46 @@ v2.runtime.web = {
     requestIdleCallback(() => URL.revokeObjectURL(a.href))
   },
 }
+v2.runtime.chrome = {
+  _callback(fn, ...args) {
+    return new Promise((r, j) => fn(...args, x => chrome.runtime.lastError ? j(chrome.runtime.lastError) : r(x)))
+  },
+  restoreEntry(id) {return tr.chrome._callback(chrome.fileSystem.restoreEntry, id)},
+  chooseEntry(options) {return tr.chrome._callback(chrome.fileSystem.chooseEntry, options)},
+  chooseFile(type, options) {
+    if (!options) options = {}
+    return tr.chrome.chooseEntry({
+      type: 'openFile',
+      acceptsMultiple: !!options.multiple,
+      accepts: options.accepts && [tr.chrome._parseAccepts(options.accepts)],
+    }).then(entry => Array.isArray(entry) ?
+      Promise.all(entry.map(tr.fs.file)) : tr.fs.file(entry))
+  },
+  _parseAccepts(str) {
+    const mimeTypes = [], extensions = []
+    for (const part of str.split(',')) {
+      if (part[0] === '.') extensions.push(part.slice(1))
+      else mimeTypes.push(part)
+    }
+    return {mimeTypes, extensions}
+  },
+  saveFile(data, name, options) {
+    if (!options) options = {}
+    if (typeof data === 'string') data = new Blob([data], {type: options.type})
+    return tr.chrome.chooseEntry({
+      type: 'saveFile',
+      suggestedName: name,
+      accepts: [{
+        mimeTypes: [options.type || data.type],
+        extensions: [v2.path.ext(name)],
+      }],
+    }).then(e => tr.fs.createWriter(e)).then(w => new Promise((r, j) => {
+      w.onwrite = r
+      w.onerror = j
+      w.write(data)
+    }))
+  },
+}
 for (const t of v2.runtime.types) {
   v2.runtime[`is${v2.ucfirst(t)}`] = v2.runtime.type === t
 }
