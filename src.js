@@ -167,6 +167,11 @@ v2.wrapBlob = function wrapBlob(blob, options) {
     else r.readAsText(blob)
   })
 }
+v2.asBlob = function asBlob(data, options) {
+  if (!options) options = {}
+  if (typeof data === 'string' || data.slice) return new Blob([data], {type: options.type || ''})
+  return data
+}
 
 v2.runtime = {
   types: ['chrome', 'web'],
@@ -185,7 +190,7 @@ v2.runtime.web = {
   },
   saveFile(data, name, options) {
     if (!options) options = {}
-    if (typeof data === 'string') data = new Blob([data], {type: options.type})
+    data = v2.asBlob(data, options)
     const a = h('a', {
       download: name || '',
       type: data.type || options.type || '',
@@ -220,7 +225,7 @@ v2.runtime.chrome = {
   },
   saveFile(data, name, options) {
     if (!options) options = {}
-    if (typeof data === 'string') data = new Blob([data], {type: options.type})
+    data = v2.asBlob(data, options)
     return tr.chrome.chooseEntry({
       type: 'saveFile',
       suggestedName: name,
