@@ -151,6 +151,23 @@ v2.formatBytes = function formatBytes(b, opts) {
   return (b < n * 16 ? Math.round(b / n * 10) / 10 : Math.round(b / n)) + ' ' + l.charAt(k) + (opts.si === false ? '' : 'i') + 'B'
 }
 
+v2.wrapBlob = function wrapBlob(blob, options) {
+  if (!options) options = {}
+  if (!blob) return Promise.reject(new Error('Not found'))
+  const type = options.as === 'xml' ? 'text/xml' : options.type || blob.type
+  const as = options.as === 'xml' ? 'document' : options.as || 'text'
+  if (as === 'blob') return Promise.resolve(options.type ? new Blob([blob], {type}) : blob)
+  return new Promise((resolve, reject) => {
+    const r = new FileReader
+    r.onerror = () => reject(r.error)
+    r.onload = () => resolve(
+      as === 'document' ? new DOMParser().parseFromString(r.result, type) :
+      as === 'json' ? JSON.parse(r.result) : r.result)
+    if (as === 'arraybuffer') r.readAsArrayBuffer(blob)
+    else r.readAsText(blob)
+  })
+}
+
 v2.runtime = {
   types: ['chrome', 'web'],
   type: window.chrome && chrome.app && chrome.app.runtime ? 'chrome' : 'web',
