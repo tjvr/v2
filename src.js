@@ -183,8 +183,8 @@ for (const t of v2.runtime.types) {
 }
 v2.runtime.current = v2.runtime
 
-v2.chooseFile = v2.runtime.web.chooseFile
-v2.saveFile = v2.runtime.web.saveFile
+v2.chooseFile = v2.runtime.current.chooseFile
+v2.saveFile = v2.runtime.current.saveFile
 
 v2.iter = {
   first(xs) {
