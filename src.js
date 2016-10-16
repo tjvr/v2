@@ -116,28 +116,6 @@ v2.throttleImmediate = function throttleImmediate(fn) {
   }
 }
 
-v2.chooseFile = function chooseFile(accept, options) {
-  if (!options) options = {}
-  const i = h('input', {type: 'file', accept, multiple: !!options.multiple})
-  return new Promise((resolve, reject) => {
-    i.onchange = e =>
-      i.files.length === 0 ? reject(new Error('No files selected')) :
-      resolve(options.multiple ? Array.from(i.files) : i.files[0])
-    i.click()
-  })
-}
-v2.saveFile = function saveFile(data, name, options) {
-  if (!options) options = {}
-  if (typeof data === 'string') data = new Blob([data], {type: options.type})
-  const a = h('a', {
-    download: name || '',
-    type: data.type || options.type || '',
-    href: URL.createObjectURL(data),
-  })
-  a.click()
-  requestIdleCallback(() => URL.revokeObjectURL(a.href))
-}
-
 v2.escapeEntities = function escapeEntities(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;')
 }
@@ -179,6 +157,28 @@ v2.runtime = {
 }
 for (const t of v2.runtime.types) {
   v2.runtime[`is${v2.ucfirst(t)}`] = v2.runtime.type === t
+}
+
+v2.chooseFile = function chooseFile(accept, options) {
+  if (!options) options = {}
+  const i = h('input', {type: 'file', accept, multiple: !!options.multiple})
+  return new Promise((resolve, reject) => {
+    i.onchange = e =>
+      i.files.length === 0 ? reject(new Error('No files selected')) :
+      resolve(options.multiple ? Array.from(i.files) : i.files[0])
+    i.click()
+  })
+}
+v2.saveFile = function saveFile(data, name, options) {
+  if (!options) options = {}
+  if (typeof data === 'string') data = new Blob([data], {type: options.type})
+  const a = h('a', {
+    download: name || '',
+    type: data.type || options.type || '',
+    href: URL.createObjectURL(data),
+  })
+  a.click()
+  requestIdleCallback(() => URL.revokeObjectURL(a.href))
 }
 
 v2.iter = {
