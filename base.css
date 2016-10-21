@@ -27,19 +27,19 @@ body {
 
 .v2-split {
 }
-.v2-split-horizontal {
+.v2-split--horizontal {
   flex-direction: row;
 }
-.v2-split-vertical {
+.v2-split--vertical {
   flex-direction: column;
 }
 .v2-split-splitter {
 }
-.v2-split-horizontal > .v2-split-splitter {
+.v2-split--horizontal > .v2-split-splitter {
   cursor: col-resize;
   width: 4px;
 }
-.v2-split-vertical > .v2-split-splitter {
+.v2-split--vertical > .v2-split-splitter {
   cursor: row-resize;
   height: 4px;
 }

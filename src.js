@@ -879,7 +879,7 @@ v2.Split = class Split extends v2.View {
   get orientation() {return this._orientation}
   set orientation(value) {
     this._orientation = value
-    this.el.className = `v2-view v2-split v2-split-${value}`
+    this.el.className = `v2-view v2-split v2-split--${value}`
   }
   get isVertical() {return this._orientation === 'vertical'}
   set isVertical(value) {this.orientation = value ? 'vertical' : 'horizontal'}
