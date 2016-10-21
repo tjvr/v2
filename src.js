@@ -2030,7 +2030,7 @@ v2.Tree._Item = class _Item extends v2.View {
   _update() {
     this._toggled()
     this._selected()
-    this.el.classList.toggle('v2-tree-item-empty', this._model.node.children.length === 0)
+    this.el.classList.toggle('v2-tree-item--empty', this._model.node.children.length === 0)
     this.el.style.paddingLeft = `${this._model.level}rem`
     this._dataChanged()
   }
