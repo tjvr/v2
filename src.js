@@ -2381,7 +2381,7 @@ v2.Collection.Item = class Item extends v2.View {
     value = !!value
     if (this._selected === value) return
     this._selected = value
-    this.el.classList.toggle('v2-collection-item-selected', value)
+    this.el.classList.toggle('v2-collection-item--selected', value)
   }
 
   setPosition(x, y) {

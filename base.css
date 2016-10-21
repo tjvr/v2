@@ -78,7 +78,7 @@ body {
   left: 0;
   box-sizing: border-box;
 }
-.v2-collection-item-selected {
+.v2-collection-item--selected {
   background: rgba(0,0,0,.1);
 }
 
