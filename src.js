@@ -1439,7 +1439,7 @@ v2.DynamicTreeItem = class DynamicTreeItem extends v2.View {
   }
 
   _updateEmpty() {
-    if (this._label) this._label.classList.toggle('v2-tree-item-empty', !this._model || this._model.children.length === 0)
+    if (this._label) this._label.classList.toggle('v2-tree-item--empty', !this._model || this._model.children.length === 0)
   }
   _childRemoved(e) {
     if (!this.items) return

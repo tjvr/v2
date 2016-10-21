@@ -127,7 +127,7 @@ body {
   left: .75rem;
   top: .75rem;
 }
-.v2-tree-item-empty > .v2-tree-item-disclosure {
+.v2-tree-item--empty > .v2-tree-item-disclosure {
   visibility: hidden;
 }
 .v2-tree-item-expanded > .v2-tree-item-disclosure {
