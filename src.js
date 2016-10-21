@@ -149,7 +149,7 @@ v2.stripHTML = function stripHTML(x) {
 
 v2.monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 v2.shortMonthNames = v2.monthNames.map(x => x.slice(0, 3))
-v2.todayFormatDate = function todayFormatDate(d, short) {
+v2.formatDateToday = function formatDateToday(d, short) {
   const now = new Date()
   if (now.getFullYear() === d.getFullYear() &&
     now.getMonth() === d.getMonth()) {
