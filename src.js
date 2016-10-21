@@ -2046,7 +2046,7 @@ v2.Tree._Item = class _Item extends v2.View {
 }
 v2.Tree._EditItem = class _EditItem extends v2.Tree._Item {
   build() {
-    return h('.v2-tree-item.v2-tree-item-editing',
+    return h('.v2-tree-item.v2-tree-item--editing',
       h('.v2-tree-item-disclosure'),
       this._labelEl = h('input.v2-tree-item-editor'))
   }

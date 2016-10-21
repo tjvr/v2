@@ -139,7 +139,7 @@ body {
 .v2-tree-item-label {
   display: inline;
 }
-.v2-tree-item-editing {
+.v2-tree-item--editing {
   display: flex;
   padding-right: 1rem;
 }
