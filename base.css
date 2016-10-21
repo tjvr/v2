@@ -176,8 +176,16 @@ body {
   padding: .5rem 0;*/
 }
 .v2-menu > .v2-menu-item {
-  padding: .35rem 1rem;
+  padding: .35rem 1rem .35rem 1.6rem;
 }
+.v2-menu-item::before {
+  display: inline-block;
+  width: 1.4rem;
+  text-align: center;
+  margin-left: -1.4rem;
+}
+.v2-menu-item-checked::before {content: '✓'}
+.v2-menu-item-mixed::before {content: '•'}
 .v2-menu > .v2-menu-item:hover {
   background: #555;
 }

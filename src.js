@@ -2484,6 +2484,7 @@ v2.MenuItem = class MenuItem extends v2.View {
   init() {
     this._menu = null
     this._target = null
+    this._state = ''
     this.action = null
   }
   build() {
@@ -2506,6 +2507,13 @@ v2.MenuItem = class MenuItem extends v2.View {
       h.removeChildren(this.el)
       h.add(this.el, value)
     }
+  }
+
+  get state() {return this._state}
+  set state(value) {
+    this._state = value
+    this.el.classList.toggle('v2-menu-item-checked', value === 'checked')
+    this.el.classList.toggle('v2-menu-item-mixed', value === 'mixed')
   }
 
   set spec(value) {
