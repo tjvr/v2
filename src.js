@@ -2532,5 +2532,3 @@ v2.MenuItem = class MenuItem extends v2.View {
     }
   }
 }
-
-// v2.TextEditor = class TextEditor extends v2.View {}
