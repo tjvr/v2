@@ -1483,7 +1483,7 @@ v2.DynamicTreeItem = class DynamicTreeItem extends v2.View {
   expand() {
     if (this.isExpanded) return
     this.isExpanded = true
-    if (this._label) this._label.classList.add('v2-tree-item-expanded')
+    if (this._label) this._label.classList.add('v2-tree-item--expanded')
     if (this.items) {
       this.container.style.display = ''
     } else {
@@ -1498,7 +1498,7 @@ v2.DynamicTreeItem = class DynamicTreeItem extends v2.View {
   collapse() {
     if (!this.isExpanded) return
     this.isExpanded = false
-    if (this._label) this._label.classList.remove('v2-tree-item-expanded')
+    if (this._label) this._label.classList.remove('v2-tree-item--expanded')
     if (this.items) {
       this.container.style.display = 'none'
     }
@@ -2018,7 +2018,7 @@ v2.Tree._Item = class _Item extends v2.View {
   }
 
   _toggled() {
-    this.el.classList.toggle('v2-tree-item-expanded', this._model.isExpanded)
+    this.el.classList.toggle('v2-tree-item--expanded', this._model.isExpanded)
   }
   _selected() {
     this.el.classList.toggle('v2-tree-item-selected', this._model.isSelected)
