@@ -2512,8 +2512,8 @@ v2.MenuItem = class MenuItem extends v2.View {
   get state() {return this._state}
   set state(value) {
     this._state = value
-    this.el.classList.toggle('v2-menu-item-checked', value === 'checked')
-    this.el.classList.toggle('v2-menu-item-mixed', value === 'mixed')
+    this.el.classList.toggle('v2-menu-item--checked', value === 'checked')
+    this.el.classList.toggle('v2-menu-item--mixed', value === 'mixed')
   }
 
   set spec(value) {
