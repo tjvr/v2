@@ -140,6 +140,12 @@ v2.escapeEntities = function escapeEntities(s) {
 }
 v2.ucfirst = function ucfirst(x) {return x[0].toUpperCase() + x.slice(1)}
 v2.foldSpace = function foldSpace(x) {return x.trim().replace(/\s+/g, ' ')}
+v2.stripHTML = function stripHTML(x) {
+  // this is why we can't have nice things
+  return x.replace(/<(?:\/|[a-z])[^ \t\f\n\/\>]*(?:[ \t\f\n]+(?:=?[^ \t\f\n\/>=]*(?:=(?:"[^"]*(?:"|$)|'[^']*(?:'|$)|[^ \t\f\n>]+)?)?)?|\/)*?\/?(?:>|$)|<!--[^]*?(?:(?:-?-)?>|(?:-?-!?)?$|<!--)|<!doctype[^>]*(?:>|$)|<[\/?!].*?(?:>|$)/gi, '')
+  // <!doctype[ \t\f\n]*[^ \t\f\n]*[ \t\f\n]*(?:(?:public[ \t\f\n]*(?:'[^'>]*(?:'|$)|"[^">]*(?:"|$))|system)[ \t\f\n]*(?:'[^'>]*(?:'|$)|"[^">]*(?:"|$)))?[^>]*(?:>|$)
+  // return new DOMParser().parseFromString(x, 'text/html').documentElement.textContent
+}
 
 v2.monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 v2.shortMonthNames = v2.monthNames.map(x => x.slice(0, 3))
