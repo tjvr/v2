@@ -2021,7 +2021,7 @@ v2.Tree._Item = class _Item extends v2.View {
     this.el.classList.toggle('v2-tree-item--expanded', this._model.isExpanded)
   }
   _selected() {
-    this.el.classList.toggle('v2-tree-item-selected', this._model.isSelected)
+    this.el.classList.toggle('v2-tree-item--selected', this._model.isSelected)
   }
   _dataChanged() {
     if (!this._model) return

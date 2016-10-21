@@ -133,7 +133,7 @@ body {
 .v2-tree-item--expanded > .v2-tree-item-disclosure {
   transform: rotate(0deg);
 }
-.v2-tree-item-selected {
+.v2-tree-item--selected {
   background: rgba(0,0,0,.08);
 }
 .v2-tree-item-label {
