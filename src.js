@@ -619,7 +619,7 @@ v2.watchableProperty = function watchableProperty(o, name, get) {
     },
   })
 }
-v2.Model = class Model {
+class Model {
   constructor(o) {if (o) Object.assign(this, o)}
   sendAllProperties(fn) {
     for (const name of this.dataProperties) {
@@ -655,7 +655,7 @@ v2.Model = class Model {
     return this.prototype.dataProperties = (this.prototype.dataProperties || []).slice()
   }
 }
-v2.emitter(v2.Model.prototype)
+v2.emitter(Model.prototype)
 
 v2.bind = function bind(a, aPath, b, bPath) {
   if (typeof aPath === 'string') aPath = aPath.split('.')
@@ -791,7 +791,7 @@ v2.request.post = function post(url, options) {
   return v2.request('POST', url, options)
 }
 
-v2.View = class View {
+class View {
   get isView() {return true}
   get isRoot() {return this.isLive && !this.parent}
 
@@ -890,9 +890,9 @@ v2.View = class View {
     this.emit('activate', {target: this})
   }
 }
-v2.emitter(v2.View.prototype)
+v2.emitter(View.prototype)
 
-v2.App = class App extends v2.View {
+class App extends View {
   get title() {return this._title}
   set title(value) {document.title = this._title = value}
 
@@ -948,7 +948,7 @@ v2.App = class App extends v2.View {
   }
 }
 
-v2.Split = class Split extends v2.View {
+class Split extends View {
   init() {
     this._panes = []
     this._paneEls = []
@@ -1077,7 +1077,7 @@ v2.Split = class Split extends v2.View {
   }
 }
 
-v2.List = class List {
+class List {
   constructor(data) {
     this._data = data || []
     this._changes = []
@@ -1242,11 +1242,11 @@ v2.List = class List {
   toString() {return this._data.toString()}
   toJSON() {return this._data}
 }
-v2.emitter(v2.List.prototype)
+v2.emitter(List.prototype)
 
-v2.FilteredList = class FilteredList {
+class FilteredList {
   constructor(o) {
-    if (o instanceof v2.List) o = {model: o}
+    if (o instanceof List) o = {model: o}
     this._changes = []
     this._data = []
     this._indices = []
@@ -1401,12 +1401,12 @@ v2.FilteredList = class FilteredList {
     this._sendChanges()
   }
 }
-v2.emitter(v2.FilteredList.prototype)
+v2.emitter(FilteredList.prototype)
 for (const k of '_splice _rawSplice _replaced _index get entries values keys forEach map filter some every reduce reduceRight includes indexOf lastIndexOf find findIndex join toLocaleString toString'.split(' ').concat(Symbol.iterator)) {
-  v2.FilteredList.prototype[k] = v2.List.prototype[k]
+  FilteredList.prototype[k] = List.prototype[k]
 }
 
-v2.CyNode = class CyNode extends v2.Model {
+class CyNode extends Model {
   constructor(data, children) {
     super({data})
     this.children = children || []
@@ -1435,9 +1435,9 @@ v2.CyNode = class CyNode extends v2.Model {
   get firstChild() {return this.children[0]}
   get lastChild() {return this.children[this.children.length - 1]}
 }
-v2.CyNode.properties('data')
+CyNode.properties('data')
 
-v2.Node = class Node extends v2.CyNode {
+class Node extends CyNode {
   constructor(data, children) {
     super(data, children)
     this.parent = null
@@ -1469,7 +1469,7 @@ v2.Node = class Node extends v2.CyNode {
   *parents() {for (let p = this; p; p = p.parent) yield p}
 }
 
-v2.DynamicTreeItem = class DynamicTreeItem extends v2.View {
+class DynamicTreeItem extends View {
   init() {
     this._model = null
     this.items = null
@@ -1597,7 +1597,7 @@ v2.DynamicTreeItem = class DynamicTreeItem extends v2.View {
     if (expanded && !suppress) this.expand()
   }
 }
-v2.DynamicTree = class DynamicTree extends v2.DynamicTreeItem {
+class DynamicTree extends DynamicTreeItem {
   init() {
     super.init()
     this.tree = this
@@ -1642,7 +1642,7 @@ v2.DynamicTree = class DynamicTree extends v2.DynamicTreeItem {
   }
 }
 
-v2.Tree = class Tree extends v2.View {
+class Tree extends View {
   init() {
     this._model = null
     this._transform = null
@@ -1669,7 +1669,7 @@ v2.Tree = class Tree extends v2.View {
   set model(value) {
     this._model = value
     this._linear.length = 0
-    this._root = new v2.Tree._L(this, -1, value)
+    this._root = new Tree._L(this, -1, value)
     this._root.expand()
   }
 
@@ -1900,7 +1900,7 @@ v2.Tree = class Tree extends v2.View {
   _reuse(l) {
     if (l.isEditing) {
       if (!this._editItem) {
-        this._editItem = new v2.Tree._EditItem({tree: this, model: l})
+        this._editItem = new Tree._EditItem({tree: this, model: l})
         this.add(this._editItem)
       } else {
         this._editItem.model = l
@@ -1913,7 +1913,7 @@ v2.Tree = class Tree extends v2.View {
     if (item) {
       this._cache.delete(item.model)
     } else {
-      item = new v2.Tree._Item({tree: this, model: l})
+      item = new Tree._Item({tree: this, model: l})
       this.add(item)
     }
     item.model = l
@@ -1971,7 +1971,7 @@ v2.Tree = class Tree extends v2.View {
     this._insertSubtreeAt(i + 1, Array.prototype.concat.apply([], l.children.map(l => l.subtree)))
   }
 }
-v2.Tree._L = class _L {
+Tree._L = class _L {
   constructor(tree, level, node) {
     this.tree = tree
     this.level = level
@@ -1989,7 +1989,7 @@ v2.Tree._L = class _L {
 
   _childInserted(e) {
     if (!this.children) return
-    const l = new v2.Tree._L(this, this.level + 1, e.node)
+    const l = new Tree._L(this, this.level + 1, e.node)
     const b = this.children[e.index]
     this.children.splice(e.index, 0, l)
     this.tree._insertSubtree(this, l, b)
@@ -2047,7 +2047,7 @@ v2.Tree._L = class _L {
     if (this.isExpanded) return this
     this.isExpanded = true
     if (!this.children) {
-      this.children = this.node.children.map(c => new v2.Tree._L(this.tree, this.level + 1, c))
+      this.children = this.node.children.map(c => new Tree._L(this.tree, this.level + 1, c))
     }
     this.tree._insertChildSubtrees(this)
     if (this.item) this.item._toggled()
@@ -2076,7 +2076,7 @@ v2.Tree._L = class _L {
     if (this.isExpanded) for (const c of this.children) c._collectSubtree(a)
   }
 }
-v2.Tree._Item = class _Item extends v2.View {
+Tree._Item = class _Item extends View {
   get model() {return this._model}
   set model(value) {
     if (this._model === value) return
@@ -2128,7 +2128,7 @@ v2.Tree._Item = class _Item extends v2.View {
   get text() {return this._text}
   set text(value) {this._labelEl.textContent = this._text = value}
 }
-v2.Tree._EditItem = class _EditItem extends v2.Tree._Item {
+Tree._EditItem = class _EditItem extends Tree._Item {
   build() {
     return h('.v2-tree-item.v2-tree-item--editing',
       h('.v2-tree-item-disclosure'),
@@ -2144,7 +2144,7 @@ v2.Tree._EditItem = class _EditItem extends v2.Tree._Item {
   set text(value) {this._labelEl.value = this._text = value}
 }
 
-v2.Collection = class Collection extends v2.View {
+class Collection extends View {
   // TODO support collections containing multiple identical items
   init() {
     this._tileWidth = 200
@@ -2444,7 +2444,7 @@ v2.Collection = class Collection extends v2.View {
     return unused
   }
 }
-v2.Collection.Item = class Item extends v2.View {
+Collection.Item = class Item extends View {
   init() {
     this.index = null
     this._selected = false
@@ -2515,7 +2515,7 @@ v2.Collection.Item = class Item extends v2.View {
   _update() {}
 }
 
-v2.Menu = class Menu extends v2.View {
+class Menu extends View {
   init() {
     this._click = this._click.bind(this)
   }
@@ -2558,13 +2558,13 @@ v2.Menu = class Menu extends v2.View {
         this.el.appendChild(h('.v2-menu-separator'))
       } else {
         const [title, spec, opts] = x
-        this.add(new v2.MenuItem(Object.assign({title, spec}, opts)))
+        this.add(new MenuItem(Object.assign({title, spec}, opts)))
       }
     }
   }
 }
 
-v2.MenuItem = class MenuItem extends v2.View {
+class MenuItem extends View {
   init() {
     this._menu = null
     this._target = null
@@ -2602,7 +2602,7 @@ v2.MenuItem = class MenuItem extends v2.View {
 
   set spec(value) {
     if (Array.isArray(value)) {
-      this.menu = new v2.Menu({spec: value})
+      this.menu = new Menu({spec: value})
     } else if (typeof value === 'string' || typeof value === 'function') {
       this.action = value
     } else if (value) {
@@ -2610,6 +2610,8 @@ v2.MenuItem = class MenuItem extends v2.View {
     }
   }
 }
+
+Object.assign(v2, {Model, View, App, Split, List, FilteredList, CyNode, Node, DynamicTreeItem, DynamicTree, Tree, Collection, Menu, MenuItem})
 
 global.h = h
 global.v2 = v2
