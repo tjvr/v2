@@ -1,3 +1,4 @@
+!function(global) {
 'use strict'
 
 function h(sel, ...args) {
@@ -420,7 +421,7 @@ v2.fs = {
   getFile(entry, path, options) {return new Promise((r, j) => entry.getFile(path, options || {}, r, j))},
   getDirectory(entry, path, options) {return new Promise((r, j) => entry.getDirectory(path, options || {}, r, j))},
 }
-if (window.JSZip) v2.fs.zip = function zip(root) {
+if (global.JSZip) v2.fs.zip = function zip(root) {
   if (!root.isDirectory) throw new Error('Root zip entry must be a directory')
   const i = root.fullPath.length + 1
   const zip = new JSZip()
@@ -431,7 +432,7 @@ if (window.JSZip) v2.fs.zip = function zip(root) {
 
 v2.rt = {
   types: ['chrome', 'web'],
-  type: window.chrome && chrome.app && chrome.app.runtime ? 'chrome' : 'web',
+  type: global.chrome && chrome.app && chrome.app.runtime ? 'chrome' : 'web',
 }
 v2.rt.web = {
   chooseFile(accept, options) {
@@ -2609,3 +2610,8 @@ v2.MenuItem = class MenuItem extends v2.View {
     }
   }
 }
+
+global.h = h
+global.v2 = v2
+
+}(this)
