@@ -149,31 +149,33 @@ v2.stripHTML = function stripHTML(x) {
 
 v2.monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 v2.shortMonthNames = v2.monthNames.map(x => x.slice(0, 3))
-v2.formatDateToday = function formatDateToday(d, short) {
-  const now = new Date()
-  if (now.getFullYear() === d.getFullYear() &&
-    now.getMonth() === d.getMonth()) {
-    if (now.getDate() === d.getDate()) return 'Today'
-    if (now.getDate() === d.getDate() + 1) return 'Yesterday'
-  }
-  return d.getDate() + (short ? v2.shortMonthNames : v2.monthNames)[d.getMonth()] + d.getDate()
-}
-v2.formatTimeHM = function formatTimeHM(d) {
-  return (''+d.getHours()).padStart(2, '0') + ':' + (''+d.getMinutes()).padStart(2, '0')
-}
-v2.formatList = function formatList(items) {
-  return items.length <= 2 ? items.join(' and ') : items.slice(0, -1).join(', ') + ', and ' + items[items.length - 1]
-}
-v2.formatBytes = function formatBytes(b, opts) {
-  if (!opts) opts = {}
-  if (b < 1024) return b + ' B'
-  const l = 'KMGTPEZY'
-  let k = 0, n = 1024
-  while (k < l.length - 1 && b >= n * 1024) {
-    ++k
-    n *= 1024
-  }
-  return (b < n * 16 ? Math.round(b / n * 10) / 10 : Math.round(b / n)) + ' ' + l.charAt(k) + (opts.si === false ? '' : 'i') + 'B'
+v2.format = {
+  dateToday(d, short) {
+    const now = new Date()
+    if (now.getFullYear() === d.getFullYear() &&
+      now.getMonth() === d.getMonth()) {
+      if (now.getDate() === d.getDate()) return 'Today'
+      if (now.getDate() === d.getDate() + 1) return 'Yesterday'
+    }
+    return d.getDate() + (short ? v2.shortMonthNames : v2.monthNames)[d.getMonth()] + d.getDate()
+  },
+  timeHM(d) {
+    return (''+d.getHours()).padStart(2, '0') + ':' + (''+d.getMinutes()).padStart(2, '0')
+  },
+  list(items) {
+    return items.length <= 2 ? items.join(' and ') : items.slice(0, -1).join(', ') + ', and ' + items[items.length - 1]
+  },
+  bytes(b, opts) {
+    if (!opts) opts = {}
+    if (b < 1024) return b + ' B'
+    const l = 'KMGTPEZY'
+    let k = 0, n = 1024
+    while (k < l.length - 1 && b >= n * 1024) {
+      ++k
+      n *= 1024
+    }
+    return (b < n * 16 ? Math.round(b / n * 10) / 10 : Math.round(b / n)) + ' ' + l.charAt(k) + (opts.si === false ? '' : 'i') + 'B'
+  },
 }
 
 v2.wrapBlob = function wrapBlob(blob, options) {
