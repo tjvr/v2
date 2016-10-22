@@ -272,7 +272,7 @@ v2.wrapBlob = function wrapBlob(blob, options) {
 }
 v2.asBlob = function asBlob(data, options) {
   if (!options) options = {}
-  if (typeof data === 'string' || data.slice) return new Blob([data], {type: options.type || ''})
+  if (typeof data === 'string' || data.byteLength != null) return new Blob([data], {type: options.type || ''})
   return data
 }
 
