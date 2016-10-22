@@ -725,7 +725,6 @@ v2.bind.Side = class Side {
   _reflectChange(e) {
     const i = this.intermediates.indexOf(e.target)
     if (i === -1) return
-    // console.log('reflect change in', object, name)
 
     for (let j = i + 1; j < this.intermediates.length; ++j) {
       this.intermediates[j].unlisten(`${this.path[j]} change`, this._reflectChange)
@@ -2431,7 +2430,7 @@ v2.Collection = class Collection extends v2.View {
     const m = this._model.get(i)
     if (!m) return null
     const item = this._cache.get(m)
-    if (item) return /*console.log(item, item.visible) || */item
+    if (item) return item
     let unused = this._unused.pop()
     if (!unused) {
       this.add(unused = new this.Item())
