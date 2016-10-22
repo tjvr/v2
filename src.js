@@ -149,18 +149,94 @@ v2.stripHTML = function stripHTML(x) {
 
 v2.monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 v2.shortMonthNames = v2.monthNames.map(x => x.slice(0, 3))
+v2.dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+v2.shortDayNames = v2.dayNames.map(x => x.slice(0, 3))
+v2.isLeapYear = function isLeapYear(y) {
+  return !(y % 4) && (y % 100 !== 0 || !(y % 400))
+}
+v2.dayCounts = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+v2.monthLengths = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
+v2.getDayOfYear = function getDayOfYear(d) {
+  const m = d.getMonth()
+  const n = d.getDate()
+  return v2.dayCounts[m] + n + (m > 1 && v2.isLeapYear(d.getFullYear()) ? 0 : -1)
+}
+v2.getMonthLength = function getMonthLength(d) {
+  const m = d.getMonth()
+  return v2.dayCounts[m] + (m === 1 && v2.isLeapYear(d.getFullYear()) ? 1 : 0)
+}
 v2.format = {
-  dateToday(d, short) {
+  dateToday(format, d) {
     const now = new Date()
     if (now.getFullYear() === d.getFullYear() &&
       now.getMonth() === d.getMonth()) {
       if (now.getDate() === d.getDate()) return 'Today'
       if (now.getDate() === d.getDate() + 1) return 'Yesterday'
     }
-    return d.getDate() + (short ? v2.shortMonthNames : v2.monthNames)[d.getMonth()] + d.getDate()
+    return v2.format.date(format, d)
   },
-  timeHM(d) {
-    return (''+d.getHours()).padStart(2, '0') + ':' + (''+d.getMinutes()).padStart(2, '0')
+  date: function date(format, d) {
+    if (!d) d = new Date()
+    if (typeof d === 'string' || typeof d === 'number') d = new Date(d)
+    return format.replace(/\\([{}])|\{([\w:]+)\}/g, (_, esc, name) => {
+      if (esc) return esc
+      switch (name) {
+        case '0date': return (d.getDate() + '').padStart(2, '0')
+        case 'date': return d.getDate()
+        case '0date0': return (d.getDate() - 1 + '').padStart(2, '0')
+        case 'date0': return d.getDate() - 1
+
+        case 'day': return d.getDay() + 1
+        case 'day0': return d.getDay()
+        case 'dayISO': return d.getDay() || 7
+        case 'dayISO0': return (d.getDay() || 7) - 1
+        case 'Day': return v2.dayNames[d.getDay()]
+        case 'Dy': return v2.shortDayNames[d.getDay()]
+
+        case 'dayOfYear': return v2.getDayOfYear(d) + 1
+        case 'dayOfYear0': return v2.getDayOfYear(d)
+
+        case '0month': return (d.getMonth() + 1 + '').padStart(2, '0')
+        case 'month': return d.getMonth() + 1
+        case '0month0': return (d.getMonth() + '').padStart(2, '0')
+        case 'month0': return d.getMonth()
+        case 'Month': return v2.monthNames[d.getMonth()]
+        case 'Mth': return v2.shortMonthNames[d.getMonth()]
+        case 'monthLength': return v2.getMonthLength(d.getMonth())
+
+        case 'isLeapYear': return v2.isLeapYear(d.getFullYear()) ? '1' : '0'
+        case 'year': return d.getFullYear()
+        case 'yr': return (d.getFullYear() + '').slice(-2)
+
+        case 'am': case 'pm': return d.getHours() < 12 ? 'am' : 'pm'
+        case 'AM': case 'PM': return d.getHours() < 12 ? 'AM' : 'PM'
+
+        case '0hour': return (d.getHours() % 12 + 1 + '').padStart(2, '0')
+        case 'hour': case 'h': return d.getHours() % 12 + 1
+        case '0hour24': case 'h24': return (d.getHours() + '').padStart(2, '0')
+        case 'hour24': return d.getHours()
+
+        case 'm': case '0minute': return (d.getMinutes() + '').padStart(2, '0')
+        case 'minute': return d.getMinutes()
+
+        case 's': case '0second': return (d.getSeconds() + '').padStart(2, '0')
+        case 'second': return d.getSeconds()
+
+        case 'ms': case '0millisecond': return (d.getMilliseconds() + '').padStart(3, '0')
+        case 'millisecond': return d.getMilliseconds()
+
+        case 'tzOff': return v2.format.timezoneOffset(d.getTimezoneOffset())
+        case 'tzOff:': return v2.format.timezoneOffset(d.getTimezoneOffset(), ':')
+
+        case 'ISO': return d.toISOString()
+        case 'unix': return Math.floor(d / 1000)
+        default: return ''
+      }
+    })
+  },
+  timezoneOffset(z, sep = '') {
+    const t = z < 0 ? -z : z
+    return (z > 0 ? '-' : '+') + (Math.floor(t / 60) + '').padStart(2, '0') + sep + (t % 60 + '').padStart(2, '0')
   },
   list(items) {
     return items.length <= 2 ? items.join(' and ') : items.slice(0, -1).join(', ') + ', and ' + items[items.length - 1]
