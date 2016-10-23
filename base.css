@@ -172,6 +172,8 @@ body {
   flex-direction: column;
   background: #333;
   color: #fff;
+  padding: .5rem 0;
+  min-width: 200px;
   /*top: -.5rem;
   padding: .5rem 0;*/
 }
