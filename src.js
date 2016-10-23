@@ -35,6 +35,7 @@ Object.assign(h, {
   nextSkippingChildren(x) {
     for (; x; x = x.parentNode) if (x.nextSibling) return x.nextSibling
   },
+  previous(x) {return x.previousSibling || x.parentNode}
 
   createElement(sel) {
     const parts = (sel || '').split(/([#.])/)
