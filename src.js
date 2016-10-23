@@ -2576,10 +2576,10 @@ class MenuBar extends Menu {
     return h('.v2-menu.v2-menu-bar.v2-view', {onmousedown: '_click', onmouseover: '_mouseOver'})
   }
   _mouseOver(e) {
-    const el = h.nearest('.v2-menu-item', e.target)
-    if (el && this._openMenu && el.view.menu) {
+    const t = e.target
+    if (t.nodeType === 1 && t.classList.contains('v2-menu-item') && this._openMenu && t.view.menu) {
       this._openMenu.hide()
-      this._selectItem(el.view, e)
+      this._selectItem(t.view, e)
     }
   }
   _selectItem(v, e) {
