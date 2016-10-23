@@ -2756,13 +2756,15 @@ class Menu extends View {
   selectItem(view, showMenu) {
     if (this._selectedItem === view) return
     if (this._openMenu && (!view || this._openMenu !== view.menu)) {
+      this._openMenu.unlisten('hide', this._openMenuHidden)
       this._openMenu.hide()
+      this.focus()
     }
     if (this._selectedItem) this._selectedItem.selected = false
     if (this._selectedItem = view) {
       view.selected = true
     }
-    if (showMenu && view && view.menu) {
+    if ((showMenu || this instanceof MenuBar) && view && view.menu) {
       this.openMenu = view.menu
       this._showMenu(view)
     }
@@ -2805,9 +2807,7 @@ class MenuBar extends Menu {
   }
   _openMenuHidden() {
     super._openMenuHidden()
-    setTimeout(() => {
-      if (!this._openMenu) this.selectItem(null)
-    })
+    this.selectItem(null)
   }
 }
 
