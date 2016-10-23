@@ -2583,7 +2583,7 @@ class Menu extends View {
       view.selected = true
     }
     if (this._openMenu && (!view || this._openMenu !== view.menu)) this._openMenu.hide()
-    if (view.menu) this._showMenu(view)
+    if (view && view.menu) this._showMenu(view)
   }
 
   set spec(value) {
