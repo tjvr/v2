@@ -2758,7 +2758,7 @@ class MenuItem extends View {
   }
   build() {
     return h('.v2-menu-item',
-      this._titleEl = h('span.v2-menu-item-title'),
+      this._titleEl = h('.v2-menu-item-title'),
       this._key = h('.v2-menu-item-key'))
   }
 
