@@ -2535,6 +2535,7 @@ class Menu extends View {
     this.el.style.transform = `translate(${x}px, ${y}px)`
   }
   hide() {this.remove()}
+  get visible() {return !!this.parent}
 
   get target() {return this._target || this.ownerItem && this.ownerItem.target}
   set target(value) {this._target = value}
