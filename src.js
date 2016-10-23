@@ -2604,6 +2604,48 @@ class Menu extends View {
     const bb = v.el.getBoundingClientRect()
     v.menu.show(this.app, bb.left, bb.top, bb.width, 0)
   }
+  focus() {this.el.focus()}
+  _keyDown(e) {
+    const k = v2.keyWithModifiers(e)
+    switch (k) {
+      case 'ArrowUp':
+      case 'k':
+        this.selectPrevious()
+        break
+      case 'ArrowDown':
+      case 'j':
+        this.selectNext()
+        break
+      case '/ArrowUp':
+      case '#ArrowUp':
+      case '#k':
+        this.selectFirst()
+        break
+      case '/ArrowDown':
+      case '#ArrowDown':
+      case '#j':
+        this.selectLast()
+        break
+    }
+  }
+  selectNext() {
+    if (!this.selectedItem) return this.selectFirst()
+    const el = h.nextMatching('.v2-menu-item', this.selectedItem.el.nextElementSibling)
+    if (el) this.selectedItem = el.view
+  }
+  selectPrevious() {
+    if (!this.selectedItem) return this.selectLast()
+    const el = h.previousMatching('.v2-menu-item', this.selectedItem.el.previousElementSibling)
+    if (el) this.selectedItem = el.view
+  }
+  selectFirst() {
+    const el = h.nextMatching('.v2-menu-item', this.el.firstElementChild)
+    if (el) this.selectedItem = el.view
+  }
+  selectLast() {
+    const el = h.previousMatching('.v2-menu-item', this.el.lastElementChild)
+    if (el) this.selectedItem = el.view
+  }
 
   get openMenu() {return this._openMenu}
   set openMenu(value) {
