@@ -2534,16 +2534,15 @@ class Menu extends View {
     return h('.v2-menu.v2-view', {onclick: '_click', onmouseover: '_mouseOver'})
   }
 
-  show(app, x, y, pad = true) {
-    x = x | 0
-    y = y | 0
+  show(app, x, y, bw = 1, bh = 1) {
+    x = x | 0, y = y | 0, bw = bw | 0, bh = bh | 0
     this.selectedItem = null
     app.addMenu(this)
     const bb = this.el.getBoundingClientRect()
     const w = Math.ceil(bb.width), h = Math.ceil(bb.height)
-    if (pad) ++x, ++y
-    if (x > innerWidth - w) x -= w + (pad ? 1 : 0)
-    if (y > innerHeight - h) y -= h + (pad ? 1 : 0)
+    x += bw, y += bh
+    if (x > innerWidth - w) x -= w + bw
+    if (y > innerHeight - h) y -= h + bh
     x = Math.max(0, x)
     y = Math.max(0, y)
     this.el.style.transform = `translate(${x}px, ${y}px)`
@@ -2588,7 +2587,7 @@ class Menu extends View {
   }
   _showMenu(v) {
     const bb = v.el.getBoundingClientRect()
-    v.menu.show(this.app, bb.right, bb.top, false)
+    v.menu.show(this.app, bb.left, bb.top, bb.width, 0)
   }
 
   get openMenu() {return this._openMenu}
@@ -2650,7 +2649,7 @@ class MenuBar extends Menu {
   }
   _showMenu(v) {
     const bb = v.el.getBoundingClientRect()
-    v.menu.show(this.app, bb.left, bb.bottom, false)
+    v.menu.show(this.app, bb.left, bb.bottom, 0, 0)
   }
 }
 
