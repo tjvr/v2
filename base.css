@@ -201,7 +201,6 @@ body {
 .v2-menu-item--has-submenu > .v2-menu-item-key {
   align-self: center;
   height: 0;
-  vertical-align: middle;
   border: .35rem solid transparent;
   border-left: .5rem solid #fff;
   border-right: 0;
