@@ -2538,9 +2538,9 @@ class Menu extends View {
   _click(e) {
     const el = h.nearest('.v2-menu-item', e.target)
     if (!el) return
-    this._activate(el.view)
+    this._selectItem(el.view)
   }
-  _activate(v) {
+  _selectItem(v) {
     const t = v.target
     const a = v.action
     if (typeof a === 'function') a(e)
