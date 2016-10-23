@@ -2516,6 +2516,9 @@ Collection.Item = class Item extends View {
 }
 
 class Menu extends View {
+  init() {
+    this.ownerItem = null
+  }
   build() {
     return h('.v2-menu.v2-view', {onclick: '_click'})
   }
@@ -2534,6 +2537,9 @@ class Menu extends View {
   hide() {
     this.remove()
   }
+
+  get target() {return this._target || this.ownerItem && this.ownerItem.target}
+  set target(value) {this._target = value}
 
   _click(e) {
     const el = h.nearest('.v2-menu-item', e.target)
@@ -2585,6 +2591,7 @@ class MenuItem extends View {
   get menu() {return this._menu}
   set menu(value) {
     this._menu = value
+    value.ownerItem = this
   }
 
   get title() {return this._title}
