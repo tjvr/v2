@@ -2549,7 +2549,7 @@ class Menu extends View {
 
   show(app, x, y, bw = 1, bh = 1, offset = true) {
     x = Math.round(x), y = Math.round(y), bw = Math.round(bw), bh = Math.round(bh)
-    this.selectedItem = null
+    this.selectItem(null)
     app.addMenu(this)
     const bb = this.el.getBoundingClientRect()
     const w = Math.ceil(bb.width), h = Math.ceil(bb.height)
@@ -2598,7 +2598,7 @@ class Menu extends View {
   _mouseOver(e) {
     const t = e.target
     if (t.nodeType !== 1 || !t.classList.contains('v2-menu-item')) return
-    this.selectedItem = t.view
+    this.selectItem(t.view, true)
   }
   _showMenu(v) {
     const bb = v.el.getBoundingClientRect()
@@ -2629,25 +2629,32 @@ class Menu extends View {
       case 'ArrowLeft':
         if (this.ownerItem) this.hide()
         break
+      case 'ArrowRight':
+        if (this._selectedItem && this._selectedItem.menu) {
+          this.openMenu = this._selectedItem.menu
+          this._showMenu(this._selectedItem)
+          this._selectedItem.menu.selectFirst()
+        }
+        break
     }
   }
   selectNext() {
     if (!this.selectedItem) return this.selectFirst()
     const el = h.nextMatching('.v2-menu-item', this.selectedItem.el.nextElementSibling)
-    if (el) this.selectedItem = el.view
+    if (el) this.selectItem(el.view)
   }
   selectPrevious() {
     if (!this.selectedItem) return this.selectLast()
     const el = h.previousMatching('.v2-menu-item', this.selectedItem.el.previousElementSibling)
-    if (el) this.selectedItem = el.view
+    if (el) this.selectItem(el.view)
   }
   selectFirst() {
     const el = h.nextMatching('.v2-menu-item', this.el.firstElementChild)
-    if (el) this.selectedItem = el.view
+    if (el) this.selectItem(el.view)
   }
   selectLast() {
     const el = h.previousMatching('.v2-menu-item', this.el.lastElementChild)
-    if (el) this.selectedItem = el.view
+    if (el) this.selectItem(el.view)
   }
 
   get openMenu() {return this._openMenu}
@@ -2665,7 +2672,7 @@ class Menu extends View {
   }
 
   get selectedItem() {return this._selectedItem}
-  set selectedItem(view) {
+  selectItem(view, showMenu) {
     if (this._selectedItem === view) return
     if (this._openMenu && (!view || this._openMenu !== view.menu)) {
       this._openMenu.hide()
@@ -2674,7 +2681,7 @@ class Menu extends View {
     if (this._selectedItem = view) {
       view.selected = true
     }
-    if (view && view.menu) {
+    if (showMenu && view && view.menu) {
       this.openMenu = view.menu
       this._showMenu(view)
     }
@@ -2702,7 +2709,7 @@ class MenuBar extends Menu {
   }
   _activateItem(v, e) {
     if (v.menu) {
-      this.selectedItem = this.selectedItem === v ? null : v
+      this.selectItem(this.selectedItem === v ? null : v, true)
       return
     }
     super._activateItem(v, e)
@@ -2714,7 +2721,7 @@ class MenuBar extends Menu {
   _openMenuHidden() {
     super._openMenuHidden()
     setTimeout(() => {
-      if (!this._openMenu) this.selectedItem = null
+      if (!this._openMenu) this.selectItem(null)
     })
   }
 }
