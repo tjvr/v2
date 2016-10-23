@@ -171,7 +171,7 @@ body {
   outline: 0;
 }
 .v2-menu-item {
-  padding: .35rem 1rem .3rem 1.6rem;
+  padding: .35rem 1rem .35rem 1.6rem;
   position: relative;
   display: flex;
 }
