@@ -579,6 +579,14 @@ v2.emitter = function emitter(o) {
       else m.set(e, [fn])
       return this
     }},
+    once: {value: function once(e, fn) {
+      const bound = () => {
+        fn()
+        this.unlisten(e, bound)
+      }
+      this.on(e, bound)
+      return this
+    }},
     unlisten: {value: function unlisten(e, fn) {
       const m = this._listeners
       if (!m) return this
