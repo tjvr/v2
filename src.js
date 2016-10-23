@@ -10,6 +10,15 @@ Object.assign(h, {
   _views: [],
   _view: null,
 
+  html(s) {
+    // TODO tr etc.
+    const d = document.createElement('div')
+    d.innerHTML = s
+    const f = document.createDocumentFragment()
+    while (d.firstChild) f.appendChild(d.firstChild)
+    return f
+  },
+
   pushView(v) {
     if (h._view) h._views.push(h._view)
     h._view = v
