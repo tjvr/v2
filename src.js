@@ -2815,7 +2815,7 @@ class MenuBar extends Menu {
   }
   _openMenuHidden() {
     super._openMenuHidden()
-    this.selectItem(null)
+    setTimeout(() => this.selectItem(null))
   }
 }
 
