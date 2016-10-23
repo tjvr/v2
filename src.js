@@ -934,7 +934,7 @@ class App extends View {
     this.add(m)
   }
   hideMenus() {
-    for (const m of this._menus) m.remove()
+    for (const m of this._menus) m.hide()
     this._menus.clear()
   }
 
