@@ -2224,8 +2224,8 @@ class Collection extends View {
         for (const item of this._cache.values()) {
           if (item.selected) {
             const bb = item.el.getBoundingClientRect()
-            x = bb.left
-            y = bb.top
+            x = bb.left + bb.width/2
+            y = bb.top + bb.height/2
             break
           }
         }
