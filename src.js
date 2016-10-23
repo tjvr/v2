@@ -2534,9 +2534,7 @@ class Menu extends View {
     y = Math.max(0, y)
     this.el.style.transform = `translate(${x}px, ${y}px)`
   }
-  hide() {
-    this.remove()
-  }
+  hide() {this.remove()}
 
   get target() {return this._target || this.ownerItem && this.ownerItem.target}
   set target(value) {this._target = value}
