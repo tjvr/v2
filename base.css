@@ -170,7 +170,8 @@ body {
   min-width: 200px;
 }
 .v2-menu-item {
-  padding: .35rem 1rem .35rem 1.6rem;
+  padding: .35rem 1.6rem .35rem 1.6rem;
+  position: relative;
 }
 .v2-menu-bar {
   flex: none;
@@ -191,6 +192,19 @@ body {
 .v2-menu-item--mixed::before {content: '•'}
 .v2-menu-item--selected {
   background: #555;
+}
+.v2-menu-item--has-submenu::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  margin: -.35rem .7rem;
+  border: .35rem solid transparent;
+  border-left: .5rem solid #fff;
+  border-right: 0;
+}
+.v2-menu-bar > .v2-menu-item--has-submenu::after {
+  content: none;
 }
 .v2-menu-separator {
   border-top: 1px solid;
