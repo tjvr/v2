@@ -2528,6 +2528,7 @@ class Menu extends View {
   show(app, x, y, pad = true) {
     x = x | 0
     y = y | 0
+    this.selectedItem = null
     app.addMenu(this)
     const bb = this.el.getBoundingClientRect()
     const w = Math.ceil(bb.width), h = Math.ceil(bb.height)
