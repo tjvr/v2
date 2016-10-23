@@ -2576,7 +2576,7 @@ class MenuBar extends Menu {
   }
   _mouseOver(e) {
     const t = e.target
-    if (t.nodeType !== 1 || !t.classList.contains('v2-menu-item') || !this._openMenu || !t.view.menu) return
+    if (t.nodeType !== 1 || !t.classList.contains('v2-menu-item') || !this._openMenu || !this._openMenu.visible || !t.view.menu) return
     this._openMenu.hide()
     this._selectItem(t.view, e)
   }
