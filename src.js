@@ -2658,7 +2658,6 @@ class Menu extends View {
   }
   _openMenuHidden() {
     this.openMenu = null
-    this.selectedItem = null
     this.focus()
   }
 
