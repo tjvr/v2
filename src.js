@@ -2569,12 +2569,16 @@ class Menu extends View {
 }
 
 class MenuBar extends Menu {
+  init() {
+    this._openMenu = null
+  }
   build() {
     return h('.v2-menu.v2-menu-bar.v2-view', {onmousedown: '_click'})
   }
   _selectItem(v, e) {
     if (v.menu) {
       const bb = v.el.getBoundingClientRect()
+      this._openMenu = v.menu
       v.menu.show(this.app, bb.left, bb.bottom)
       return
     }
