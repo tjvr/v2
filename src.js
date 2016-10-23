@@ -2523,13 +2523,13 @@ class Menu extends View {
     return h('.v2-menu.v2-view', {onclick: '_click'})
   }
 
-  show(app, x, y) {
+  show(app, x, y, pad = true) {
     app.addMenu(this)
     const bb = this.el.getBoundingClientRect()
     const w = Math.ceil(bb.width), h = Math.ceil(bb.height)
-    ++x, ++y
-    if (x > innerWidth - w) x -= w + 1
-    if (y > innerHeight - h) y -= h + 1
+    if (pad) ++x, ++y
+    if (x > innerWidth - w) x -= w + (pad ? 1 : 0)
+    if (y > innerHeight - h) y -= h + (pad ? 1 : 0)
     x = Math.max(0, x)
     y = Math.max(0, y)
     this.el.style.transform = `translate(${x}px, ${y}px)`
