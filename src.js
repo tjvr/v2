@@ -2817,7 +2817,7 @@ class MenuItem extends View {
   build() {
     return h('.v2-menu-item',
       this._titleEl = h('.v2-menu-item-title'),
-      this._key = h('.v2-menu-item-key'))
+      this._keyEl = h('.v2-menu-item-key'))
   }
 
   get target() {return this._target || this.parent.target}
@@ -2847,8 +2847,11 @@ class MenuItem extends View {
       h.add(this._titleEl, value)
     }
   }
-  get key() {return this._key.textContent}
-  set key(value) {this._key.textContent = value}
+  get key() {return this._key}
+  set key(value) {
+    this._key = value
+    this._keyEl.textContent = v2.format.key(value)
+  }
   get enabled() {return this._enabled}
   set enabled(value) {this.el.classList.toggle('v2-menu-item--disabled', !(this._enabled = value))}
 
