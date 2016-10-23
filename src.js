@@ -2759,6 +2759,7 @@ class MenuBar extends Menu {
 class MenuItem extends View {
   init() {
     this._menu = null
+    this._currentMenu = null
     this._target = null
     this._state = ''
     this._selected = false
@@ -2773,10 +2774,18 @@ class MenuItem extends View {
   get target() {return this._target || this.parent.target}
   set target(value) {this._target = value}
 
-  get menu() {return this._menu}
+  get menu() {
+    if (this._currentMenu) return this._currentMenu
+    const m = typeof this._menu === 'function' ? this._menu() : this._menu
+    if (m) {
+      this._currentMenu = m
+      m.once('hide', () => this._currentMenu = null)
+      m.ownerItem = this
+    }
+    return m
+  }
   set menu(value) {
     this._menu = value
-    if (value) value.ownerItem = this
     this.el.classList.toggle('v2-menu-item--has-submenu', !!value)
   }
 
