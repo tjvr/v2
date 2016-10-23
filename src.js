@@ -923,7 +923,7 @@ class App extends View {
     e.preventDefault()
   }
   _appMouseDown(e) {
-    const m = h.nearest('.v2-menu', e.target)
+    const m = h.nearest('.v2-menu:not(.v2-menu-bar)', e.target)
     if (m) return
     else this.hideMenus()
   }
