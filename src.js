@@ -26,6 +26,12 @@ Object.assign(h, {
       if (el.matches(sel)) return el
     }
   },
+  nextDescendentMatching(sel, el, stop) {
+    if (el === stop) return
+    for (; el; el = h.next(el, stop)) {
+      if (el.nodeType === 1 && el.matches(sel)) return el
+    }
+  },
   previousMatching(sel, el, stop) {
     for (; el && el !== stop; el = el.previousElementSibling) {
       if (el.matches(sel)) return el
