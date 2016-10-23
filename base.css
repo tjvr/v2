@@ -189,7 +189,7 @@ body {
 }
 .v2-menu-item--checked::before {content: '✓'}
 .v2-menu-item--mixed::before {content: '•'}
-.v2-menu-item:hover {
+.v2-menu-item--selected {
   background: #555;
 }
 .v2-menu-separator {
