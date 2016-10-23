@@ -2520,7 +2520,7 @@ class Menu extends View {
     this._click = this._click.bind(this)
   }
   build() {
-    return h('.v2-menu.v2-view')
+    return h('.v2-menu.v2-view', {onclick: this._click})
   }
 
   show(app, x, y) {
@@ -2533,7 +2533,6 @@ class Menu extends View {
     x = Math.max(0, x)
     y = Math.max(0, y)
     this.el.style.transform = `translate(${x}px, ${y}px)`
-    this.el.addEventListener('click', this._click)
   }
   hide() {
     this.remove()
