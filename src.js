@@ -2565,11 +2565,6 @@ class Menu extends View {
   _mouseOver(e) {
     const t = e.target
     if (t.nodeType !== 1 || !t.classList.contains('v2-menu-item')) return
-    if (this._openMenu) {
-      if (this._openMenu === t.view.menu) return
-      this._openMenu.hide()
-    }
-    if (t.view.menu) this._showMenu(t.view, e)
     this.selectedItem = t.view
   }
   _showMenu(v, e) {
@@ -2581,7 +2576,11 @@ class Menu extends View {
   get selectedItem() {return this._selectedItem}
   set selectedItem(view) {
     if (this._selectedItem) this._selectedItem.selected = false
-    if (this._selectedItem = view) view.selected = true
+    if (this._selectedItem = view) {
+      view.selected = true
+    }
+    if (this._openMenu && (!view || this._openMenu !== view.menu)) this._openMenu.hide()
+    if (view.menu) this._showMenu(view)
   }
 
   set spec(value) {
