@@ -2585,7 +2585,6 @@ class MenuItem extends View {
   get menu() {return this._menu}
   set menu(value) {
     this._menu = value
-    value.target = this.target
   }
 
   get title() {return this._title}
