@@ -2535,7 +2535,7 @@ class Menu extends View {
   }
 
   show(app, x, y, bw = 1, bh = 1) {
-    x = x | 0, y = y | 0, bw = bw | 0, bh = bh | 0
+    x = Math.round(x), y = Math.round(y), bw = Math.round(bw), bh = Math.round(bh)
     this.selectedItem = null
     app.addMenu(this)
     const bb = this.el.getBoundingClientRect()
