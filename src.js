@@ -2534,13 +2534,13 @@ class Menu extends View {
     return h('.v2-menu.v2-view', {onclick: '_click', onmouseover: '_mouseOver'})
   }
 
-  show(app, x, y, bw = 1, bh = 1) {
+  show(app, x, y, bw = 1, bh = 1, offset = true) {
     x = Math.round(x), y = Math.round(y), bw = Math.round(bw), bh = Math.round(bh)
     this.selectedItem = null
     app.addMenu(this)
     const bb = this.el.getBoundingClientRect()
     const w = Math.ceil(bb.width), h = Math.ceil(bb.height)
-    const pt = parseInt(getComputedStyle(this.el).paddingTop)
+    const pt = offset ? parseInt(getComputedStyle(this.el).paddingTop) : 0
     x += bw, y += bh - pt
     if (x > innerWidth - w) x -= w + bw
     if (y > innerHeight - h) y -= h + bh - pt
