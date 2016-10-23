@@ -643,7 +643,7 @@ v2.emitter = function emitter(o) {
       if (!m) return
       const l = m.get(e)
       if (!l) return
-      for (const fn of l) fn(arg)
+      for (let i = l.length; i--;) l[i](arg)
       return this
     }},
   })
