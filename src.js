@@ -2563,6 +2563,12 @@ class Menu extends View {
   }
 }
 
+class MenuBar extends Menu {
+  build() {
+    return h('.v2-menu.v2-menu-bar.v2-view')
+  }
+}
+
 class MenuItem extends View {
   init() {
     this._menu = null
