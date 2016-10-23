@@ -2567,7 +2567,7 @@ class Menu extends View {
     if (t.nodeType !== 1 || !t.classList.contains('v2-menu-item')) return
     this.selectedItem = t.view
   }
-  _showMenu(v, e) {
+  _showMenu(v) {
     const bb = v.el.getBoundingClientRect()
     this._openMenu = v.menu
     v.menu.show(this.app, bb.right, bb.top, false)
@@ -2605,12 +2605,12 @@ class MenuBar extends Menu {
   }
   _activateItem(v, e) {
     if (v.menu) {
-      this._showMenu(v, e)
+      this._showMenu(v)
       return
     }
     super._activateItem(v, e)
   }
-  _showMenu(v, e) {
+  _showMenu(v) {
     const bb = v.el.getBoundingClientRect()
     this._openMenu = v.menu
     v.menu.show(this.app, bb.left, bb.bottom, false)
