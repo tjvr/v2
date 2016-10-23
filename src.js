@@ -17,21 +17,18 @@ Object.assign(h, {
   popView(v) {h._view = h._views.pop()},
 
   nearest(sel, el, stop) {
-    while (el && el.nodeType === 1 && el !== stop) {
+    for (; el && el.nodeType === 1 && el !== stop; el = el.parentNode) {
       if (el.matches(sel)) return el
-      el = el.parentNode
     }
   },
   nextMatching(sel, el, stop) {
-    while (el && el !== stop) {
+    for (; el && el !== stop; el = el.nextElementSibling) {
       if (el.matches(sel)) return el
-      el = el.nextElementSibling
     }
   },
   previousMatching(sel, el, stop) {
-    while (el && el !== stop) {
+    for (; el && el !== stop; el = el.previousElementSibling) {
       if (el.matches(sel)) return el
-      el = el.previousElementSibling
     }
   },
   nextSkippingChildren(x) {
