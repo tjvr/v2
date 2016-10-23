@@ -158,12 +158,6 @@ body {
 .v2-tree-item-editor:hover {border: 1px solid #999;}
 .v2-tree-item-editor:focus {border: 1px solid #5af;}
 
-.v2-menu-bar {
-  flex: none;
-}
-.v2-menu-bar > .v2-menu-item {
-  padding: .25rem .5rem;
-}
 .v2-menu {
   position: absolute;
   top: 0;
@@ -177,6 +171,12 @@ body {
 }
 .v2-menu > .v2-menu-item {
   padding: .35rem 1rem .35rem 1.6rem;
+}
+.v2-menu-bar {
+  flex: none;
+}
+.v2-menu-bar > .v2-menu-item {
+  padding: .25rem .5rem;
 }
 .v2-menu-item::before {
   display: inline-block;
