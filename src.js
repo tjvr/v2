@@ -2540,9 +2540,10 @@ class Menu extends View {
     app.addMenu(this)
     const bb = this.el.getBoundingClientRect()
     const w = Math.ceil(bb.width), h = Math.ceil(bb.height)
-    x += bw, y += bh
+    const pt = parseInt(getComputedStyle(this.el).paddingTop)
+    x += bw, y += bh - pt
     if (x > innerWidth - w) x -= w + bw
-    if (y > innerHeight - h) y -= h + bh
+    if (y > innerHeight - h) y -= h + bh - pt
     x = Math.max(0, x)
     y = Math.max(0, y)
     this.el.style.transform = `translate(${x}px, ${y}px)`
