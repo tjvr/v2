@@ -79,7 +79,7 @@ Object.assign(h, {
       for (const c of a) h.add(el, c)
     } else if (typeof a === 'object' && a) {
       if (a.isView) h._view.add(a, el)
-      else if (a.tagName) el.appendChild(a)
+      else if (a.nodeType) el.appendChild(a)
       // else if (a.then) h.addPromise(el, a)
       else h.attrs(el, a)
     } else {
