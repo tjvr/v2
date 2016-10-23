@@ -31,6 +31,7 @@ Object.assign(h, {
       if (el.matches(sel)) return el
     }
   },
+  next(x) {return x.firstChild || h.nextSkippingChildren(x)},
   nextSkippingChildren(x) {
     for (; x; x = x.parentNode) if (x.nextSibling) return x.nextSibling
   },
