@@ -2667,11 +2667,11 @@ class Menu extends View {
     if (el) this.selectItem(el.view)
   }
   selectFirst() {
-    const el = h.nextMatching('.v2-menu-item', this.el.firstElementChild)
+    const el = h.nextDescendentMatching('.v2-menu-item', this.el.firstElementChild, this.el)
     if (el) this.selectItem(el.view)
   }
   selectLast() {
-    const el = h.previousMatching('.v2-menu-item', this.el.lastElementChild)
+    const el = h.previousDescendentMatching('.v2-menu-item', h.lastDescendent(this.el), this.el)
     if (el) this.selectItem(el.view)
   }
 
