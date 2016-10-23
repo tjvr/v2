@@ -2582,8 +2582,7 @@ class MenuBar extends Menu {
   }
   _activateItem(v, e) {
     if (v.menu) {
-      if (this._openMenu === v.menu) this._openMenu.hide()
-      else this._showMenu(v, e)
+      this._showMenu(v, e)
       return
     }
     super._activateItem(v, e)
