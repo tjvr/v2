@@ -2689,7 +2689,7 @@ class Menu extends View {
       this._openMenu.unlisten('hide', this._openMenuHidden)
     }
     if (this._openMenu = value) {
-      this._openMenu.on('hide', this._openMenuHidden)
+      value.on('hide', this._openMenuHidden)
     }
   }
   _openMenuHidden() {
