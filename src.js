@@ -22,6 +22,18 @@ Object.assign(h, {
       el = el.parentNode
     }
   },
+  nextMatching(sel, el, stop) {
+    while (el && el !== stop) {
+      if (el.matches(sel)) return el
+      el = el.nextElementSibling
+    }
+  },
+  previousMatching(sel, el, stop) {
+    while (el && el !== stop) {
+      if (el.matches(sel)) return el
+      el = el.previousElementSibling
+    }
+  },
   nextSkippingChildren(x) {
     for (; x; x = x.parentNode) if (x.nextSibling) return x.nextSibling
   },
