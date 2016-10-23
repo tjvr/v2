@@ -37,7 +37,8 @@ Object.assign(h, {
       if (x.nextSibling) return x.nextSibling
     }
   },
-  previous(x) {return x.previousSibling || x.parentNode}
+  previous(x) {return x.previousSibling ? h.lastDescendent(x.previousSibling) : x.parentNode},
+  lastDescendent(x) {return x.lastChild || x},
 
   createElement(sel) {
     const parts = (sel || '').split(/([#.])/)
