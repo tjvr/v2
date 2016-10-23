@@ -2636,6 +2636,9 @@ class Menu extends View {
           this._selectedItem.menu.selectFirst()
         }
         break
+      case 'Enter':
+        if (this._selectedItem) this._activateItem(this._selectedItem, e)
+        break
     }
   }
   selectNext() {
