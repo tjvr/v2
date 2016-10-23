@@ -2581,6 +2581,7 @@ class MenuItem extends View {
   }
 
   get target() {return this._target || this.parent.target}
+  set target(value) {this._target = value}
 
   get menu() {return this._menu}
   set menu(value) {
