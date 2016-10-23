@@ -173,6 +173,10 @@ body {
 .v2-menu-item {
   padding: .35rem 1.6rem;
   position: relative;
+  display: flex;
+}
+.v2-menu-item-title {
+  flex: 1;
 }
 .v2-menu-bar {
   flex: none;

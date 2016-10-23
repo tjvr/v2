@@ -2757,7 +2757,9 @@ class MenuItem extends View {
     this.action = null
   }
   build() {
-    return h('.v2-menu-item')
+    return h('.v2-menu-item',
+      this._titleEl = h('span.v2-menu-item-title'),
+      this._key = h('.v2-menu-item-key'))
   }
 
   get target() {return this._target || this.parent.target}
@@ -2773,12 +2775,14 @@ class MenuItem extends View {
   get title() {return this._title}
   set title(value) {
     this._title = value
-    if (typeof value === 'string') this.el.textContent = value
+    if (typeof value === 'string') this._titleEl.textContent = value
     else {
-      h.removeChildren(this.el)
-      h.add(this.el, value)
+      h.removeChildren(this._titleEl)
+      h.add(this._titleEl, value)
     }
   }
+  get key() {return this._key.textContent}
+  set key(value) {this._key.textContent = value}
 
   get state() {return this._state}
   set state(value) {
