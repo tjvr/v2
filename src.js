@@ -2519,6 +2519,7 @@ class Menu extends View {
   init() {
     this.ownerItem = null
     this._openMenu = null
+    this._selectedItem = null
   }
   build() {
     return h('.v2-menu.v2-view', {onclick: '_click', onmouseover: '_mouseOver'})
@@ -2569,11 +2570,18 @@ class Menu extends View {
       this._openMenu.hide()
     }
     if (t.view.menu) this._showMenu(t.view, e)
+    this.selectedItem = t.view
   }
   _showMenu(v, e) {
     const bb = v.el.getBoundingClientRect()
     this._openMenu = v.menu
     v.menu.show(this.app, bb.right, bb.top, false)
+  }
+
+  get selectedItem() {return this._selectedItem}
+  set selectedItem(view) {
+    if (this._selectedItem) this._selectedItem.selected = false
+    if (this._selectedItem = view) view.selected = true
   }
 
   set spec(value) {
