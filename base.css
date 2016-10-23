@@ -198,18 +198,16 @@ body {
 .v2-menu-item--selected {
   background: #555;
 }
-.v2-menu-item--has-submenu::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 50%;
-  margin: -.35rem .7rem;
+.v2-menu-item--has-submenu > .v2-menu-item-key {
+  align-self: center;
+  height: 0;
+  vertical-align: middle;
   border: .35rem solid transparent;
   border-left: .5rem solid #fff;
   border-right: 0;
 }
-.v2-menu-bar > .v2-menu-item--has-submenu::after {
-  content: none;
+.v2-menu-bar > .v2-menu-item > .v2-menu-item-key {
+  display: none;
 }
 .v2-menu-separator {
   border-top: 1px solid;
