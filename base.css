@@ -183,6 +183,7 @@ body {
   padding: 0;
   width: 100%;
   flex-direction: row;
+  z-index: auto;
 }
 .v2-menu-bar > .v2-menu-item {
   padding: .25rem .5rem;
