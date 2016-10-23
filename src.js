@@ -2578,16 +2578,20 @@ class MenuBar extends Menu {
     const t = e.target
     if (t.nodeType !== 1 || !t.classList.contains('v2-menu-item') || !this._openMenu || !this._openMenu.visible || !t.view.menu) return
     this._openMenu.hide()
-    this._activateItem(t.view, e)
+    this._showMenu(t.view, e)
   }
   _activateItem(v, e) {
     if (v.menu) {
-      const bb = v.el.getBoundingClientRect()
-      this._openMenu = v.menu
-      v.menu.show(this.app, bb.left, bb.bottom)
+      if (this._openMenu === v.menu) this._openMenu.hide()
+      else this._showMenu(v, e)
       return
     }
     super._activateItem(v, e)
+  }
+  _showMenu(v, e) {
+    const bb = v.el.getBoundingClientRect()
+    this._openMenu = v.menu
+    v.menu.show(this.app, bb.left, bb.bottom, false)
   }
 }
 
