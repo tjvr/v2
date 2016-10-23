@@ -291,6 +291,44 @@ v2.format = {
     }
     return (b < n * 16 ? Math.round(b / n * 10) / 10 : Math.round(b / n)) + ' ' + l.charAt(k) + (opts.si === false ? '' : 'i') + 'B'
   },
+  _keyNames: {
+    ArrowLeft: 'Left',
+    ArrowRight: 'Right',
+    ArrowUp: 'Up',
+    ArrowDown: 'Down',
+    ' ': 'Space',
+    '-': '–',
+  },
+  _appleKeyNames: {
+    Enter: 'Return',
+    Backspace: '⌫',
+    Delete: '⌦',
+    Escape: '⎋',
+    ArrowLeft: '←',
+    ArrowRight: '→',
+    ArrowUp: '↑',
+    ArrowDown: '↓',
+    CapsLock: '⇪',
+    Control: '^',
+    Alt: '⌥',
+    Shift: '⇧',
+    Meta: '⌘',
+  },
+  key(s) {
+    const x = /^([\/#^]+)./.exec(s)
+    if (x) s = s.slice(x[1].length)
+    return (x ? v2.format.modifiers(x[1]) : '') + (
+      v2.rt.isApple && v2.format._appleKeyNames[s] ||
+      v2.format._keyNames[s] ||
+      v2.ucfirst(s))
+  },
+  modifiers(s) {
+    const a = v2.rt.isApple
+    return (s.includes(a ? '##' : '#') ? a ? v2.format._appleKeyNames.Control : 'Ctrl+' : '') +
+      (s.includes('/') ? a ? v2.format._appleKeyNames.Alt : 'Alt+' : '') +
+      (s.includes('^') ? a ? v2.format._appleKeyNames.Shift : 'Shift+' : '') +
+      (a && s.includes('#') ? v2.format._appleKeyNames.Meta : '')
+  }
 }
 
 v2.wrapBlob = function wrapBlob(blob, options) {
