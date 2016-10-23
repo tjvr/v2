@@ -2777,8 +2777,8 @@ class MenuItem extends View {
   get menu() {return this._menu}
   set menu(value) {
     this._menu = value
-    value.ownerItem = this
-    this.el.classList.toggle('v2-menu-item--has-submenu')
+    if (value) value.ownerItem = this
+    this.el.classList.toggle('v2-menu-item--has-submenu', !!value)
   }
 
   get title() {return this._title}
