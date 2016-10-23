@@ -2705,13 +2705,21 @@ class Menu extends View {
         this.selectLast()
         break
       case 'ArrowLeft':
-        if (this.ownerItem) this.hide()
+        if (this.ownerItem) {
+          if (this.ownerItem.parent instanceof MenuBar) {
+            this.ownerItem.parent.selectPrevious()
+          } else {
+            this.hide()
+          }
+        }
         break
       case 'ArrowRight':
         if (this._selectedItem && this._selectedItem.menu) {
           this.openMenu = this._selectedItem.menu
           this._showMenu(this._selectedItem)
           this._selectedItem.menu.selectFirst()
+        } else if (this.ownerItem && this.ownerItem.parent instanceof MenuBar) {
+          this.ownerItem.parent.selectNext()
         }
         break
       case 'Enter':
