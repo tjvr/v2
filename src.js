@@ -37,6 +37,11 @@ Object.assign(h, {
       if (el.matches(sel)) return el
     }
   },
+  previousDescendentMatching(sel, el, stop) {
+    for (; el && el !== stop; el = h.previous(el, stop)) {
+      if (el.nodeType === 1 && el.matches(sel)) return el
+    }
+  },
   next(x, stop) {return x === stop ? null : x.firstChild || h.nextSkippingChildren(x, stop)},
   nextSkippingChildren(x, stop) {
     for (; x && x !== stop; x = x.parentNode) {
