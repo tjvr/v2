@@ -2544,7 +2544,7 @@ class Menu extends View {
     this._selectedItem = null
   }
   build() {
-    return h('.v2-menu.v2-view', {onclick: '_click', onmouseover: '_mouseOver'})
+    return h('.v2-menu.v2-view', {tabIndex: 0, onclick: '_click', onmouseover: '_mouseOver', onkeydown: '_keyDown'})
   }
 
   show(app, x, y, bw = 1, bh = 1, offset = true) {
@@ -2560,6 +2560,7 @@ class Menu extends View {
     x = Math.max(0, x)
     y = Math.max(0, y)
     this.el.style.transform = `translate(${x}px, ${y}px)`
+    setTimeout(() => this.focus())
   }
   hide() {
     this.emit('hide', {target: this})
@@ -2616,6 +2617,7 @@ class Menu extends View {
   _openMenuHidden() {
     this.openMenu = null
     this.selectedItem = null
+    this.focus()
   }
 
   get selectedItem() {return this._selectedItem}
