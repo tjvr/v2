@@ -2659,6 +2659,10 @@ class Menu extends View {
     if (el && !el.classList.contains('v2-menu-item--disabled')) this._activateItem(el.view, e)
   }
   _activateItem(v, e) {
+    const app = this.app
+    if (app) app.hideMenus()
+    else this.hide()
+
     const t = v.target
     const a = v.action
     if (typeof a === 'function') a(e)
@@ -2669,10 +2673,6 @@ class Menu extends View {
     for (let m = this; m; m = m.ownerItem && m.ownerItem.parent) {
       m.emit('activate', obj)
     }
-
-    const app = this.app
-    if (app) app.hideMenus()
-    else this.hide()
   }
   _mouseOver(e) {
     const t = h.nearest('.v2-menu-item', e.target)
