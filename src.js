@@ -2615,7 +2615,7 @@ class MenuItem extends View {
   }
 }
 
-Object.assign(v2, {Model, View, App, Split, List, FilteredList, CyNode, Node, DynamicTreeItem, DynamicTree, Tree, Collection, Menu, MenuItem})
+Object.assign(v2, {Model, View, App, Split, List, FilteredList, CyNode, Node, DynamicTreeItem, DynamicTree, Tree, Collection, Menu, MenuBar, MenuItem})
 
 global.h = h
 global.v2 = v2
