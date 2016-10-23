@@ -177,7 +177,7 @@ v2.keyWithModifiers = function keyWithModifiers(e) {
 v2.escapeEntities = function escapeEntities(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;')
 }
-v2.ucfirst = function ucfirst(x) {return x[0].toUpperCase() + x.slice(1)}
+v2.ucfirst = function ucfirst(x) {return x.charAt(0).toUpperCase() + x.slice(1)}
 v2.foldSpace = function foldSpace(x) {return x.trim().replace(/\s+/g, ' ')}
 v2.stripHTML = function stripHTML(x) {
   // this is why we can't have nice things
