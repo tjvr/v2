@@ -631,8 +631,7 @@ v2.emitter = function emitter(o) {
       const l = m.get(e)
       if (!l) return this
       const i = l.indexOf(fn)
-      if (i === -1) return this
-      l.splice(i, 1)
+      if (i !== -1) l.splice(i, 1)
       return this
     }},
     listeners: {value: function listeners(e) {
