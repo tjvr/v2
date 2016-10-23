@@ -2666,20 +2666,20 @@ class Menu extends View {
   }
   selectNext() {
     if (!this.selectedItem) return this.selectFirst()
-    const el = h.nextDescendentMatching('.v2-menu-item', h.nextSkippingChildren(this.selectedItem.el), this.el)
+    const el = h.nextDescendentMatching('.v2-menu-item:not(.v2-menu-item--disabled)', h.nextSkippingChildren(this.selectedItem.el), this.el)
     if (el) this.selectItem(el.view)
   }
   selectPrevious() {
     if (!this.selectedItem) return this.selectLast()
-    const el = h.previousDescendentMatching('.v2-menu-item', h.previous(this.selectedItem.el), this.el)
+    const el = h.previousDescendentMatching('.v2-menu-item:not(.v2-menu-item--disabled)', h.previous(this.selectedItem.el), this.el)
     if (el) this.selectItem(el.view)
   }
   selectFirst() {
-    const el = h.nextDescendentMatching('.v2-menu-item', this.el.firstElementChild, this.el)
+    const el = h.nextDescendentMatching('.v2-menu-item:not(.v2-menu-item--disabled)', this.el.firstElementChild, this.el)
     if (el) this.selectItem(el.view)
   }
   selectLast() {
-    const el = h.previousDescendentMatching('.v2-menu-item', h.lastDescendent(this.el), this.el)
+    const el = h.previousDescendentMatching('.v2-menu-item:not(.v2-menu-item--disabled)', h.lastDescendent(this.el), this.el)
     if (el) this.selectItem(el.view)
   }
 
