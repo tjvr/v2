@@ -2608,7 +2608,7 @@ class MenuBar extends Menu {
   }
   _activateItem(v, e) {
     if (v.menu) {
-      this.selectedItem = v
+      this.selectedItem = this.selectedItem === v ? null : v
       return
     }
     super._activateItem(v, e)
