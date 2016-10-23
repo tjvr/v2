@@ -2518,9 +2518,10 @@ Collection.Item = class Item extends View {
 class Menu extends View {
   init() {
     this.ownerItem = null
+    this._openMenu = null
   }
   build() {
-    return h('.v2-menu.v2-view', {onclick: '_click'})
+    return h('.v2-menu.v2-view', {onclick: '_click', onmouseover: '_mouseOver'})
   }
 
   show(app, x, y, pad = true) {
@@ -2534,7 +2535,13 @@ class Menu extends View {
     y = Math.max(0, y)
     this.el.style.transform = `translate(${x}px, ${y}px)`
   }
-  hide() {this.remove()}
+  hide() {
+    this.remove()
+    if (this._openMenu) {
+      this._openMenu.hide()
+      this._openMenu = null
+    }
+  }
   get visible() {return !!this.parent}
 
   get target() {return this._target || this.ownerItem && this.ownerItem.target}
@@ -2554,6 +2561,20 @@ class Menu extends View {
     if (app) app.hideMenus()
     else this.hide()
   }
+  _mouseOver(e) {
+    const t = e.target
+    if (t.nodeType !== 1 || !t.classList.contains('v2-menu-item')) return
+    if (this._openMenu) {
+      if (this._openMenu === t.view.menu) return
+      this._openMenu.hide()
+    }
+    if (t.view.menu) this._showMenu(t.view, e)
+  }
+  _showMenu(v, e) {
+    const bb = v.el.getBoundingClientRect()
+    this._openMenu = v.menu
+    v.menu.show(this.app, bb.right, bb.top, false)
+  }
 
   set spec(value) {
     for (const x of value) if (x) {
@@ -2568,9 +2589,6 @@ class Menu extends View {
 }
 
 class MenuBar extends Menu {
-  init() {
-    this._openMenu = null
-  }
   build() {
     return h('.v2-menu.v2-menu-bar.v2-view', {onmousedown: '_click', onmouseover: '_mouseOver'})
   }
