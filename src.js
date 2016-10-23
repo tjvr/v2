@@ -2608,12 +2608,13 @@ class Menu extends View {
 
   get selectedItem() {return this._selectedItem}
   set selectedItem(view) {
+    if (this._selectedItem === view) return
+    if (this._openMenu && (!view || this._openMenu !== view.menu)) {
+      this._openMenu.hide()
+    }
     if (this._selectedItem) this._selectedItem.selected = false
     if (this._selectedItem = view) {
       view.selected = true
-    }
-    if (this._openMenu && (!view || this._openMenu !== view.menu)) {
-      this._openMenu.hide()
     }
     if (view && view.menu) this._showMenu(view)
   }
