@@ -2622,6 +2622,7 @@ class MenuItem extends View {
     this._menu = null
     this._target = null
     this._state = ''
+    this._selected = false
     this.action = null
   }
   build() {
@@ -2653,6 +2654,9 @@ class MenuItem extends View {
     this.el.classList.toggle('v2-menu-item--checked', value === 'checked')
     this.el.classList.toggle('v2-menu-item--mixed', value === 'mixed')
   }
+
+  get selected() {return this._selected}
+  set selected(value) {this.el.classList.toggle('v2-menu-item--selected', this._selected = !!value)}
 
   set spec(value) {
     if (Array.isArray(value)) {
