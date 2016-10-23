@@ -2588,7 +2588,6 @@ class Menu extends View {
   }
   _showMenu(v) {
     const bb = v.el.getBoundingClientRect()
-    this.openMenu = v.menu
     v.menu.show(this.app, bb.right, bb.top, false)
   }
 
@@ -2616,7 +2615,10 @@ class Menu extends View {
     if (this._selectedItem = view) {
       view.selected = true
     }
-    if (view && view.menu) this._showMenu(view)
+    if (view && view.menu) {
+      this.openMenu = view.menu
+      this._showMenu(view)
+    }
   }
 
   set spec(value) {
@@ -2648,7 +2650,6 @@ class MenuBar extends Menu {
   }
   _showMenu(v) {
     const bb = v.el.getBoundingClientRect()
-    this.openMenu = v.menu
     v.menu.show(this.app, bb.left, bb.bottom, false)
   }
 }
