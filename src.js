@@ -2626,6 +2626,9 @@ class Menu extends View {
       case '#j':
         this.selectLast()
         break
+      case 'ArrowLeft':
+        if (this.ownerItem) this.hide()
+        break
     }
   }
   selectNext() {
