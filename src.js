@@ -2711,6 +2711,12 @@ class MenuBar extends Menu {
     const bb = v.el.getBoundingClientRect()
     v.menu.show(this.app, bb.left, bb.bottom, 0, 0, false)
   }
+  _openMenuHidden() {
+    super._openMenuHidden()
+    setTimeout(() => {
+      if (!this._openMenu) this.selectedItem = null
+    })
+  }
 }
 
 class MenuItem extends View {
