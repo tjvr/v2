@@ -2596,9 +2596,8 @@ class Menu extends View {
     else this.hide()
   }
   _mouseOver(e) {
-    const t = e.target
-    if (t.nodeType !== 1 || !t.classList.contains('v2-menu-item')) return
-    this.selectItem(t.view, true)
+    const t = h.nearest('.v2-menu-item', e.target)
+    if (t) this.selectItem(t.view, true)
   }
   _showMenu(v) {
     const bb = v.el.getBoundingClientRect()
