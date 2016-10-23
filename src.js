@@ -2537,8 +2537,7 @@ class Menu extends View {
 
   _click(e) {
     const el = h.nearest('.v2-menu-item', e.target)
-    if (!el) return
-    this._selectItem(el.view, e)
+    if (el) this._selectItem(el.view, e)
   }
   _selectItem(v, e) {
     const t = v.target
