@@ -2763,6 +2763,7 @@ class MenuItem extends View {
     this._target = null
     this._state = ''
     this._selected = false
+    this._enabled = true
     this.action = null
   }
   build() {
@@ -2800,6 +2801,8 @@ class MenuItem extends View {
   }
   get key() {return this._key.textContent}
   set key(value) {this._key.textContent = value}
+  get enabled() {return this._enabled}
+  set enabled(value) {this.el.classList.toggle('v2-menu-item--disabled', !(this._enabled = value))}
 
   get state() {return this._state}
   set state(value) {
