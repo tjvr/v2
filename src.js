@@ -2527,6 +2527,7 @@ class Menu extends View {
   init() {
     this.ownerItem = null
     this._openMenu = null
+    this._openMenuHidden = this._openMenuHidden.bind(this)
     this._selectedItem = null
   }
   build() {
@@ -2548,6 +2549,7 @@ class Menu extends View {
     this.el.style.transform = `translate(${x}px, ${y}px)`
   }
   hide() {
+    this.emit('hide', {target: this})
     this.remove()
     if (this._openMenu) {
       this._openMenu.hide()
@@ -2580,8 +2582,22 @@ class Menu extends View {
   }
   _showMenu(v) {
     const bb = v.el.getBoundingClientRect()
-    this._openMenu = v.menu
+    this.openMenu = v.menu
     v.menu.show(this.app, bb.right, bb.top, false)
+  }
+
+  get openMenu() {return this._openMenu}
+  set openMenu(value) {
+    if (this._openMenu) {
+      this._openMenu.unlisten('hide', this._openMenuHidden)
+    }
+    if (this._openMenu = value) {
+      this._openMenu.on('hide', this._openMenuHidden)
+    }
+  }
+  _openMenuHidden() {
+    this.openMenu = null
+    this.selectedItem = null
   }
 
   get selectedItem() {return this._selectedItem}
@@ -2623,7 +2639,7 @@ class MenuBar extends Menu {
   }
   _showMenu(v) {
     const bb = v.el.getBoundingClientRect()
-    this._openMenu = v.menu
+    this.openMenu = v.menu
     v.menu.show(this.app, bb.left, bb.bottom, false)
   }
 }
