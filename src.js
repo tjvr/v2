@@ -2487,6 +2487,13 @@ class Collection extends View {
     this._reflow()
   }
 
+  setTileSize(w, h) {
+    this._tileWidth = w
+    this._tileHeight = h
+    for (const v of this._cache.values()) v.setSize(w, h)
+    for (const v of this._unused) v.setSize(w, h)
+    this._reflow()
+  }
   _reflow() {
     if (!this._model) {
       this._unused.push(...this._cache.values())
