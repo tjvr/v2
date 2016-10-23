@@ -2697,7 +2697,9 @@ class Menu extends View {
         const [title, spec, opts] = x
         this.add(new MenuItem(Object.assign({title, spec}, opts)))
       } else {
-        this.add(x)
+        h.pushView(this)
+        h.add(this.el, x)
+        h.popView()
       }
     }
   }
