@@ -2612,7 +2612,9 @@ class Menu extends View {
     if (this._selectedItem = view) {
       view.selected = true
     }
-    if (this._openMenu && (!view || this._openMenu !== view.menu)) this._openMenu.hide()
+    if (this._openMenu && (!view || this._openMenu !== view.menu)) {
+      this._openMenu.hide()
+    }
     if (view && view.menu) this._showMenu(view)
   }
 
