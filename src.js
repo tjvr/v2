@@ -469,6 +469,12 @@ if (global.JSZip) v2.fs.zip = function zip(root) {
 }
 
 v2.rt = {
+  platforms: ['mac', 'win', 'iOS', 'android', 'other'],
+  platform:
+    /Macintosh/.test(navigator.userAgent) ? 'mac' :
+    /Windows/.test(navigator.userAgent) ? 'win' :
+    /like Mac OS X/i.test(navigator.userAgent) ? 'iOS' :
+    /Android/i.test(navigator.userAgent) ? 'android' : 'other',
   types: ['chrome', 'web'],
   type: global.chrome && chrome.app && chrome.app.runtime ? 'chrome' : 'web',
 }
@@ -539,6 +545,10 @@ v2.rt.chrome = {
 for (const t of v2.rt.types) {
   v2.rt[`is${v2.ucfirst(t)}`] = v2.rt.type === t
 }
+for (const p of v2.rt.platforms) {
+  v2.rt[`is${v2.ucfirst(p)}`] = v2.rt.platform === p
+}
+v2.rt.isApple = v2.rt.isMac || v2.rt.isIOS
 v2.rt.current = v2.rt[v2.rt.type] || {}
 
 v2.chooseFile = v2.rt.current.chooseFile || v2.rt.web.chooseFile
