@@ -2571,6 +2571,12 @@ class Menu extends View {
     if (typeof a === 'function') a(e)
     else if (typeof t === 'function') t(a, e)
     else if (t && a) t[a](e)
+
+    const obj = {target: this, item: v}
+    for (let m = this; m; m = m.ownerItem && m.ownerItem.parent) {
+      m.emit('activate', obj)
+    }
+
     const app = this.app
     if (app) app.hideMenus()
     else this.hide()
