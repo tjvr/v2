@@ -2806,6 +2806,8 @@ class MenuItem extends View {
   set spec(value) {
     if (Array.isArray(value)) {
       this.menu = new Menu({spec: value})
+    } else if (value instanceof Menu) {
+      this.menu = value
     } else if (typeof value === 'string' || typeof value === 'function') {
       this.action = value
     } else if (value) {
