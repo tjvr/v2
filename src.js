@@ -2517,7 +2517,7 @@ Collection.Item = class Item extends View {
 
 class Menu extends View {
   build() {
-    return h('.v2-menu.v2-view', {onclick: this._click})
+    return h('.v2-menu.v2-view', {onclick: '_click'})
   }
 
   show(app, x, y) {
