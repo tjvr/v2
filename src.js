@@ -2570,7 +2570,15 @@ class Menu extends View {
 
 class MenuBar extends Menu {
   build() {
-    return h('.v2-menu.v2-menu-bar.v2-view')
+    return h('.v2-menu.v2-menu-bar.v2-view', {onmousedown: '_click'})
+  }
+  _selectItem(v, e) {
+    if (v.menu) {
+      const bb = v.el.getBoundingClientRect()
+      v.menu.show(this.app, bb.left, bb.bottom)
+      return
+    }
+    super._selectItem(v, e)
   }
 }
 
