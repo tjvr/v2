@@ -2601,7 +2601,7 @@ class Menu extends View {
 
   _click(e) {
     const el = h.nearest('.v2-menu-item', e.target)
-    if (el) this._activateItem(el.view, e)
+    if (el && !el.classList.contains('v2-menu-item--disabled')) this._activateItem(el.view, e)
   }
   _activateItem(v, e) {
     const t = v.target
@@ -2621,7 +2621,7 @@ class Menu extends View {
   }
   _mouseOver(e) {
     const t = h.nearest('.v2-menu-item', e.target)
-    if (t) this.selectItem(t.view, true)
+    if (t && !t.classList.contains('v2-menu-item--disabled')) this.selectItem(t.view, true)
   }
   _showMenu(v) {
     const bb = v.el.getBoundingClientRect()
