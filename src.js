@@ -2721,7 +2721,7 @@ class Menu extends View {
   }
   selectNext() {
     if (!this.selectedItem) return this.selectFirst()
-    const el = h.nextDescendentMatching('.v2-menu-item:not(.v2-menu-item--disabled)', h.nextSkippingChildren(this.selectedItem.el), this.el)
+    const el = h.nextDescendentMatching('.v2-menu-item:not(.v2-menu-item--disabled)', h.nextSkippingChildren(this.selectedItem.el, this.el), this.el)
     if (el) this.selectItem(el.view)
   }
   selectPrevious() {
