@@ -2658,12 +2658,12 @@ class Menu extends View {
   }
   selectNext() {
     if (!this.selectedItem) return this.selectFirst()
-    const el = h.nextMatching('.v2-menu-item', this.selectedItem.el.nextElementSibling)
+    const el = h.nextDescendentMatching('.v2-menu-item', h.nextSkippingChildren(this.selectedItem.el), this.el)
     if (el) this.selectItem(el.view)
   }
   selectPrevious() {
     if (!this.selectedItem) return this.selectLast()
-    const el = h.previousMatching('.v2-menu-item', this.selectedItem.el.previousElementSibling)
+    const el = h.previousDescendentMatching('.v2-menu-item', h.previous(this.selectedItem.el), this.el)
     if (el) this.selectItem(el.view)
   }
   selectFirst() {
