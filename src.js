@@ -1632,7 +1632,7 @@ class DynamicTreeItem extends View {
     const before = this.items[e.index]
     const item = new DynamicTreeItem({tree: this.tree, model})
     this.items.splice(e.index, 0, item)
-    this.add(item, this.container, before.el)
+    this.add(item, this.container, before && before.el)
   }
 
   toggle(recursive) {
@@ -1721,6 +1721,18 @@ class DynamicTree extends DynamicTreeItem {
       h.removeChildren(this.container)
     }
     super._reload()
+    if (this._placeholder && (!this.items || !this.items.length)) {
+      h.add(this.container, this._placeholder)
+    }
+  }
+  _childInserted(e) {
+    if (this._placeholder && (!this.items || !this.items.length)) {
+      h.removeChildren(this.container)
+    }
+    super._childInserted(e)
+  }
+  _childRemoved(e) {
+    super._childRemoved(e)
     if (this._placeholder && (!this.items || !this.items.length)) {
       h.add(this.container, this._placeholder)
     }
