@@ -2635,7 +2635,7 @@ class Menu extends View {
     this._selectedItem = null
   }
   build() {
-    return h('.v2-menu.v2-view', {tabIndex: 0, onmouseup: '_click', onmouseover: '_mouseOver', onkeydown: '_keyDown'})
+    return h('.v2-menu.v2-view', {tabIndex: 0, onmouseup: '_click', onmousemove: '_mouseSelect', onkeydown: '_keyDown'})
   }
 
   show(app, x, y, bw = 1, bh = 1, offset = true) {
@@ -2686,7 +2686,7 @@ class Menu extends View {
       m.emit('activate', obj)
     }
   }
-  _mouseOver(e) {
+  _mouseSelect(e) {
     const t = h.nearest('.v2-menu-item', e.target)
     if (t && !t.classList.contains('v2-menu-item--disabled')) this.selectItem(t.view, true)
   }
@@ -2808,11 +2808,11 @@ class Menu extends View {
 
 class MenuBar extends Menu {
   build() {
-    return h('.v2-menu.v2-menu-bar.v2-view', {onmousedown: '_click', onmouseover: '_mouseOver'})
+    return h('.v2-menu.v2-menu-bar.v2-view', {onmousedown: '_click', onmousemove: '_mouseSelect'})
   }
-  _mouseOver(e) {
+  _mouseSelect(e) {
     if (!this._openMenu || !this._openMenu.visible) return
-    super._mouseOver(e)
+    super._mouseSelect(e)
   }
   _activateItem(v, e) {
     if (v.menu) {
