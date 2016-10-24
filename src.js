@@ -2623,7 +2623,7 @@ class Menu extends View {
     this._selectedItem = null
   }
   build() {
-    return h('.v2-menu.v2-view', {tabIndex: 0, onclick: '_click', onmouseover: '_mouseOver', onkeydown: '_keyDown'})
+    return h('.v2-menu.v2-view', {tabIndex: 0, onmouseup: '_click', onmouseover: '_mouseOver', onkeydown: '_keyDown'})
   }
 
   show(app, x, y, bw = 1, bh = 1, offset = true) {
