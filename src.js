@@ -1717,18 +1717,18 @@ class DynamicTree extends DynamicTreeItem {
     this._reload()
   }
   _reload() {
-    if (this._placeholder && this.items && !this.items.length) {
+    if (this._placeholder && (!this.items || !this.items.length)) {
       h.removeChildren(this.container)
     }
     super._reload()
-    if (this._placeholder && this.items && !this.items.length) {
+    if (this._placeholder && (!this.items || !this.items.length)) {
       h.add(this.container, this._placeholder)
     }
   }
   get placeholder() {return this._placeholder}
   set placeholder(value) {
     this._placeholder = value
-    if (this.items && !this.items.length) {
+    if (!this.items || !this.items.length) {
       h.removeChildren(this.container)
       if (value) h.add(this.container, value)
     }
