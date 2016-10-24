@@ -1655,7 +1655,7 @@ class DynamicTreeItem extends View {
     if (set.has(this.model)) return
     set.add(this.model)
     this.collapse()
-    for (const c of this.items) c.collapseRecursive(set)
+    if (this.items) for (const c of this.items) c.collapseRecursive(set)
   }
   expand() {
     if (this.isExpanded) return
