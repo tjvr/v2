@@ -1013,7 +1013,7 @@ class App extends View {
     document.removeEventListener('mousedown', this._appMouseDown, true)
   }
   _contextMenu(e) {
-    e.preventDefault()
+    if (e.target.localName !== 'textarea' && (e.target.localName !== 'input' || !['text', 'search', 'tel', 'url', 'email', 'password', 'date', 'month', 'week', 'time', 'datetime-local', 'number'])) e.preventDefault()
   }
   _appMouseDown(e) {
     const m = h.nearest('.v2-menu:not(.v2-menu-bar)', e.target)
