@@ -2648,7 +2648,7 @@ class Menu extends View {
     if (item) this.selectItem(item.view)
   }
 
-  show(app, x, y, bw = 1, bh = 1, offset = true) {
+  show(app, x, y, bw = 1, bh = 1, offset = true, focus = true) {
     x = Math.round(x), y = Math.round(y), bw = Math.round(bw), bh = Math.round(bh)
     this.selectItem(null)
     app.addMenu(this)
@@ -2661,7 +2661,7 @@ class Menu extends View {
     x = Math.max(0, x)
     y = Math.max(0, y)
     this.el.style.transform = `translate(${x}px, ${y}px)`
-    setTimeout(() => this.focus())
+    if (focus) setTimeout(() => this.focus())
   }
   hide() {
     this.emit('hide', {target: this})
@@ -2700,9 +2700,9 @@ class Menu extends View {
     const t = h.nearest('.v2-menu-item', e.target)
     if (t && !t.classList.contains('v2-menu-item--disabled')) this.selectItem(t.view, true)
   }
-  _showMenu(v) {
+  _showMenu(v, focus = false) {
     const bb = v.el.getBoundingClientRect()
-    v.menu.show(this.app, bb.left, bb.top, bb.width, 0)
+    v.menu.show(this.app, bb.left, bb.top, bb.width, 0, true, focus)
   }
   focus() {this.el.focus()}
   _keyDown(e) {
@@ -2738,7 +2738,7 @@ class Menu extends View {
       case 'ArrowRight':
         if (this._selectedItem && this._selectedItem.menu) {
           this.openMenu = this._selectedItem.menu
-          this._showMenu(this._selectedItem)
+          this._showMenu(this._selectedItem, true)
           this._selectedItem.menu.selectFirst()
         } else if (this.ownerItem && this.ownerItem.parent instanceof MenuBar) {
           this.ownerItem.parent.selectNext()
