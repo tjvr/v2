@@ -60,6 +60,11 @@ Object.assign(h, {
   previous(x) {return x.previousSibling ? h.lastDescendent(x.previousSibling) : x.parentNode},
   lastDescendent(x) {return x.lastChild || x},
 
+  // isLink(x) {return x.localName === 'a' || x.localName === 'area') && x.hasAttribute('href')}
+  // isFormElement(x) {return (x.localName === 'input' && x.type !== 'hidden' || x.localName === 'textarea' || x.localName === 'select' || x.localName === 'button')}
+  // isFocusable(x) {return h.isLink(x) || h.isFormElement(x) && !x.disabled || x.localName === 'iframe' || x.localName === 'object' || x.localName === 'embed' || x.tabIndex != null || x.localName === 'html' && x.ownerDocument.designMode === 'on' || x.isContentEditable}
+  isFocusable(x) {return x.tabIndex > -1 || x.hasAttribute('tabindex')},
+
   createElement(sel) {
     const parts = (sel || '').split(/([#.])/)
     const el = document.createElement(parts[0] || 'div')
