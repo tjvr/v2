@@ -2635,7 +2635,12 @@ class Menu extends View {
     this._selectedItem = null
   }
   build() {
-    return h('.v2-menu.v2-view', {tabIndex: 0, onmouseup: '_click', onmousemove: '_mouseSelect', onkeydown: '_keyDown'})
+    return h('.v2-menu.v2-view', {tabIndex: 0, onmouseup: '_click', onmousemove: '_mouseSelect', onkeydown: '_keyDown', onfocusin: '_focusIn'})
+  }
+
+  _focusIn(e) {
+    const item = h.nearest('.v2-menu-item', e.target)
+    if (item) this.selectItem(item.view)
   }
 
   show(app, x, y, bw = 1, bh = 1, offset = true) {
