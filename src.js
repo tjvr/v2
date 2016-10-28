@@ -63,7 +63,7 @@ Object.assign(h, {
   // isLink(x) {return x.localName === 'a' || x.localName === 'area') && x.hasAttribute('href')}
   // isFormElement(x) {return (x.localName === 'input' && x.type !== 'hidden' || x.localName === 'textarea' || x.localName === 'select' || x.localName === 'button')}
   // isFocusable(x) {return h.isLink(x) || h.isFormElement(x) && !x.disabled || x.localName === 'iframe' || x.localName === 'object' || x.localName === 'embed' || x.tabIndex != null || x.localName === 'html' && x.ownerDocument.designMode === 'on' || x.isContentEditable}
-  isFocusable(x) {return x.tabIndex > -1 || x.hasAttribute('tabindex')},
+  isFocusable(x) {return (x.tabIndex > -1 || x.hasAttribute('tabindex')) && !x.disabled},
 
   createElement(sel) {
     const parts = (sel || '').split(/([#.])/)
