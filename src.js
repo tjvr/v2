@@ -2808,6 +2808,7 @@ class Menu extends View {
       this.openMenu = view.menu
       this._showMenu(view)
     }
+    if (!this.el.contains(document.activeElement)) this.focus()
   }
 
   set spec(value) {
