@@ -2748,6 +2748,16 @@ class Menu extends View {
         if (this._selectedItem) this._activateItem(this._selectedItem, e)
         break
     }
+    if (e.key !== 'Tab' || e.metaKey || e.ctrlKey) return
+    if (e.shiftKey) {
+      if (e.target === this.el) e.preventDefault()
+      return
+    }
+    let t = h.next(e.target, this)
+    for (; t; t = h.next(t, this)) {
+      if (t.nodeType === 1 && h.isFocusable(t)) return
+    }
+    e.preventDefault()
   }
   selectNext() {
     if (!this.selectedItem) return this.selectFirst()
