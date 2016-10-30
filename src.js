@@ -57,8 +57,12 @@ Object.assign(h, {
       if (x.nextSibling) return x.nextSibling
     }
   },
-  previous(x) {return x.previousSibling ? h.lastDescendent(x.previousSibling) : x.parentNode},
-  lastDescendent(x) {return x.lastChild || x},
+  previous(x, stop) {return x === stop ? null : x.previousSibling ? h.lastDescendent(x.previousSibling, stop) : x.parentNode},
+  lastDescendent(x, stop) {
+    for (; x && x !== stop; x = x.lastChild) {
+      if (!x.lastChild) return x
+    }
+  },
 
   // isLink(x) {return x.localName === 'a' || x.localName === 'area') && x.hasAttribute('href')}
   // isFormElement(x) {return (x.localName === 'input' && x.type !== 'hidden' || x.localName === 'textarea' || x.localName === 'select' || x.localName === 'button')}
