@@ -64,6 +64,17 @@ Object.assign(h, {
     }
   },
 
+  constrainTab(e, root) {
+    if (e.key !== 'Tab' || e.metaKey || e.ctrlKey) return
+    const advance = e.shiftKey ? h.previous : h.next
+    let t = e.target
+    const name = t.localName === 'input' && t.type === 'radio' && t.name
+    for (t = advance(t, root); t; t = advance(t, root)) {
+      if (t.nodeType === 1 && h.isFocusable(t) && (!name || t.localName !== 'input' || t.type !== 'radio' || t.name !== name)) return
+    }
+    e.preventDefault()
+  },
+
   // isLink(x) {return x.localName === 'a' || x.localName === 'area') && x.hasAttribute('href')}
   // isFormElement(x) {return (x.localName === 'input' && x.type !== 'hidden' || x.localName === 'textarea' || x.localName === 'select' || x.localName === 'button')}
   // isFocusable(x) {return h.isLink(x) || h.isFormElement(x) && !x.disabled || x.localName === 'iframe' || x.localName === 'object' || x.localName === 'embed' || x.tabIndex != null || x.localName === 'html' && x.ownerDocument.designMode === 'on' || x.isContentEditable}
@@ -2752,16 +2763,7 @@ class Menu extends View {
         if (this._selectedItem) this._activateItem(this._selectedItem, e)
         break
     }
-    if (e.key !== 'Tab' || e.metaKey || e.ctrlKey) return
-    if (e.shiftKey) {
-      if (e.target === this.el) e.preventDefault()
-      return
-    }
-    let t = h.next(e.target, this.el)
-    for (; t; t = h.next(t, this.el)) {
-      if (t.nodeType === 1 && h.isFocusable(t)) return
-    }
-    e.preventDefault()
+    h.constrainTab(e, this.el)
   }
   selectNext() {
     if (!this.selectedItem) return this.selectFirst()
