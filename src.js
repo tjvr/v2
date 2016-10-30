@@ -74,6 +74,16 @@ Object.assign(h, {
     }
     e.preventDefault()
   },
+  firstFocusable(root) {
+    for (let t = root; t; t = h.next(t, root)) {
+      if (t.nodeType === 1 && h.isFocusable(t)) return t
+    }
+  },
+  lastFocusable(root) {
+    for (let t = h.lastDescendent(root); t; t = h.previous(t, root)) {
+      if (t.nodeType === 1 && h.isFocusable(t)) return t
+    }
+  },
 
   // isLink(x) {return x.localName === 'a' || x.localName === 'area') && x.hasAttribute('href')}
   // isFormElement(x) {return (x.localName === 'input' && x.type !== 'hidden' || x.localName === 'textarea' || x.localName === 'select' || x.localName === 'button')}
