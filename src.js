@@ -72,6 +72,8 @@ Object.assign(h, {
     for (t = advance(t, root); t; t = advance(t, root)) {
       if (t.nodeType === 1 && h.isFocusable(t) && (!name || t.localName !== 'input' || t.type !== 'radio' || t.name !== name)) return
     }
+    const f = (e.shiftKey ? h.lastFocusable : h.firstFocusable)(root)
+    if (f) f.focus()
     e.preventDefault()
   },
   firstFocusable(root) {
