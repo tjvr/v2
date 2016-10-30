@@ -2757,8 +2757,8 @@ class Menu extends View {
       if (e.target === this.el) e.preventDefault()
       return
     }
-    let t = h.next(e.target, this)
-    for (; t; t = h.next(t, this)) {
+    let t = h.next(e.target, this.el)
+    for (; t; t = h.next(t, this.el)) {
       if (t.nodeType === 1 && h.isFocusable(t)) return
     }
     e.preventDefault()
