@@ -51,7 +51,7 @@ Object.assign(h, {
       if (el.nodeType === 1 && el.matches(sel)) return el
     }
   },
-  next(x, stop) {return x === stop ? null : x.firstChild || h.nextSkippingChildren(x, stop)},
+  next(x, stop) {return x.firstChild || h.nextSkippingChildren(x, stop)},
   nextSkippingChildren(x, stop) {
     for (; x && x !== stop; x = x.parentNode) {
       if (x.nextSibling) return x.nextSibling
