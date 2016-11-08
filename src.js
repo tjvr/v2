@@ -2716,7 +2716,7 @@ class Menu extends View {
     const a = v.action
     if (typeof a === 'function') a(e)
     else if (typeof t === 'function') t(a, e)
-    else if (t && a) t[a](e)
+    else if (t && a && typeof t[a] === 'function') t[a](e)
 
     const obj = {target: this, item: v}
     for (let m = this; m; m = m.ownerItem && m.ownerItem.parent) {
