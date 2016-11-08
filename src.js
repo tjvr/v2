@@ -2746,14 +2746,17 @@ class Menu extends View {
       case '/ArrowUp':
       case '#ArrowUp':
       case '#k':
+      case '^K':
         this.selectFirst()
         break
       case '/ArrowDown':
       case '#ArrowDown':
       case '#j':
+      case '^J':
         this.selectLast()
         break
       case 'ArrowLeft':
+      case 'h':
         if (this.ownerItem) {
           if (this.ownerItem.parent instanceof MenuBar) {
             this.ownerItem.parent.selectPrevious()
@@ -2763,6 +2766,7 @@ class Menu extends View {
         }
         break
       case 'ArrowRight':
+      case 'l':
         if (this._selectedItem && this._selectedItem.menu) {
           this.openMenu = this._selectedItem.menu
           this._showMenu(this._selectedItem, true)
@@ -2772,6 +2776,7 @@ class Menu extends View {
         }
         break
       case 'Enter':
+      case 'o':
         if (this._selectedItem) this._activateItem(this._selectedItem, e)
         break
     }
