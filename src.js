@@ -107,10 +107,10 @@ Object.assign(h, {
     return el
   },
   add(el, a) {
-    if (Array.isArray(a)) {
-      for (const c of a) h.add(el, c)
-    } else if (typeof a === 'object' && a) {
-      if (a.isView) h._view.add(a, el)
+    if (a && typeof a === 'object') {
+      if (Array.isArray(a) || v2.iter.is(a)) {
+        for (const c of a) h.add(el, c)
+      } else if (a.isView) h._view.add(a, el)
       else if (a.nodeType) el.appendChild(a)
       // else if (a.then) h.addPromise(el, a)
       else h.attrs(el, a)
