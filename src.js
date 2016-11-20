@@ -624,27 +624,304 @@ v2.rt.current = v2.rt[v2.rt.type] || {}
 v2.chooseFile = v2.rt.current.chooseFile || v2.rt.web.chooseFile
 v2.saveFile = v2.rt.current.saveFile || v2.rt.web.saveFile
 
-v2.iter = {
-  first(xs) {
+v2.iter = function() {
+  function is(xs) {return typeof xs[Symbol.iterator] === 'function' || typeof xs.next === 'function'}
+  function from(xs) {return new Iter(typeof xs[Symbol.iterator] === 'function' ? xs[Symbol.iterator]() : xs)}
+  function generator(gen) {return (...args) => new Iter(gen(...args))}
+  const G = generator
+
+  const range = G(function*(start, end, skip = 1) {
+    if (end === undefined) [start, end] = [0, start]
+    if (skip > 0) for (let i = start; i < end; i += skip) yield i
+    else for (let i = start; i > end; i += skip) yield i
+  })
+  const irange = G(function*(start = 0, skip = 1) {
+    for (let i = start; ; i += skip) yield i
+  })
+  const replicate = G(function*(n, x) {for (let i = 0; i < n; ++i) yield x})
+  const forever = G(function*(x) {for (;;) yield x})
+  const iterate = G(function*(x, fn) {for (;; x = fn(x)) yield x})
+
+  const entries = G(function*(o) {for (const k of Object.keys(o)) yield [k, o[k]]})
+  function keys(o) {return new Iter(Object.keys(o)[Symbol.iterator]())}
+  const values = G(function*(o) {for (const k of Object.keys(o)) yield o[k]})
+
+  function split(xs, n = 2) {return new SplitSource(xs, n).derived}
+  const cycle = G(function*(xs) {
+    const cache = []
+    for (const x of xs) {
+      cache.push(xs)
+      yield x
+    }
+    for (;;) yield* cache
+  })
+  const enumerate = G(function*(xs) {let i = 0; for (const x of xs) yield [i++, x]})
+  const map = G(function*(xs, fn) {for (const x of xs) yield fn(x)})
+  const filter = G(function*(xs, fn) {for (const x of xs) if (fn(x)) yield x})
+  const concat = G(function*(...xss) {for (const xs of xss) yield* xs})
+  const push = G(function*(xs, ...ys) {yield* xs; yield* ys})
+  const unshift = G(function*(xs, ...ys) {yield* ys; yield* xs})
+  const flatten = G(function*(xss) {for (const xs of xss) yield* xs})
+  const chunksOf = G(function*(n, xs) {
+    let list = []
+    for (const x of xs) {
+      if (list.length >= n) {yield list; list = []}
+      list.push(x)
+    }
+    if (list.length) yield list
+  })
+  function first(xs) {
     if (Array.isArray(xs)) return xs[0]
     for (const x of xs) return x
-  },
-  last(xs) {
+  }
+  function last(xs) {
     if (Array.isArray(xs)) return xs[xs.length - 1]
     let z
     for (const x of xs) z = x
     return z
-  },
-  *slice(xs, start, end) {
-    if (!Array.isArray(xs)) throw new Error('unimplemented')
-    if (start === undefined) start = 0
-    else if (start < 0) start += array.length
-    if (end === undefined) end = array.length
-    else if (end < 0) end += array.length
-    for (let i = start; i < end; ++i) yield array[i]
-  },
-  *map(xs, fn) {for (const x of xs) yield fn(x)},
-}
+  }
+  const drop = G(function*(n, xs) {for (const x of xs) if (n <= 0) yield x; else --n})
+  const dropWhile = G(function*(xs, fn) {let init = true; for (const x of xs) if (!init || !fn(x)) {init = false; yield x}})
+  const dropLast = G(function*(n, xs) {
+    if (n === 0) yield* xs; else {
+      const list = []
+      let i = 0
+      for (const x of xs) {
+        if (i >= n) yield list[i % n]
+        list[i++ % n] = x
+      }
+    }
+  })
+  const take = G(function*(n, xs) {for (const x of xs) if (n-- > 0) yield x; else return})
+  const takeWhile = G(function*(fn, xs) {for (const x of xs) if (fn(x)) yield x; else return})
+  const takeLast = G(function*(n, xs) {
+    const list = []
+    let i = 0
+    for (const x of xs) list[i++ % n] = x
+    if (n > list.length) n = list.length
+    for (let j = 0; j < n; j++) yield list[(i + j) % n]
+  })
+  const zip = G(function*(...xss) {
+    const its = map(xs => xs[Symbol.iterator](), xss)
+    for (;;) {
+      const rs = its.map(it => it.next())
+      if (some(r => r.done, rs)) return
+      yield rs.map(r => r.value)
+    }
+  })
+
+  function every(fn, xs) {for (const x of xs) if (!fn(x)) return false; return true}
+  function some(fn, xs) {for (const x of xs) if (fn(x)) return true; return false}
+  function find(fn, xs) {for (const x of xs) if (fn(x)) return x}
+  // function findIndex(fn, xs) {for (const [i, x] of enumerate(xs)) if (fn(x)) return i}
+  function findIndex(fn, xs) {let i = 0; for (const x of xs) {if (fn(x)) return i; ++i} return -1}
+  function findLastIndex(fn, xs) {let i = 0, j = -1; for (const x of xs) {if (fn(x)) j = i; ++i} return j}
+  //function indexOf(y, xs) {return findIndex(x => x === y, xs)}
+  function indexOf(y, xs) {let i = 0; for (const x of xs) {if (x === y) return i; ++i} return -1}
+  function lastIndexOf(y, xs) {let i = 0, j = -1; for (const x of xs) {if (x === y) j = i; ++i} return j}
+  function includes(y, xs) {
+    for (const x of xs) if (x === y) return true
+    return false
+  }
+  function reduce(a, fn, xs) {for (const x of xs) a = fn(a, x); return a}
+  function inject(a, fn, xs) {for (const x of xs) fn(a, x); return a}
+
+  function head(xs) {for (const x of xs) return x}
+  function last(xs) {if (Array.isArray(xs)) return xs[xs.length - 1]; let l; for (const x of xs) l = x; return l}
+  function tail(xs) {return drop(1, xs)}
+  function init(xs) {return dropLast(1, xs)}
+
+  function count(xs) {if (Array.isArray(xs)) return xs.length; let i = 0; for (const x of xs) ++i; return i}
+  function pick(i, xs) {if (Array.isArray(xs)) return xs[i]; for (const x of xs) if (i-- <= 0) return x}
+
+  function sum(xs) {return reduce(0, (x, y) => x + y, xs)}
+  function product(xs) {return reduce(1, (x, y) => x * y, xs)}
+  function max(xs) {return reduce(-Infinity, Math.max, xs)}
+  function min(xs) {return reduce(Infinity, Math.min, xs)}
+  function groupBy(fn, xs) {return inject(new Map, (m, x) => {
+    const k = fn(x), l = m.get(k)
+    if (l) l.push(x)
+    else m.set(k, [x])
+  }, xs)}
+
+  const unique = G(function*(xs) {
+    const used = new Set
+    for (const x of xs) {
+      if (!used.has(x)) {
+        yield x
+        used.add(x)
+      }
+    }
+  })
+
+  function array(xs) {return Array.from(xs)}
+  const intersperse = G(function*(sep, xs) {
+    let use = false
+    for (const x of xs) {
+      if (use) yield sep
+      yield x
+      use = true
+    }
+  })
+  function join(sep, xs) {
+    let s = ''
+    if (sep) {
+      let use = false
+      for (const x of xs) {
+        if (use) s += sep
+        s += x
+        use = true
+      }
+    } else {
+      for (const x of xs) s += x
+    }
+    return s
+  }
+
+  const slice = G(function*(xs, start = 0, end) {
+    if (Array.isArray(xs)) {
+      if (start < 0) start += array.length
+      if (end === undefined) end = array.length
+      else if (end < 0) end += array.length
+      for (let i = start; i < end; ++i) yield array[i]
+    } else if (end === undefined) {
+      yield* start < 0 ? takeLast(-start, xs) : drop(start, xs)
+    } else if (start >= 0) {
+      let i = 0
+      if (end === 0) return
+      else if (end > 0) {
+        for (const x of xs) {
+          if (i >= start) yield x
+          if (++i >= end) return
+        }
+      } else {
+        // yield* dropLast(-end, drop(start, xs))
+        const list = []
+        const n = -end
+        for (const x of xs) {
+          if (i >= start) {
+            const k = (i - start) % n
+            if (i - start >= n) yield list[k]
+            list[k] = x
+          }
+          ++i
+        }
+      }
+    } else {
+        // yield* dropLast(-end, takeLast(-start, xs))
+      const list = []
+      let n = -start
+      let i = 0
+      for (const x of xs) list[i++ % n] = x
+      if (n > list.length) n = list.length
+      for (let j = 0; j < n + end; j++) yield list[(i + j) % n]
+    }
+  })
+
+  class Iter {
+    constructor(inner) {this.inner = inner}
+    [Symbol.iterator]() {return this.inner}
+    next() {return this.inner.next()}
+    array() {return Array.from(this.inner)}
+    join(sep) {return join(sep, this)}
+    intersperse(sep) {return intersperse(sep, this)}
+
+    split() {return split(this.inner)}
+    cycle() {return cycle(this.inner)}
+    enumerate() {return enumerate(this.inner)}
+    map(fn) {return map(this.inner, fn)}
+    filter(fn) {return filter(this.inner, fn)}
+    concat(...xs) {return concat(...[this.inner, ...xs])}
+    push(...xs) {return push(this.inner, ...xs)}
+    unshift(...xs) {return unshift(this.inner, ...xs)}
+    flatten() {return flatten(this.inner)}
+    chunksOf(n) {return chunksOf(n, this.inner)}
+    drop(n) {return drop(n, this.inner)}
+    dropWhile(fn) {return dropWhile(this.inner, fn)}
+    dropLast(n) {return dropLast(n, this.inner)}
+    take(n) {return take(n, this.inner)}
+    takeWhile(fn) {return takeWhile(this.inner, fn)}
+    takeLast(n) {return takeLast(n, this.inner)}
+    zip(...xs) {return zip(...[this.inner, ...xs])}
+
+    every(fn) {return every(fn, this.inner)}
+    some(fn) {return some(fn, this.inner)}
+    find(fn) {return find(fn, this.inner)}
+    findIndex(fn) {return findIndex(fn, this.inner)}
+    findLastIndex(fn) {return findLastIndex(fn, this.inner)}
+    indexOf(x) {return indexOf(x, this.inner)}
+    lastIndexOf(x) {return lastIndexOf(x, this.inner)}
+    includes(x) {return includes(x, this.inner)}
+    reduce(x, fn) {return reduce(x, fn, this.inner)}
+    inject(x, fn) {return inject(x, fn, this.inner)}
+
+    head() {return head(this.inner)}
+    last() {return last(this.inner)}
+    tail() {return tail(this.inner)}
+    init() {return init(this.inner)}
+    count() {return count(this.inner)}
+    pick(i) {return pick(i, this.inner)}
+
+    sum() {return sum(this.inner)}
+    product() {return product(this.inner)}
+    max() {return max(this.inner)}
+    min() {return min(this.inner)}
+
+    groupBy(fn) {return groupBy(fn, this.inner)}
+    unique() {return unique(this.inner)}
+
+    slice(start, end) {return slice(this.inner, start, end)}
+  }
+  class SplitSource {
+    constructor(iter, n) {
+      this.iter = iter
+      this.derived = Array(n)
+      for (let i = this.derived.length; i--;) {
+        this.derived[i] = new SplitIter(this)
+      }
+    }
+    pull() {
+      const {done, value} = this.iter.next()
+      if (done) return
+      for (const b of this.derived) b.push(value)
+    }
+  }
+  class SplitIter extends Iter {
+    constructor(source) {
+      super(this)
+      this.inner = this
+      this.buffer = []
+      this.source = source
+    }
+    [Symbol.iterator]() {return this}
+    push(v) {this.buffer.push(v)}
+    next() {
+      if (!this.buffer.length) this.source.pull()
+      return this.buffer.length ? {done: false, value: this.buffer.shift()} : {done: true}
+    }
+  }
+
+  Object.assign(from, {
+    is, from, generator,
+    range, irange, replicate, forever, iterate,
+    entries, keys, values,
+    array, intersperse, join,
+
+    split, cycle, enumerate,
+    map, filter, concat, push, unshift, flatten, chunksOf,
+    drop, dropWhile, dropLast,
+    take, takeWhile, takeLast,
+    zip,
+    every, some, find, findIndex, findLastIndex, indexOf, lastIndexOf, includes, reduce, inject,
+    head, last, tail, init,
+    count, pick,
+    sum, product, max, min,
+    groupBy, unique,
+    slice,
+  })
+  return from
+}()
+
 v2.path = {
   dirname(x) {
     const p = /^(?:\w+:)?\//.exec(x)
