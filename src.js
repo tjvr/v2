@@ -1316,13 +1316,22 @@ class App extends View {
   _onActivate() {
     document.addEventListener('contextmenu', this._contextMenu)
     document.addEventListener('mousedown', this._appMouseDown, true)
+    document.addEventListener('keydown', this._appKeyDown, true)
   }
   _onDeactivate() {
     document.removeEventListener('contextmenu', this._contextMenu)
     document.removeEventListener('mousedown', this._appMouseDown, true)
+    document.removeEventListener('keydown', this._appKeyDown, true)
   }
   _contextMenu(e) {
     if (e.target.localName !== 'textarea' && (e.target.localName !== 'input' || !['text', 'search', 'tel', 'url', 'email', 'password', 'date', 'month', 'week', 'time', 'datetime-local', 'number'])) e.preventDefault()
+  }
+  _appKeyDown(e) {
+    if (v2.rt.isMac && v2.rt.isChrome && e.key === 'f' && e.metaKey && e.ctrlKey && !e.shiftKey && !e.altKey) {
+      const win = chrome.app.window.current()
+      if (win.isFullscreen()) win.restore()
+      else win.fullscreen()
+    }
   }
   _appMouseDown(e) {
     const m = h.nearest('.v2-menu:not(.v2-menu-bar)', e.target)
