@@ -206,8 +206,15 @@ v2.keyWithModifiers = function keyWithModifiers(e) {
   return (e.shiftKey ? '^' : '') + (e.altKey ? '/' : '') + (e.metaKey || e.ctrlKey ? '#' : '') + (e.metaKey && e.ctrlKey ? '#' : '') + e.key
 }
 
+const ENTITY_RE = /[&<>"'/]/g
 v2.escapeEntities = function escapeEntities(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;')
+  return String(s).replace(ENTITY_RE, s =>
+    s === '&' ? '&amp;' :
+    s === '<' ? '&lt;' :
+    s === '>' ? '&gt;' :
+    s === '"' ? '&quot;' :
+    s === '\'' ? '&#x27;' :
+    s === '/' ? '&#x2f;' : '')
 }
 const SPECIAL_RE = /[\[\]{}()?*+.^$\\\/|-]/g
 v2.escapeRegExp = function escapeRegExp(s) {
