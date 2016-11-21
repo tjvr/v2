@@ -209,6 +209,10 @@ v2.keyWithModifiers = function keyWithModifiers(e) {
 v2.escapeEntities = function escapeEntities(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/\//g, '&#x2F;')
 }
+const SPECIAL_RE = /[\[\]{}()?*+.^$\\\/|-]/g
+v2.escapeRegExp = function escapeRegExp(s) {
+  return String(s).replace(SPECIAL_RE, '\\$&')
+}
 v2.ucfirst = function ucfirst(x) {return x.charAt(0).toUpperCase() + x.slice(1)}
 v2.foldSpace = function foldSpace(x) {return x.trim().replace(/\s+/g, ' ')}
 v2.stripHTML = function stripHTML(x) {
