@@ -2962,9 +2962,13 @@ class Menu extends View {
     this._openMenu = null
     this._openMenuHidden = this._openMenuHidden.bind(this)
     this._selectedItem = null
+    this._clearDelay = 500
+    this._typeTimeout = null
+    this._clear = this._clear.bind(this)
   }
   build() {
-    return h('.v2-menu.v2-view', {tabIndex: 0, onmouseup: '_click', onmousemove: '_mouseSelect', onkeydown: '_keyDown', onfocusin: '_focusIn'})
+    return h('.v2-menu.v2-view', {onmouseup: '_click', onmousemove: '_mouseSelect', onkeydown: '_keyDown', onfocusin: '_focusIn'},
+      this._input = h('input.v2-menu-input', {oninput: '_selectByTitle'}))
   }
 
   _focusIn(e) {
@@ -3028,32 +3032,32 @@ class Menu extends View {
     const bb = v.el.getBoundingClientRect()
     v.menu.show(this.app, bb.left, bb.top, bb.width, 0, true, focus)
   }
-  focus() {this.el.focus()}
+  focus() {this._input.focus()}
   _keyDown(e) {
     const k = v2.keyWithModifiers(e)
     switch (k) {
       case 'ArrowUp':
-      case 'k':
+      // case 'k':
         this.selectPrevious()
         break
       case 'ArrowDown':
-      case 'j':
+      // case 'j':
         this.selectNext()
         break
       case '/ArrowUp':
       case '#ArrowUp':
-      case '#k':
-      case '^K':
+      // case '#k':
+      // case '^K':
         this.selectFirst()
         break
       case '/ArrowDown':
       case '#ArrowDown':
-      case '#j':
-      case '^J':
+      // case '#j':
+      // case '^J':
         this.selectLast()
         break
       case 'ArrowLeft':
-      case 'h':
+      // case 'h':
         if (this.ownerItem) {
           if (this.ownerItem.parent instanceof MenuBar) {
             this.ownerItem.parent.selectPrevious()
@@ -3063,7 +3067,7 @@ class Menu extends View {
         }
         break
       case 'ArrowRight':
-      case 'l':
+      // case 'l':
         if (this._selectedItem && this._selectedItem.menu) {
           this.openMenu = this._selectedItem.menu
           this._showMenu(this._selectedItem, true)
@@ -3073,12 +3077,29 @@ class Menu extends View {
         }
         break
       case 'Enter':
-      case 'o':
+      // case 'o':
         if (this._selectedItem) this._activateItem(this._selectedItem, e)
         break
     }
     h.constrainTab(e, this.el)
   }
+
+  _selectByTitle() {
+    this.selectByTitle(this._input.value)
+    clearTimeout(this._typeTimeout)
+    this._typeTimeout = setTimeout(this._clear, this._clearDelay)
+  }
+  _clear() {
+    this._input.value = ''
+  }
+  selectByTitle(title) {
+    if (!title) return
+    const re = new RegExp('^' + v2.escapeRegExp(title.trim()).replace(/\s+/, '\\s+'), 'i')
+    for (const v of this.children) {
+      if (re.test(v.title)) return this.selectItem(v)
+    }
+  }
+
   selectNext() {
     if (!this.selectedItem) return this.selectFirst()
     const el = h.nextDescendentMatching('.v2-menu-item:not(.v2-menu-item--disabled)', h.nextSkippingChildren(this.selectedItem.el, this.el), this.el)
@@ -3149,8 +3170,9 @@ class Menu extends View {
 
 class MenuBar extends Menu {
   build() {
-    return h('.v2-menu.v2-menu-bar.v2-view', {onmousedown: '_click', onmousemove: '_mouseSelect'})
+    return h('.v2-menu.v2-menu-bar.v2-view', {tabIndex: 0, onmousedown: '_click', onmousemove: '_mouseSelect'})
   }
+  focus() {this.el.focus()}
   _mouseSelect(e) {
     if (!this._openMenu || !this._openMenu.visible) return
     super._mouseSelect(e)
