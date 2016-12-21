@@ -70,11 +70,12 @@ Object.assign(h, {
     let t = e.target
     const name = t.localName === 'input' && t.type === 'radio' && t.name
     for (t = advance(t, root); t; t = advance(t, root)) {
-      if (t.nodeType === 1 && h.isFocusable(t) && (!name || t.localName !== 'input' || t.type !== 'radio' || t.name !== name)) return
+      if (t.nodeType === 1 && h.isFocusable(t) && (!name || t.localName !== 'input' || t.type !== 'radio' || t.name !== name)) return true
     }
     const f = (e.shiftKey ? h.lastFocusable : h.firstFocusable)(root)
     if (f) f.focus()
     e.preventDefault()
+    return true
   },
   firstFocusable(root) {
     for (let t = root; t; t = h.next(t, root)) {
