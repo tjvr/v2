@@ -88,10 +88,19 @@ Object.assign(h, {
     }
   },
 
-  // isLink(x) {return x.localName === 'a' || x.localName === 'area') && x.hasAttribute('href')}
-  // isFormElement(x) {return (x.localName === 'input' && x.type !== 'hidden' || x.localName === 'textarea' || x.localName === 'select' || x.localName === 'button')}
+  isLink(x) {return (x.localName === 'a' || x.localName === 'area') && x.hasAttribute('href')},
+  isFormElement(x) {return (x.localName === 'input' && x.type !== 'hidden' || x.localName === 'textarea' || x.localName === 'select' || x.localName === 'button')},
   // isFocusable(x) {return h.isLink(x) || h.isFormElement(x) && !x.disabled || x.localName === 'iframe' || x.localName === 'object' || x.localName === 'embed' || x.tabIndex != null || x.localName === 'html' && x.ownerDocument.designMode === 'on' || x.isContentEditable}
   isFocusable(x) {return (x.tabIndex > -1 || x.hasAttribute('tabindex')) && !x.disabled},
+  acceptsKeyboardInput(x, e) {
+    const arrow = ['ArrowLeft', 'ArrowUp', 'ArrowDown', 'ArrowRight'].includes(e.key)
+    const space = e.key === ' '
+    return e.key !== 'Escape' && (
+      (x.localName === 'input' && (['text', 'search', 'tel', 'url', 'email', 'password', 'date', 'month', 'week', 'time', 'datetime-local', 'number', 'color'].includes(x.type) || ['radio', 'range'].includes(x.type) && arrow || ['checkbox', 'button', 'radio'].includes(x.type) && space) || x.localName === 'textarea' || x.localName === 'select') && !x.disabled ||
+      x.isContentEditable ||
+      (x.localName === 'html' || x.localName === 'body') && x.ownerDocument.designMode === 'on')
+  },
+  // acceptsClick(x) {return h.isLink(x) || h.isFormElement(x)},
 
   createElement(sel) {
     const parts = (sel || '').split(/([#.])/)
