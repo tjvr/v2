@@ -213,7 +213,7 @@ v2.throttleImmediate = function throttleImmediate(fn) {
 }
 
 v2.keyWithModifiers = function keyWithModifiers(e) {
-  return (e.shiftKey ? '^' : '') + (e.altKey ? '/' : '') + (e.metaKey || e.ctrlKey ? '#' : '') + (e.metaKey && e.ctrlKey ? '#' : '') + e.key
+  return (v2.rt.isApple && e.ctrlKey ? '`' : '') + (e.shiftKey ? '^' : '') + (e.altKey ? '/' : '') + ((v2.rt.isApple ? e.metaKey : e.ctrlKey) ? '#' : '') + e.key
 }
 
 const ENTITY_RE = /[&<>"'/]/g
