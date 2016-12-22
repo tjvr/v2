@@ -75,6 +75,7 @@ Object.assign(h, {
     const f = (e.shiftKey ? h.lastFocusable : h.firstFocusable)(root)
     if (f) f.focus()
     e.preventDefault()
+    e.stopPropagation()
     return true
   },
   firstFocusable(root) {
