@@ -2131,9 +2131,10 @@ class Tree extends View {
     this.editNode = (node, label) => node.data = label
     this.menu = null
     this.rowHeight = 24
+    this.keyBindings = Tree.keyBindings
   }
   build() {
-    return h('.v2-view.v2-tree', {tabIndex: 0, onscroll: '_scroll', onmousedown: '_mouseDown', onkeydown: '_keyDown'},
+    return h('.v2-view.v2-tree', {tabIndex: 0, onscroll: '_scroll', onmousedown: '_mouseDown'},
       this._overflowEl = h('.v2-tree-overflow'))
   }
 
@@ -2279,38 +2280,8 @@ class Tree extends View {
     }
     this._lastL = l
   }
-  _keyDown(e) {
-    const k = v2.keyWithModifiers(e)
-    const editing = this._editing && this._editItem.visible
-    switch (k) {
-      case 'Return':
-        if (editing) this.acceptEdit()
-        break
-      case 'Escape':
-        if (editing) this.cancelEdit()
-        break
-      case '/ArrowUp':
-        this.selectFirst()
-        break
-      case 'ArrowUp':
-        this.selectPrevious()
-        break
-      case '/ArrowDown':
-        this.selectLast()
-        break
-      case 'ArrowDown':
-        this.selectNext()
-        break
-      case 'ArrowRight':
-        this.selectIn()
-        break
-      case 'ArrowLeft':
-        this.selectOut()
-        break
-      default: return
-    }
-    e.preventDefault()
-    e.stopPropagation()
+  _hasContext(n) {
+    return n === 'editing' ? this._editing && this._editItem.visible : super._hasContext(n)
   }
 
   _select(l) {
@@ -2458,6 +2429,16 @@ class Tree extends View {
     this._insertSubtreeAt(i + 1, Array.prototype.concat.apply([], l.children.map(l => l.subtree)))
   }
 }
+Tree.keyBindings = [
+  {key: 'Return', command: 'acceptEdit', context: 'editing'},
+  {key: 'Escape', command: 'cancelEdit', context: 'editing'},
+  {key: '/ArrowUp', command: 'selectFirst'},
+  {key: 'ArrowUp', command: 'selectPrevious'},
+  {key: '/ArrowDown', command: 'selectLast'},
+  {key: 'ArrowDown', command: 'selectNext'},
+  {key: 'ArrowRight', command: 'selectIn'},
+  {key: 'ArrowLeft', command: 'selectOut'},
+]
 Tree._L = class _L {
   constructor(tree, level, node) {
     this.tree = tree
