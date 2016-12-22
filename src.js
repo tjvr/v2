@@ -99,7 +99,7 @@ Object.assign(h, {
     return e.key !== 'Escape' && (
       (x.localName === 'input' && (['text', 'search', 'tel', 'url', 'email', 'password', 'date', 'month', 'week', 'time', 'datetime-local', 'number', 'color'].includes(x.type) || ['radio', 'range'].includes(x.type) && arrow || ['checkbox', 'button', 'radio'].includes(x.type) && space) || x.localName === 'textarea' || x.localName === 'select') && !x.disabled ||
       x.isContentEditable ||
-      (x.localName === 'html' || x.localName === 'body') && x.ownerDocument.designMode === 'on')
+      (x.localName === 'html' || x.localName === 'body') && x.ownerDocument.designMode === 'on') && (x.dataset.nativeKeybindings !== 'false' || e.key.length === 1 && !(e.ctrlKey || e.metaKey || !v2.rt.isApple && e.altKey))
   },
   // acceptsClick(x) {return h.isLink(x) || h.isFormElement(x)},
 
@@ -2991,10 +2991,11 @@ class Menu extends View {
     this._clearDelay = 500
     this._typeTimeout = null
     this._clear = this._clear.bind(this)
+    this.keyBindings = Menu.keyBindings
   }
   build() {
     return h('.v2-menu.v2-view', {onmouseup: '_click', onmousemove: '_mouseSelect', onkeydown: '_keyDown', onfocusin: '_focusIn'},
-      this._input = h('input.v2-menu-input', {oninput: '_selectByTitle'}))
+      this._input = h('input.v2-menu-input', {oninput: '_selectByTitle', dataset: {nativeKeybindings: false}}))
   }
 
   _focusIn(e) {
@@ -3032,9 +3033,9 @@ class Menu extends View {
 
   _click(e) {
     const el = h.nearest('.v2-menu-item', e.target)
-    if (el && !el.classList.contains('v2-menu-item--disabled')) this._activateItem(el.view, e)
+    if (el && !el.classList.contains('v2-menu-item--disabled')) this._activateItem(el.view)
   }
-  _activateItem(v, e) {
+  _activateItem(v) {
     const app = this.app
     if (app) app.hideMenus()
     else this.hide()
@@ -3042,9 +3043,9 @@ class Menu extends View {
     setTimeout(() => {
       const t = v.target
       const a = v.action
-      if (typeof a === 'function') a(e)
-      else if (typeof t === 'function') t(a, e)
-      else if (t && a && typeof t[a] === 'function') t[a](e)
+      if (typeof a === 'function') a()
+      else if (typeof t === 'function') t(a)
+      else if (t && a && typeof t[a] === 'function') t[a]()
 
       const obj = {target: this, item: v}
       for (let m = this; m; m = m.ownerItem && m.ownerItem.parent) {
@@ -3062,47 +3063,13 @@ class Menu extends View {
   }
   focus() {this._input.focus()}
   _keyDown(e) {
-    const k = v2.keyWithModifiers(e)
-    switch (k) {
-      case 'ArrowUp':
-      // case 'k':
-        this.selectPrevious()
-        break
-      case 'ArrowDown':
-      // case 'j':
-        this.selectNext()
-        break
-      case '/ArrowUp':
-      case '#ArrowUp':
-      // case '#k':
-      // case '^K':
-        this.selectFirst()
-        break
-      case '/ArrowDown':
-      case '#ArrowDown':
-      // case '#j':
-      // case '^J':
-        this.selectLast()
-        break
-      case 'ArrowLeft':
-      // case 'h':
-        if (this.ownerItem) this.selectOut()
-        break
-      case 'ArrowRight':
-      // case 'l':
-        this.selectIn()
-        break
-      case 'Enter':
-      // case 'o':
-        this.activateSelection()
-        break
-      default:
-        if (!h.constrainTab(e, this.el)) return
-    }
-    e.preventDefault()
-    e.stopPropagation()
+    h.constrainTab(e, this.el)
+  }
+  _hasContext(n) {
+    return n === 'submenu' ? this.ownerItem : super._hasContext(n)
   }
   selectOut() {
+    if (!this.ownerItem) return
     if (this.ownerItem.parent instanceof MenuBar) {
       this.ownerItem.parent.selectPrevious()
     } else {
@@ -3119,7 +3086,7 @@ class Menu extends View {
     }
   }
   activateSelection() {
-    if (this._selectedItem) this._activateItem(this._selectedItem, e)
+    if (this._selectedItem) this._activateItem(this._selectedItem)
   }
 
   _selectByTitle() {
@@ -3205,6 +3172,27 @@ class Menu extends View {
     }
   }
 }
+Menu.keyBindings = [
+  {key: 'ArrowUp', command: 'selectPrevious'},
+  {key: 'ArrowDown', command: 'selectNext'},
+  {key: '/ArrowUp', command: 'selectFirst', context: 'pf-apple'},
+  {key: '#ArrowUp', command: 'selectFirst'},
+  {key: '/ArrowDown', command: 'selectLast', context: 'pf-apple'},
+  {key: '#ArrowDown', command: 'selectLast'},
+  {key: 'ArrowLeft', command: 'selectOut'},
+  {key: 'ArrowRight', command: 'selectIn'},
+  {key: 'Enter', command: 'activateSelection'},
+  // {key: 'k', command: 'selectPrevious'},
+  // {key: 'j', command: 'selectNext'},
+  // {key: '^K', command: 'selectFirst'},
+  // {key: '#k', command: 'selectFirst'},
+  // {key: '#k', command: 'selectFirst'},
+  // {key: '^J', command: 'selectLast'},
+  // {key: '#j', command: 'selectLast'},
+  // {key: 'h', command: 'selectOut'},
+  // {key: 'l', command: 'selectIn'},
+  // {key: 'o', command: 'activateSelection'},
+]
 
 class MenuBar extends Menu {
   build() {
@@ -3215,12 +3203,12 @@ class MenuBar extends Menu {
     if (!this._openMenu || !this._openMenu.visible) return
     super._mouseSelect(e)
   }
-  _activateItem(v, e) {
+  _activateItem(v) {
     if (v.menu) {
       this.selectItem(this.selectedItem === v ? null : v, true)
       return
     }
-    super._activateItem(v, e)
+    super._activateItem(v)
   }
   _showMenu(v) {
     const bb = v.el.getBoundingClientRect()
