@@ -1229,6 +1229,14 @@ class View {
     return r.isApp && r
   }
 
+  *descendants() {
+    yield this
+    for (const c of this.children) yield* c.descendants()
+  }
+  *ancestors() {
+    for (let v = this; v; v = v.parent) yield v
+  }
+
   constructor(p) {
     this._listeners = null
     this.children = new Set
