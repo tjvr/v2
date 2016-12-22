@@ -2249,50 +2249,46 @@ class Tree extends View {
     this._lastL = l
   }
   _keyDown(e) {
-    if (this._editing && this._editItem.visible) {
-      if (e.keyCode === 13) {
-        e.preventDefault()
-        this.acceptEdit()
-      } else if (e.keyCode === 27) {
-        e.preventDefault()
-        this.cancelEdit()
-      }
-      return
-    }
-    switch (e.keyCode) {
-      case 38: {
-        if (e.altKey) {
-          this._select(this._linear[0])
-        } else {
-          const i = this._linear.indexOf(this._lastL)
-          const j = i === -1 ? this._linear.length - 1 : i > 0 ? i - 1 : 0
-          this._select(this._linear[j])
-        }
+    const k = v2.keyWithModifiers(e)
+    const editing = this._editing && this._editItem.visible
+    switch (k) {
+      case 'Return':
+        if (editing) this.acceptEdit()
+        break
+      case 'Escape':
+        if (editing) this.cancelEdit()
+        break
+      case '/ArrowUp':
+        this._select(this._linear[0])
+        break
+      case 'ArrowUp': {
+        const i = this._linear.indexOf(this._lastL)
+        const j = i === -1 ? this._linear.length - 1 : i > 0 ? i - 1 : 0
+        this._select(this._linear[j])
       } break
-      case 40: {
-        if (e.altKey) {
-          this._select(this._linear[this._linear.length - 1])
-        } else {
-          const i = this._linear.indexOf(this._lastL)
-          const end = this._linear.length - 1
-          const j = i === -1 ? 0 : i < end ? i + 1 : end
-          this._select(this._linear[j])
-        }
+      case '/ArrowDown':
+        this._select(this._linear[this._linear.length - 1])
+        break
+      case 'ArrowDown': {
+        const i = this._linear.indexOf(this._lastL)
+        const end = this._linear.length - 1
+        const j = i === -1 ? 0 : i < end ? i + 1 : end
+        this._select(this._linear[j])
       } break
-      case 39: {
+      case 'ArrowRight':
         if (!this._lastL || !this._lastL.isExpandable) break
         if (this._lastL.isExpanded) {
           this._select(this._lastL.children[0])
         } else this._lastL.toggle(e.ctrlKey || e.metaKey)
-      } break
-      case 37: {
+        break
+      case 'ArrowLeft':
         if (!this._lastL) break
         if (this._lastL.isExpanded) this._lastL.toggle(e.ctrlKey || e.metaKey)
         else {
           const p = this._parentOf(this._lastL)
           if (p) this._select(p)
         }
-      } break
+        break
       default: return
     }
     e.preventDefault()
