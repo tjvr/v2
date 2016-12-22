@@ -1936,7 +1936,7 @@ class DynamicTreeItem extends View {
     this.items = null
     this.tree = null
     this.isExpanded = false
-    this._content = null
+    this.content = null
     this._childRemoved = this._childRemoved.bind(this)
     this._childInserted = this._childInserted.bind(this)
     this._needsReload = false
@@ -1952,7 +1952,7 @@ class DynamicTreeItem extends View {
   get model() {return this._model}
   set model(value) {
     if (this._model === value) return
-    if (this._content) {
+    if (this.content) {
       while (this._label.childNodes.length > 1) {
         this._label.removeChild(this._label.lastChild)
       }
@@ -1967,7 +1967,7 @@ class DynamicTreeItem extends View {
       value.on('child removed', this._childRemoved)
       if (this._label) {
         h.pushView(this)
-        h.add(this._label, this._content = this.tree.template(value.data))
+        h.add(this._label, this.content = this.tree.template(value.data))
         h.popView()
         this._updateEmpty()
       }
