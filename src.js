@@ -2049,6 +2049,11 @@ class DynamicTreeItem extends View {
     }
   }
 
+  *[Symbol.iterator]() {
+    yield this
+    if (this.items) for (const i of this.items) yield* i
+  }
+
   _reload(suppress) {
     if (this.items) for (const i of this.items) i.remove()
     this.items = null
