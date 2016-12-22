@@ -2628,9 +2628,10 @@ class Collection extends View {
     this.Item = this.constructor.Item
     this._reflow = this._reflow.bind(this)
     this._changed = this._changed.bind(this)
+    this.keyBindings = Collection.keyBindings
   }
   build() {
-    return h('.v2-view.v2-collection', {tabIndex: 0, onscroll: '_scroll', onmousedown: '_mouseDown', onkeydown: '_keyDown', ondblclick: '_dblclick'},
+    return h('.v2-view.v2-collection', {tabIndex: 0, onscroll: '_scroll', onmousedown: '_mouseDown', ondblclick: '_dblclick'},
       this._overflow = h('.v2-collection-overflow'))
   }
   menu() {}
@@ -2708,22 +2709,6 @@ class Collection extends View {
     }
     this._selection = new Set(selection)
     this._reflow()
-  }
-
-  _keyDown(e) {
-    if (e.key === 'ArrowLeft') {
-      this.selectLeft()
-    } else if (e.key === 'ArrowRight') {
-      this.selectRight()
-    } else if (e.key === 'ArrowUp') {
-      this.selectUp()
-    } else if (e.key === 'ArrowDown') {
-      this.selectDown()
-    } else {
-      return
-    }
-    e.preventDefault()
-    e.stopPropagation()
   }
   _mouseDown(e) {
     const item = h.nearest('.v2-collection-item', e.target)
@@ -2919,6 +2904,12 @@ class Collection extends View {
     return unused
   }
 }
+Collection.keyBindings = [
+  {key: 'ArrowLeft', command: 'selectLeft'},
+  {key: 'ArrowRight', command: 'selectRight'},
+  {key: 'ArrowUp', command: 'selectUp'},
+  {key: 'ArrowDown', command: 'selectDown'},
+]
 Collection.Item = class Item extends View {
   init() {
     this.index = null
