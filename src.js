@@ -3038,16 +3038,18 @@ class Menu extends View {
     if (app) app.hideMenus()
     else this.hide()
 
-    const t = v.target
-    const a = v.action
-    if (typeof a === 'function') a(e)
-    else if (typeof t === 'function') t(a, e)
-    else if (t && a && typeof t[a] === 'function') t[a](e)
+    setTimeout(() => {
+      const t = v.target
+      const a = v.action
+      if (typeof a === 'function') a(e)
+      else if (typeof t === 'function') t(a, e)
+      else if (t && a && typeof t[a] === 'function') t[a](e)
 
-    const obj = {target: this, item: v}
-    for (let m = this; m; m = m.ownerItem && m.ownerItem.parent) {
-      m.emit('activate', obj)
-    }
+      const obj = {target: this, item: v}
+      for (let m = this; m; m = m.ownerItem && m.ownerItem.parent) {
+        m.emit('activate', obj)
+      }
+    })
   }
   _mouseSelect(e) {
     const t = h.nearest('.v2-menu-item', e.target)
