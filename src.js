@@ -35,7 +35,7 @@ Object.assign(h, {
       if (el.matches(sel)) return el
     }
   },
-  nextDescendentMatching(sel, el, stop) {
+  nextDescendantMatching(sel, el, stop) {
     if (el === stop) return
     for (; el; el = h.next(el, stop)) {
       if (el.nodeType === 1 && el.matches(sel)) return el
@@ -46,7 +46,7 @@ Object.assign(h, {
       if (el.matches(sel)) return el
     }
   },
-  previousDescendentMatching(sel, el, stop) {
+  previousDescendantMatching(sel, el, stop) {
     for (; el && el !== stop; el = h.previous(el, stop)) {
       if (el.nodeType === 1 && el.matches(sel)) return el
     }
@@ -57,8 +57,8 @@ Object.assign(h, {
       if (x.nextSibling) return x.nextSibling
     }
   },
-  previous(x, stop) {return x === stop ? null : x.previousSibling ? h.lastDescendent(x.previousSibling, stop) : x.parentNode},
-  lastDescendent(x, stop) {
+  previous(x, stop) {return x === stop ? null : x.previousSibling ? h.lastDescendant(x.previousSibling, stop) : x.parentNode},
+  lastDescendant(x, stop) {
     for (; x && x !== stop; x = x.lastChild) {
       if (!x.lastChild) return x
     }
@@ -84,7 +84,7 @@ Object.assign(h, {
     }
   },
   lastFocusable(root) {
-    for (let t = h.lastDescendent(root); t; t = h.previous(t, root)) {
+    for (let t = h.lastDescendant(root); t; t = h.previous(t, root)) {
       if (t.nodeType === 1 && h.isFocusable(t)) return t
     }
   },
@@ -3112,20 +3112,20 @@ class Menu extends View {
 
   selectNext() {
     if (!this.selectedItem) return this.selectFirst()
-    const el = h.nextDescendentMatching('.v2-menu-item:not(.v2-menu-item--disabled)', h.nextSkippingChildren(this.selectedItem.el, this.el), this.el)
+    const el = h.nextDescendantMatching('.v2-menu-item:not(.v2-menu-item--disabled)', h.nextSkippingChildren(this.selectedItem.el, this.el), this.el)
     if (el) this.selectItem(el.view)
   }
   selectPrevious() {
     if (!this.selectedItem) return this.selectLast()
-    const el = h.previousDescendentMatching('.v2-menu-item:not(.v2-menu-item--disabled)', h.previous(this.selectedItem.el), this.el)
+    const el = h.previousDescendantMatching('.v2-menu-item:not(.v2-menu-item--disabled)', h.previous(this.selectedItem.el), this.el)
     if (el) this.selectItem(el.view)
   }
   selectFirst() {
-    const el = h.nextDescendentMatching('.v2-menu-item:not(.v2-menu-item--disabled)', this.el.firstElementChild, this.el)
+    const el = h.nextDescendantMatching('.v2-menu-item:not(.v2-menu-item--disabled)', this.el.firstElementChild, this.el)
     if (el) this.selectItem(el.view)
   }
   selectLast() {
-    const el = h.previousDescendentMatching('.v2-menu-item:not(.v2-menu-item--disabled)', h.lastDescendent(this.el), this.el)
+    const el = h.previousDescendantMatching('.v2-menu-item:not(.v2-menu-item--disabled)', h.lastDescendant(this.el), this.el)
     if (el) this.selectItem(el.view)
   }
 
