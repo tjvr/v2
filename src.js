@@ -997,8 +997,8 @@ v2.emitter = function emitter(o) {
       return this
     }},
     once: {value: function once(e, fn) {
-      const bound = () => {
-        fn()
+      const bound = x => {
+        fn(x)
         this.unlisten(e, bound)
       }
       this.on(e, bound)
