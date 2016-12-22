@@ -1249,6 +1249,14 @@ class View {
     h.popView()
     return result
   }
+  hasContext(c) {
+    return c.startsWith('!') ? !this._hasContext(c.slice(1)) : this._hasContext(c)
+  }
+  _hasContext(c) {
+    return c.startsWith('rt-') ? v2.rt.type === c.slice(3) :
+      c === 'pf-apple' ? v2.rt.isApple :
+      c.startsWith('pf-') ? v2.rt.platform === c.slice(3) : false
+  }
 
   set(p) {
     Object.assign(this, p)
@@ -1328,6 +1336,7 @@ class App extends View {
     this._cursorEl = h('.v2-app-cursor')
     this._contextMenu = this._contextMenu.bind(this)
     this._appMouseDown = this._appMouseDown.bind(this)
+    this._appKeyDown = this._appKeyDown.bind(this)
   }
   build() {
     return h('.v2-view.v2-app')
@@ -1337,18 +1346,37 @@ class App extends View {
   _onActivate() {
     document.addEventListener('contextmenu', this._contextMenu)
     document.addEventListener('mousedown', this._appMouseDown, true)
-    document.addEventListener('keydown', this._appKeyDown, true)
+    document.addEventListener('keydown', this._appKeyDown)
   }
   _onDeactivate() {
     document.removeEventListener('contextmenu', this._contextMenu)
     document.removeEventListener('mousedown', this._appMouseDown, true)
-    document.removeEventListener('keydown', this._appKeyDown, true)
+    document.removeEventListener('keydown', this._appKeyDown)
   }
   _contextMenu(e) {
     if (e.target.localName !== 'textarea' && (e.target.localName !== 'input' || !['text', 'search', 'tel', 'url', 'email', 'password', 'date', 'month', 'week', 'time', 'datetime-local', 'number'])) e.preventDefault()
   }
   _appKeyDown(e) {
-    if (v2.rt.isMac && v2.rt.isChrome && e.key === 'f' && e.metaKey && e.ctrlKey && !e.shiftKey && !e.altKey) {
+    let t = e.target
+    if (t === document.body) t = this.el
+    const key = v2.keyWithModifiers(e)
+    const override = h.acceptsKeyboardInput(t, e)
+    const cmd = key.includes('#')
+    for (; t; t = t.parentElement) {
+      const v = t.view
+      if (!v || !v.keyBindings) continue
+      for (const b of v.keyBindings) {
+        if (b.key !== key ||
+          override && (cmd ? b.override === false : !b.override) ||
+          b.context && (
+            typeof b.context === 'string' ? !v.hasContext(b.context) :
+            b.context.some(c => !v.hasContext(c)))) continue
+        v[b.command](...(b.args || []))
+        e.preventDefault()
+        return
+      }
+    }
+    if (v2.rt.isMac && v2.rt.isChrome && key === '`#f') {
       const win = chrome.app.window.current()
       if (win.isFullscreen()) win.restore()
       else win.fullscreen()
@@ -2268,6 +2296,7 @@ class Tree extends View {
       default: return
     }
     e.preventDefault()
+    e.stopPropagation()
   }
 
   _select(l) {
@@ -3090,8 +3119,11 @@ class Menu extends View {
       // case 'o':
         if (this._selectedItem) this._activateItem(this._selectedItem, e)
         break
+      default:
+        if (!h.constrainTab(e, this.el)) return
     }
-    h.constrainTab(e, this.el)
+    e.preventDefault()
+    e.stopPropagation()
   }
 
   _selectByTitle() {
