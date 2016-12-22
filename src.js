@@ -3085,33 +3085,40 @@ class Menu extends View {
         break
       case 'ArrowLeft':
       // case 'h':
-        if (this.ownerItem) {
-          if (this.ownerItem.parent instanceof MenuBar) {
-            this.ownerItem.parent.selectPrevious()
-          } else {
-            this.hide()
-          }
-        }
+        if (this.ownerItem) this.selectOut()
         break
       case 'ArrowRight':
       // case 'l':
-        if (this._selectedItem && this._selectedItem.menu) {
-          this.openMenu = this._selectedItem.menu
-          this._showMenu(this._selectedItem, true)
-          this._selectedItem.menu.selectFirst()
-        } else if (this.ownerItem && this.ownerItem.parent instanceof MenuBar) {
-          this.ownerItem.parent.selectNext()
-        }
+        this.selectIn()
         break
       case 'Enter':
       // case 'o':
-        if (this._selectedItem) this._activateItem(this._selectedItem, e)
+        this.activateSelection()
         break
       default:
         if (!h.constrainTab(e, this.el)) return
     }
     e.preventDefault()
     e.stopPropagation()
+  }
+  selectOut() {
+    if (this.ownerItem.parent instanceof MenuBar) {
+      this.ownerItem.parent.selectPrevious()
+    } else {
+      this.hide()
+    }
+  }
+  selectIn() {
+    if (this._selectedItem && this._selectedItem.menu) {
+      this.openMenu = this._selectedItem.menu
+      this._showMenu(this._selectedItem, true)
+      this._selectedItem.menu.selectFirst()
+    } else if (this.ownerItem && this.ownerItem.parent instanceof MenuBar) {
+      this.ownerItem.parent.selectNext()
+    }
+  }
+  activateSelection() {
+    if (this._selectedItem) this._activateItem(this._selectedItem, e)
   }
 
   _selectByTitle() {
