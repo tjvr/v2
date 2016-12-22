@@ -1370,16 +1370,17 @@ class App extends View {
     if (e.target.localName !== 'textarea' && (e.target.localName !== 'input' || !['text', 'search', 'tel', 'url', 'email', 'password', 'date', 'month', 'week', 'time', 'datetime-local', 'number'])) e.preventDefault()
   }
   _appKeyDown(e) {
-    let t = e.target
-    if (t === document.body) t = this.el
+    const t = e.target
+    const isGlobal = t === document.body
     const key = v2.keyWithModifiers(e)
     const override = h.acceptsKeyboardInput(t, e)
     const cmd = key.includes('#')
-    for (; t; t = t.parentElement) {
-      const v = t.view
-      if (!v || !v.keyBindings) continue
+    const tv = h.ownerView(t)
+    for (const v of isGlobal ? this.descendants() : tv.ancestors()) {
+      if (!v.keyBindings) continue
       for (const b of v.keyBindings) {
         if (b.key !== key ||
+          isGlobal && !(b.global || v === this) ||
           override && (cmd ? b.override === false : !b.override) ||
           b.context && (
             typeof b.context === 'string' ? !v.hasContext(b.context) :
