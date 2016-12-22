@@ -25,6 +25,10 @@ Object.assign(h, {
   },
   popView(v) {h._view = h._views.pop()},
 
+  ownerView(v) {
+    for (; v; v = v.parentElement) if (v.view) return v.view
+  },
+
   nearest(sel, el, stop) {
     for (; el && el.nodeType === 1 && el !== stop; el = el.parentNode) {
       if (el.matches(sel)) return el
