@@ -3241,7 +3241,7 @@ class MenuBar extends Menu {
   }
   _showMenu(v) {
     const bb = v.el.getBoundingClientRect()
-    v.menu.show(this.app, bb.left, bb.bottom, 0, 0, false)
+    v.menu.show(this.app, bb.right, bb.bottom, -bb.width, 0, false)
   }
   _openMenuHidden() {
     super._openMenuHidden()
