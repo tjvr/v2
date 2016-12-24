@@ -107,6 +107,17 @@ Object.assign(h, {
   },
   // acceptsClick(x) {return h.isLink(x) || h.isFormElement(x)},
 
+  isFullscreen(d = document) {return !!h.fullscreenElement(d)},
+  fullscreenElement(d = document) {return d.webkitFullscreenElement || d.webkitFullScreenElement || d.mozFullscreenElement || d.mozFullScreenElement || d.msFullScreenElement || d.msFullscreenElement},
+  enterFullscreen(e) {
+    const fn = e.requestFullscreen || e.webkitRequestFullScreen || e.webkitRequestFullscreen || e.mozRequestFullScreen || e.mozRequestFullscreen || e.msRequestFullScreen || e.msRequestFullscreen
+    if (fn) fn.call(e, Element.ALLOW_KEYBOARD_INPUT)
+  },
+  exitFullscreen(d = document) {
+    const fn = d.exitFullscreen || d.webkitExitFullscreen || d.webkitCancelFullScreen || d.mozExitFullscreen || d.mozCancelFullScreen || d.msExitFullscreen || d.msCancelFullScreen
+    if (fn) fn.call(d)
+  },
+
   createElement(sel) {
     const parts = (sel || '').split(/([#.])/)
     const el = document.createElement(parts[0] || 'div')
