@@ -1408,7 +1408,7 @@ class App extends View {
     }
   }
   _appMouseDown(e) {
-    const m = h.nearest('.v2-menu:not(.v2-menu-bar)', e.target)
+    const m = h.nearest('.v2-menu', e.target)
     if (m) return
     else this.hideMenus()
   }
@@ -3061,9 +3061,10 @@ class Menu extends View {
 
   _click(e) {
     const el = h.nearest('.v2-menu-item', e.target)
-    if (el && !el.classList.contains('v2-menu-item--disabled')) this._activateItem(el.view)
+    this._activateItem(el && !el.classList.contains('v2-menu-item--disabled') && el.view)
   }
   _activateItem(v) {
+    if (!v) return
     const app = this.app
     if (app) app.hideMenus()
     else this.hide()
@@ -3232,6 +3233,7 @@ class MenuBar extends Menu {
     super._mouseSelect(e)
   }
   _activateItem(v) {
+    if (!v) return this.selectItem(null)
     if (v.menu) {
       this.selectItem(this.selectedItem === v ? null : v, true)
       return
