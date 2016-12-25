@@ -1,6 +1,40 @@
 !function(global) {
 'use strict'
 
+const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || Math.pow(2, 53) - 1
+function toLength(len) {
+  len = +len
+  return len != len || len <= 0 ? 0 : len > MAX_SAFE_INTEGER ? MAX_SAFE_INTEGER : len
+}
+if (!String.prototype.padStart) String.prototype.padStart = function padStart(max, fill = ' ') {
+  if (this == null) throw new TypeError('"this" value cannot be null or undefined')
+  const s = '' + this
+  max = toLength(max)
+  fill = '' + fill
+  const len = s.length
+  if (len >= max || !fill) return s
+  const toFill = max - len
+  let r, l
+  while ((r = toFill - (l = fill.length)) > 0) {
+    fill += r < l ? fill.slice(0, r) : fill
+  }
+  return fill.slice(0, toFill) + s
+}
+if (!String.prototype.padEnd) String.prototype.padEnd = function padEnd(max, fill = ' ') {
+  if (this == null) throw new TypeError('"this" value cannot be null or undefined')
+  const s = '' + this
+  max = toLength(max)
+  fill = '' + fill
+  const len = s.length
+  if (len >= max || !fill) return s
+  const toFill = max - len
+  let r, l
+  while ((r = toFill - (l = fill.length)) > 0) {
+    fill += r < l ? fill.slice(0, r) : fill
+  }
+  return s + fill.slice(0, toFill)
+}
+
 function h(sel, ...args) {
   const el = h.createElement(sel)
   h.add(el, args)
