@@ -3014,6 +3014,7 @@ Collection.Item = class Item extends View {
 class Menu extends View {
   init() {
     this.ownerItem = null
+    this._openMenuItem = null
     this._openMenu = null
     this._openMenuHidden = this._openMenuHidden.bind(this)
     this._selectedItem = null
@@ -3048,12 +3049,10 @@ class Menu extends View {
     if (focus) setTimeout(() => this.focus())
   }
   hide() {
+    if (!this.parent) return
     this.emit('hide', {target: this})
     this.remove()
-    if (this._openMenu) {
-      this._openMenu.hide()
-      this._openMenu = null
-    }
+    this.setOpenMenu(null)
   }
   get visible() {return !!this.parent}
 
@@ -3087,8 +3086,10 @@ class Menu extends View {
     if (t && !t.classList.contains('v2-menu-item--disabled')) this.selectItem(t.view, true)
   }
   _showMenu(v, focus = false) {
+    if (this._openMenuItem === v) return
     const bb = v.el.getBoundingClientRect()
-    v.menu.show(this.app, bb.left, bb.top, bb.width, 0, true, focus)
+    this.setOpenMenu(v.makeMenu(), v)
+    this._openMenu.show(this.app, bb.left, bb.top, bb.width, 0, true, focus)
   }
   focus() {this._input.focus()}
   _keyDown(e) {
@@ -3107,9 +3108,8 @@ class Menu extends View {
   }
   selectIn() {
     if (this._selectedItem && this._selectedItem.menu) {
-      this.openMenu = this._selectedItem.menu
       this._showMenu(this._selectedItem, true)
-      this._selectedItem.menu.selectFirst()
+      this._openMenu.selectFirst()
     } else if (this.ownerItem && this.ownerItem.parent instanceof MenuBar) {
       this.ownerItem.parent.selectNext()
     }
@@ -3154,33 +3154,32 @@ class Menu extends View {
   }
 
   get openMenu() {return this._openMenu}
-  set openMenu(value) {
+  setOpenMenu(value = null, item = null) {
     if (this._openMenu) {
       this._openMenu.unlisten('hide', this._openMenuHidden)
+      this._openMenu.hide()
     }
+    this._openMenuItem = item
     if (this._openMenu = value) {
       value.on('hide', this._openMenuHidden)
     }
   }
   _openMenuHidden() {
-    this.openMenu = null
+    this.setOpenMenu(null)
     this.focus()
   }
 
   get selectedItem() {return this._selectedItem}
   selectItem(view, showMenu) {
     if (this._selectedItem === view) return
-    if (this._openMenu && (!view || this._openMenu !== view.menu)) {
-      this._openMenu.unlisten('hide', this._openMenuHidden)
-      this._openMenu.hide()
-      this.focus()
+    if (this._openMenu && (!view || this._openMenuItem !== view)) {
+      this.setOpenMenu(null)
     }
     if (this._selectedItem) this._selectedItem.selected = false
     if (this._selectedItem = view) {
       view.selected = true
     }
     if ((showMenu || this instanceof MenuBar) && view && view.menu) {
-      this.openMenu = view.menu
       this._showMenu(view)
     }
     if (!this.el.contains(document.activeElement)) this.focus()
@@ -3229,7 +3228,7 @@ class MenuBar extends Menu {
   }
   focus() {this.el.focus()}
   _mouseSelect(e) {
-    if (!this._openMenu || !this._openMenu.visible) return
+    if (!this._openMenu) return
     super._mouseSelect(e)
   }
   _activateItem(v) {
@@ -3241,18 +3240,18 @@ class MenuBar extends Menu {
   }
   _showMenu(v) {
     const bb = v.el.getBoundingClientRect()
-    v.menu.show(this.app, bb.right, bb.bottom, -bb.width, 0, false)
+    this.setOpenMenu(v.makeMenu(), v)
+    this._openMenu.show(this.app, bb.right, bb.bottom, -bb.width, 0, false)
   }
   _openMenuHidden() {
     super._openMenuHidden()
-    setTimeout(() => this.selectItem(null))
+    this.selectItem(null)
   }
 }
 
 class MenuItem extends View {
   init() {
     this._menu = null
-    this._currentMenu = null
     this._target = null
     this._state = ''
     this._selected = false
@@ -3268,16 +3267,12 @@ class MenuItem extends View {
   get target() {return this._target || this.parent.target}
   set target(value) {this._target = value}
 
-  get menu() {
-    if (this._currentMenu) return this._currentMenu
+  makeMenu() {
     const m = typeof this._menu === 'function' ? this._menu() : this._menu
-    if (m) {
-      this._currentMenu = m
-      m.once('hide', () => this._currentMenu = null)
-      m.ownerItem = this
-    }
+    if (m) m.ownerItem = this
     return m
   }
+  get menu() {return this._menu}
   set menu(value) {
     this._menu = value
     this.el.classList.toggle('v2-menu-item--has-submenu', !!value)
