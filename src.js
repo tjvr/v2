@@ -3068,7 +3068,6 @@ class Menu extends View {
   }
 
   show(app, x, y, bw = 1, bh = 1, offset = true, focus = true) {
-    x = Math.round(x), y = Math.round(y), bw = Math.round(bw), bh = Math.round(bh)
     this.selectItem(null)
     app.addMenu(this)
     const bb = this.el.getBoundingClientRect()
@@ -3077,8 +3076,8 @@ class Menu extends View {
     x += bw, y += bh - pt
     if (x > innerWidth - w) x -= w + bw
     if (y > innerHeight - h) y -= h + bh - pt
-    x = Math.max(0, x)
-    y = Math.max(0, y)
+    x = Math.round(Math.max(0, x))
+    y = Math.round(Math.max(0, y))
     this.el.style.transform = `translate(${x}px, ${y}px)`
     if (focus) setTimeout(() => this.focus())
   }
