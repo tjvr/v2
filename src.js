@@ -3213,6 +3213,7 @@ class Menu extends View {
     if (this._selectedItem = view) {
       view.selected = true
     }
+    this.el.classList.toggle('v2-menu--has-selection', !!view)
     if ((showMenu || this instanceof MenuBar) && view && view.menu) {
       this._showMenu(view)
     }
