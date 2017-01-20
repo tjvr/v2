@@ -1931,12 +1931,20 @@ class CyNode extends Model {
     this.children = children || []
   }
 
+  clear() {
+    for (const c of this.children) c._removed()
+    let index = this.children.length
+    this.children.length = 0
+    while (index--) this.emit('child removed', {target: this, inde})
+  }
   add(node) {
+    node._moveTo(this)
     const index = this.children.length
     this.children.push(node)
     this.emit('child inserted', {target: this, node, index})
   }
   insert(node, index) {
+    node._moveTo(this)
     this.children.splice(index, 0, node)
     this.emit('child inserted', {target: this, node, index})
   }
@@ -1945,7 +1953,6 @@ class CyNode extends Model {
     if (!child) return
     this.children.splice(index, 1)
     child._removed()
-    // TODO set parent on acyclic nodes
     this.emit('child removed', {target: this, index})
   }
   _moveTo(parent) {}
@@ -1953,6 +1960,8 @@ class CyNode extends Model {
 
   get firstChild() {return this.children[0]}
   get lastChild() {return this.children[this.children.length - 1]}
+
+  [Symbol.iterator]() {return this.children[Symbol.iterator]()}
 }
 CyNode.properties('data')
 
@@ -1969,14 +1978,6 @@ class Node extends CyNode {
   }
   _removed() {
     this.parent = null
-  }
-  add(node) {
-    node._moveTo(this)
-    super.add(node)
-  }
-  insert(node, index) {
-    node._moveTo(this)
-    super.insert(node, index)
   }
   remove() {
     const parent = this.parent
