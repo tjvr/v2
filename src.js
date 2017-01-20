@@ -1935,7 +1935,7 @@ class CyNode extends Model {
     for (const c of this.children) c._removed()
     let index = this.children.length
     this.children.length = 0
-    while (index--) this.emit('child removed', {target: this, inde})
+    while (index--) this.emit('child removed', {target: this, index})
   }
   add(node) {
     node._moveTo(this)
