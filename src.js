@@ -1412,7 +1412,7 @@ class App extends View {
     document.removeEventListener('keydown', this._appKeyDown)
   }
   _contextMenu(e) {
-    if (e.target.localName !== 'textarea' && (e.target.localName !== 'input' || !['text', 'search', 'tel', 'url', 'email', 'password', 'date', 'month', 'week', 'time', 'datetime-local', 'number'])) e.preventDefault()
+    if (e.target.localName !== 'textarea' && (e.target.localName !== 'input' || !['text', 'search', 'tel', 'url', 'email', 'password', 'date', 'month', 'week', 'time', 'datetime-local', 'number']) && getComputedStyle(e.target).WebkitUserSelect !== 'text') e.preventDefault()
   }
   _appKeyDown(e) {
     const t = e.target
