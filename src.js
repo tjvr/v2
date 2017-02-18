@@ -3331,7 +3331,7 @@ Table.Row = class Row extends View {
     this._columns = value
     h.removeChildren(this.el)
     h.add(this.el, this._cells = value.map(c =>
-      h('.v2-table-cell', {style: {width: `${c.width}px`}}, c.attrs || {})))
+      h('.v2-table-cell' + (c.cellClass ? '.'+c.cellClass : ''), {style: {width: `${c.width}px`}})))
     if (this._model) this._update()
   }
 
