@@ -1122,7 +1122,7 @@ v2.emitter = function emitter(o) {
     on: {value: function on(e, fn) {
       const m = this._listeners || (this._listeners = new Map)
       const l = m.get(e)
-      if (l) l.push(fn)
+      if (l) !l.includes(fn) && l.push(fn)
       else m.set(e, [fn])
       return this
     }},
