@@ -888,7 +888,7 @@ v2.iter = function() {
         }
       }
     } else {
-        // yield* dropLast(-end, takeLast(-start, xs))
+      // yield* dropLast(-end, takeLast(-start, xs))
       const list = []
       let n = -start
       let i = 0
