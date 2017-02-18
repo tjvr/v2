@@ -3353,7 +3353,7 @@ class Table extends ListBackedView {
 
   _reflow() {
     if (!this._model) {
-      this._unused.push(...this._cache)
+      this._unused.push(...this._cache.values())
       this._cache.clear()
       for (const unused of this._unused) unused.visible = false
       this._overflow.style.height = 0
