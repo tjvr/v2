@@ -1379,10 +1379,10 @@ class View {
     if (!p) p = {}
     h.pushView(this)
     this.el = this.build(p)
-    h.popView()
     if (!this.container) this.container = this.el
     this.el.view = this
     this.init()
+    h.popView()
     Object.assign(this, p)
   }
   init() {}
