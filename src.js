@@ -3259,7 +3259,7 @@ class Table extends ListBackedView {
     for (const v of this._unused) v.columns = this._usedColumns
     h.removeChildren(this._header)
     h.add(this._header, this._usedColumns.map(c =>
-      h('.v2-table-header-cell', c.name, {style: {width: `${c.width}px`}, title: c.title || c.name})))
+      h('.v2-table-header-cell', c.displayName == null ? c.name : c.displayName, {style: {width: `${c.width}px`}, title: c.name})))
     this._reflow()
   }
 
