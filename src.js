@@ -741,16 +741,6 @@ v2.iter = function() {
     }
     if (list.length) yield list
   })
-  function first(xs) {
-    if (Array.isArray(xs)) return xs[0]
-    for (const x of xs) return x
-  }
-  function last(xs) {
-    if (Array.isArray(xs)) return xs[xs.length - 1]
-    let z
-    for (const x of xs) z = x
-    return z
-  }
   const drop = G(function*(n, xs) {for (const x of xs) if (n <= 0) yield x; else --n})
   const dropWhile = G(function*(xs, fn) {let init = true; for (const x of xs) if (!init || !fn(x)) {init = false; yield x}})
   const dropLast = G(function*(n, xs) {
@@ -797,8 +787,17 @@ v2.iter = function() {
   function reduce(a, fn, xs) {for (const x of xs) a = fn(a, x); return a}
   function inject(a, fn, xs) {for (const x of xs) fn(a, x); return a}
 
-  function head(xs) {for (const x of xs) return x}
-  function last(xs) {if (Array.isArray(xs)) return xs[xs.length - 1]; let l; for (const x of xs) l = x; return l}
+  function first(xs) {
+    if (Array.isArray(xs)) return xs[0]
+    for (const x of xs) return x
+  }
+  const head = first
+  function last(xs) {
+    if (Array.isArray(xs)) return xs[xs.length - 1]
+    let z
+    for (const x of xs) z = x
+    return z
+  }
   function tail(xs) {return drop(1, xs)}
   function init(xs) {return dropLast(1, xs)}
 
@@ -926,7 +925,8 @@ v2.iter = function() {
     reduce(x, fn) {return reduce(x, fn, this.inner)}
     inject(x, fn) {return inject(x, fn, this.inner)}
 
-    head() {return head(this.inner)}
+    first() {return first(this.inner)}
+    head() {return first(this.inner)}
     last() {return last(this.inner)}
     tail() {return tail(this.inner)}
     init() {return init(this.inner)}
@@ -984,7 +984,7 @@ v2.iter = function() {
     take, takeWhile, takeLast,
     zip,
     every, some, find, findIndex, findLastIndex, indexOf, lastIndexOf, includes, reduce, inject,
-    head, last, tail, init,
+    first, head, last, tail, init,
     count, pick,
     sum, product, max, min,
     groupBy, unique,
