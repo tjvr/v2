@@ -3179,6 +3179,7 @@ class Table extends ListBackedView {
   // TODO headers
   init() {
     super.init()
+    this._resize = null
     this._scrollX = 0
     this._itemSelector = '.v2-table-row'
     this._rowHeight = 24
@@ -3186,6 +3187,8 @@ class Table extends ListBackedView {
     this._columns = []
     this._usedColumns = []
     this.Row = this.constructor.Row
+    this._resizeMove = this._resizeMove.bind(this)
+    this._resizeUp = this._resizeUp.bind(this)
   }
   build() {
     return h('.v2-view.v2-table', {tabIndex: 0, onmousedown: '_mouseDown', ondblclick: '_dblclick'},
@@ -3211,9 +3214,38 @@ class Table extends ListBackedView {
       if (e.button === 2) {
         this.makeColumnMenu().show(this.app, e.clientX, e.clientY)
       }
+      const r = h.nearest('.v2-table-header-cell-resizer', e.target)
+      if (r) {
+        e.preventDefault()
+        const index = +r.dataset.index
+        const column = this.definitions[this._columns[index]]
+        this._resize = {
+          index,
+          column,
+          offset: column.width - e.clientX,
+        }
+        document.addEventListener('mousemove', this._resizeMove, true)
+        document.addEventListener('mouseup', this._resizeUp, true)
+        return
+      }
       return
     }
     super._mouseDown(e)
+  }
+  _resizeMove(e) {
+    const i = this._resize.index
+    const w = Math.max(1, e.clientX + this._resize.offset)
+    this._resize.column.width = w
+    for (const v of this._cache.values()) v.updateColumnWidth(i, w)
+    for (const v of this._unused) v.updateColumnWidth(i, w)
+    this._headerCells[i].style.width = `${w}px`
+    e.preventDefault()
+  }
+  _resizeUp(e) {
+    this._resizeMove(e)
+    document.removeEventListener('mousemove', this._resizeMove, true)
+    document.removeEventListener('mouseup', this._resizeUp, true)
+    e.preventDefault()
   }
   makeColumnMenu() {
     return new Menu({target: this.toggleColumn.bind(this), spec:
@@ -3259,8 +3291,11 @@ class Table extends ListBackedView {
     for (const v of this._cache.values()) v.columns = this._usedColumns
     for (const v of this._unused) v.columns = this._usedColumns
     h.removeChildren(this._header)
-    h.add(this._header, this._usedColumns.map(c =>
-      h('.v2-table-header-cell', c.displayName == null ? c.name : c.displayName, {style: {width: `${c.width}px`}, title: c.name})))
+    this._headerCells = []
+    h.add(this._header, this._usedColumns.map((c, i) => [
+      this._headerCells[i] = h('.v2-table-header-cell', c.displayName == null ? c.name : c.displayName, {style: {width: `${c.width}px`}, title: c.name}),
+      h('.v2-table-header-cell-resizer', {dataset: {index: i}}),
+    ]))
     this._reflow()
   }
 
@@ -3335,6 +3370,7 @@ Table.Row = class Row extends View {
       h('.v2-table-cell' + (c.cellClass ? '.'+c.cellClass : ''), {style: {width: `${c.width}px`}})))
     if (this._model) this._update()
   }
+  updateColumnWidth(i, w) {this._cells[i].style.width = `${w}px`}
 
   get selected() {return this._selected}
   set selected(value) {

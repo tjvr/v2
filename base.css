@@ -114,12 +114,22 @@ body {
   color: rgba(0,0,0,.6);
   text-overflow: ellipsis;
   overflow: hidden;
+  position: relative;
 }
 .v2-table-header-cell:hover {
   background: rgba(0,0,0,.05);
 }
 .v2-table-header-cell:active {
   background: rgba(0,0,0,.1);
+}
+.v2-table-header-cell-resizer {
+  display: inline-block;
+  width: 6px;
+  height: 100%;
+  margin: 0 -3px;
+  cursor: col-resize;
+  position: relative;
+  z-index: 1;
 }
 .v2-table-contents {
   position: absolute;
