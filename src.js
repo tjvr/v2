@@ -2943,7 +2943,7 @@ class ListBackedView extends View {
   }
 
   resize() {
-    this._bb = this.el.getBoundingClientRect()
+    this._bb = this.container.getBoundingClientRect()
     this._scroll()
   }
   _scroll() {
@@ -3239,8 +3239,8 @@ class Table extends ListBackedView {
     const y0 = i * this._rowHeight
     const y1 = y0 + this._rowHeight
     const y = this._scrollY, yh = y + this._bb.height
-    if (y0 < y) this.el.scrollTop += y0 - y
-    else if (y1 >= yh) this.el.scrollTop += y1 - yh
+    if (y0 < y) this.container.scrollTop += y0 - y
+    else if (y1 >= yh) this.container.scrollTop += y1 - yh
   }
 
   get rowHeight() {return this._rowHeight}
