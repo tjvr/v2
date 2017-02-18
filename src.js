@@ -1408,6 +1408,9 @@ class View {
     Object.assign(this, p)
     return this
   }
+  doCommand(name, args) {
+    this[name](...(args || []))
+  }
 
   mount(mp, before) {
     if (before) mp.insertBefore(this.el, before)
@@ -1518,7 +1521,7 @@ class App extends View {
           b.context && (
             typeof b.context === 'string' ? !v.hasContext(b.context) :
             b.context.some(c => !v.hasContext(c)))) continue
-        v[b.command](...(b.args || []))
+        v.doCommand(b.command, b.args)
         e.preventDefault()
         return
       }
