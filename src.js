@@ -2514,7 +2514,7 @@ class Tree extends View {
   _reuse(l) {
     if (l.isEditing) {
       if (!this._editItem) {
-        this._editItem = new Tree._EditItem({tree: this, model: l})
+        this._editItem = new this.constructor.EditItem({tree: this, model: l})
         this.add(this._editItem)
       } else {
         this._editItem.model = l
@@ -2527,7 +2527,7 @@ class Tree extends View {
     if (item) {
       this._cache.delete(item.model)
     } else {
-      item = new Tree._Item({tree: this, model: l})
+      item = new this.constructor.Item({tree: this, model: l})
       this.add(item)
     }
     item.model = l
@@ -2700,7 +2700,7 @@ Tree._L = class _L {
     if (this.isExpanded) for (const c of this.children) c._collectSubtree(a)
   }
 }
-Tree._Item = class _Item extends View {
+Tree.Item = class Item extends View {
   get model() {return this._model}
   set model(value) {
     if (this._model === value) return
@@ -2752,7 +2752,7 @@ Tree._Item = class _Item extends View {
   get text() {return this._text}
   set text(value) {this._labelEl.textContent = this._text = value}
 }
-Tree._EditItem = class _EditItem extends Tree._Item {
+Tree.EditItem = class EditItem extends Tree.Item {
   build() {
     return h('.v2-tree-item.v2-tree-item--editing',
       h('.v2-tree-item-disclosure'),
