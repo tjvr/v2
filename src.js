@@ -3189,6 +3189,8 @@ class Table extends ListBackedView {
     this.Row = this.constructor.Row
     this._resizeMove = this._resizeMove.bind(this)
     this._resizeUp = this._resizeUp.bind(this)
+    this._dragMove = this._dragMove.bind(this)
+    this._dragUp = this._dragUp.bind(this)
   }
   build() {
     return h('.v2-view.v2-table', {tabIndex: 0, onmousedown: '_mouseDown', ondblclick: '_dblclick'},
@@ -3219,14 +3221,19 @@ class Table extends ListBackedView {
         e.preventDefault()
         const index = +r.dataset.index
         const column = this.definitions[this._columns[index]]
-        this._resize = {
-          index,
-          column,
-          offset: column.width - e.clientX,
-        }
+        this._resize = {index, column, offset: column.width - e.clientX}
         document.addEventListener('mousemove', this._resizeMove, true)
         document.addEventListener('mouseup', this._resizeUp, true)
         return
+      }
+      const c = h.nearest('.v2-table-header-cell', e.target)
+      if (c) {
+        e.preventDefault()
+        const index = +c.dataset.index
+        const column = this.definitions[this._columns[index]]
+        this._resize = {index, column, offset: -e.clientX}
+        document.addEventListener('mousemove', this._dragMove, true)
+        document.addEventListener('mouseup', this._dragUp, true)
       }
       return
     }
@@ -3240,16 +3247,37 @@ class Table extends ListBackedView {
     this.emit('user data change', {target: this})
     e.preventDefault()
   }
+  _resizeUp(e) {
+    this._resizeMove(e)
+    this._resize = null
+    document.removeEventListener('mousemove', this._resizeMove, true)
+    document.removeEventListener('mouseup', this._resizeUp, true)
+    e.preventDefault()
+  }
+  _dragMove(e) {
+    const c = this._headerCells[this._resize.index]
+    c.style.transform = `translate(${e.clientX + this._resize.offset}px,0)`
+    e.preventDefault()
+  }
+  _dragUp(e) {
+    const i = this._resize.index
+    this._headerCells[i].style.transform = ''
+    const x = this._columns.slice(0, i)
+      .reduce((a, c) => a + this.definitions[c].width, 0) +
+      e.clientX + this._resize.offset
+    let z = 0, j = 0, w
+    while (j < this._columns.length && x >= z + (w = this.definitions[this._columns[j]].width) / 2) z += w, ++j
+    this._columns.splice(j, 0, ...this._columns.splice(i, 1))
+    this.columns = this._columns
+    this._resize = null
+    document.removeEventListener('mousemove', this._dragMove, true)
+    document.removeEventListener('mouseup', this._dragUp, true)
+    e.preventDefault()
+  }
   setColumnWidth(i, w) {
     for (const v of this._cache.values()) v.updateColumnWidth(i, w)
     for (const v of this._unused) v.updateColumnWidth(i, w)
     this._headerCells[i].style.width = `${w}px`
-  }
-  _resizeUp(e) {
-    this._resizeMove(e)
-    document.removeEventListener('mousemove', this._resizeMove, true)
-    document.removeEventListener('mouseup', this._resizeUp, true)
-    e.preventDefault()
   }
   makeColumnMenu() {
     return new Menu({target: this.toggleColumn.bind(this), spec:
@@ -3297,7 +3325,7 @@ class Table extends ListBackedView {
     h.removeChildren(this._header)
     this._headerCells = []
     h.add(this._header, this._usedColumns.map((c, i) => [
-      this._headerCells[i] = h('.v2-table-header-cell', c.displayName == null ? c.name : c.displayName, {style: {width: `${c.width}px`}, title: c.name}),
+      this._headerCells[i] = h('.v2-table-header-cell', c.displayName == null ? c.name : c.displayName, {style: {width: `${c.width}px`}, title: c.name, dataset: {index: i}}),
       h('.v2-table-header-cell-resizer', {dataset: {index: i}}),
     ]))
     if (this.isLive) this._reflow()
