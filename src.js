@@ -1215,6 +1215,7 @@ class Model {
     return this.prototype.dataProperties = (this.prototype.dataProperties || []).slice()
   }
 }
+Model.prototype.dataProperties = []
 v2.emitter(Model.prototype)
 
 v2.bind = function bind(a, aPath, b, bPath) {
