@@ -3236,10 +3236,14 @@ class Table extends ListBackedView {
     const i = this._resize.index
     const w = Math.max(1, e.clientX + this._resize.offset)
     this._resize.column.width = w
+    this.setColumnWidth(i, w)
+    this.emit('user data change', {target: this})
+    e.preventDefault()
+  }
+  setColumnWidth(i, w) {
     for (const v of this._cache.values()) v.updateColumnWidth(i, w)
     for (const v of this._unused) v.updateColumnWidth(i, w)
     this._headerCells[i].style.width = `${w}px`
-    e.preventDefault()
   }
   _resizeUp(e) {
     this._resizeMove(e)
@@ -3296,7 +3300,21 @@ class Table extends ListBackedView {
       this._headerCells[i] = h('.v2-table-header-cell', c.displayName == null ? c.name : c.displayName, {style: {width: `${c.width}px`}, title: c.name}),
       h('.v2-table-header-cell-resizer', {dataset: {index: i}}),
     ]))
-    this._reflow()
+    if (this.isLive) this._reflow()
+    this.emit('user data change', {target: this})
+  }
+  get columnUserData() {
+    return {
+      sizes: v2.iter.entries(this.definitions).map(([k, o]) => [k, o.width]).toObject(),
+      visible: this._columns,
+    }
+  }
+  set columnUserData(data) {
+    if (!data) return
+    if (data.sizes) for (const [k, w] of v2.iter.entries(data.sizes)) {
+      this.definitions[k].width = w
+    }
+    if (data.visible) this.columns = data.visible
   }
 
   _reflow() {
