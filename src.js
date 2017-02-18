@@ -2768,56 +2768,21 @@ Tree.EditItem = class EditItem extends Tree.Item {
   set text(value) {this._labelEl.value = this._text = value}
 }
 
-class Collection extends View {
+class ListBackedView extends View {
   // TODO support collections containing multiple identical items
   init() {
-    this._tileWidth = 200
-    this._tileHeight = 275
-    this._justifyTiles = true
-    this.itemsPerLine = 1
     this._cache = new Map
     this._unused = []
     this._bb = null
     this._model = null
     this._scrollY = 0
     this._selection = new Set
-    this.Item = this.constructor.Item
     this._reflow = this._reflow.bind(this)
     this._changed = this._changed.bind(this)
-    this.keyBindings = Collection.keyBindings
-  }
-  build() {
-    return h('.v2-view.v2-collection', {tabIndex: 0, onscroll: '_scroll', onmousedown: '_mouseDown', ondblclick: '_dblclick'},
-      this._overflow = h('.v2-collection-overflow'))
+    this.keyBindings = this.constructor.keyBindings
   }
   menu() {}
   dblclick() {}
-
-  showMenu(items, x, y) {
-    if (!items) items = this.selectedItems
-    if (!Array.isArray(items)) items = [items]
-    const m = this.menu && this.menu(items)
-    if (!m) return
-    const done = m => {
-      if (x == null) {
-        for (const item of this._cache.values()) {
-          if (item.selected) {
-            const bb = item.el.getBoundingClientRect()
-            x = bb.left + bb.width/2
-            y = bb.top + bb.height/2
-            break
-          }
-        }
-        if (x == null) {
-          x = this._bb.left
-          y = this._bb.top
-        }
-      }
-      m.show(this.app, x, y)
-    }
-    if (m.then) return m.then(done)
-    else done(m)
-  }
 
   get model() {return this._model}
   set model(value) {
@@ -2866,8 +2831,9 @@ class Collection extends View {
     this._selection = new Set(selection)
     this._reflow()
   }
+
   _mouseDown(e) {
-    const item = h.nearest('.v2-collection-item', e.target)
+    const item = h.nearest(this._itemSelector, e.target)
     const i = item && item.view.index
     if (item) {
       if (e.metaKey || e.ctrlKey) {
@@ -2893,8 +2859,141 @@ class Collection extends View {
     if (e.metaKey || e.ctrlKey || e.shiftKey) return
     this.dblclick(this.selectedItems)
   }
-
   focus() {this.el.focus()}
+
+  selectPrevious(add) {
+    let i = v2.iter.last(this._selection)
+    if (i == null || i === 0) return this.selectFirst()
+    while (!this._model.get(--i)) if (i <= 0) return
+    this.select(i, add)
+    this.scrollToIndexIfNecessary(i)
+  }
+  selectNext(add) {
+    let i = v2.iter.last(this._selection)
+    const last = this.model.length - 1
+    if (i == null || i >= last) return this.selectFirst()
+    while (!this._model.get(++i)) if (i >= last) return
+    this.select(i, add)
+    this.scrollToIndexIfNecessary(i)
+  }
+  selectFirst(add) {
+    let j = 0
+    for (; !this._model.get(j); ++j) {
+      if (j >= this._model.length) return
+    }
+    this.select(j, add)
+    this.scrollToIndexIfNecessary(j)
+    return this
+  }
+  selectLast(add) {
+    let j = this.model.length - 1
+    for (; !this._model.get(j); --j) {
+      if (j <= 0) return
+    }
+    this.select(j, add)
+    this.scrollToIndexIfNecessary(j)
+    return this
+  }
+  selectAll() {
+    if (this.model.length) this.selectRange(0, this.model.length - 1)
+  }
+  toggleSelect(i) {
+    if (this._selection.has(i)) {
+      this.deselect(i)
+    } else {
+      this.select(i, true)
+    }
+    return this
+  }
+  deselect(i) {
+    this._selection.delete(i)
+    const item = this.itemAtIndex(i)
+    if (item) item.selected = false
+    return this
+  }
+  select(i, add) {return this.selectRange(i, i, add)}
+  selectRange(i, j, add) {
+    if (i > j) [i, j] = [j, i]
+    if (!add) this.clearSelection()
+    for (let k = i; k <= j; ++k) {
+      this._selection.add(k)
+      const item = this.itemAtIndex(k)
+      if (item) item.selected = true
+    }
+    return this
+  }
+  clearSelection() {
+    for (const i of this._selection) {
+      const item = this.itemAtIndex(i)
+      if (item) item.selected = false
+    }
+    this._selection.clear()
+    return this
+  }
+  scrollToIndexIfNecessary(i) {}
+  itemAtIndex(i) {
+    const m = this.model.get(i)
+    if (!m) return null
+    return this._cache.get(m)
+  }
+
+  get selectedItems() {
+    return Array.from(this._selection).map(i => this._model.get(i))
+  }
+
+  resize() {
+    this._bb = this.el.getBoundingClientRect()
+    this._scroll()
+  }
+  _scroll() {
+    this._scrollY = this.container.scrollTop
+    this._reflow()
+  }
+
+  _reflow() {}
+}
+
+class Collection extends ListBackedView {
+  init() {
+    super.init()
+    this._itemSelector = '.v2-collection-item'
+    this._tileWidth = 200
+    this._tileHeight = 275
+    this._justifyTiles = true
+    this.itemsPerLine = 1
+    this.Item = this.constructor.Item
+  }
+  build() {
+    return h('.v2-view.v2-collection', {tabIndex: 0, onscroll: '_scroll', onmousedown: '_mouseDown', ondblclick: '_dblclick'},
+      this._overflow = h('.v2-collection-overflow'))
+  }
+
+  showMenu(items, x, y) {
+    if (!items) items = this.selectedItems
+    if (!Array.isArray(items)) items = [items]
+    const m = this.menu && this.menu(items)
+    if (!m) return
+    const done = m => {
+      if (x == null) {
+        for (const item of this._cache.values()) {
+          if (item.selected) {
+            const bb = item.el.getBoundingClientRect()
+            x = bb.left + bb.width/2
+            y = bb.top + bb.height/2
+            break
+          }
+        }
+        if (x == null) {
+          x = this._bb.left
+          y = this._bb.top
+        }
+      }
+      m.show(this.app, x, y)
+    }
+    if (m.then) return m.then(done)
+    else done(m)
+  }
+
   selectLeft(add) {
     let i = v2.iter.last(this._selection)
     if (i == null) return this.selectFirst()
@@ -2931,43 +3030,6 @@ class Collection extends View {
     this.select(i, add)
     this.scrollToIndexIfNecessary(i)
   }
-  selectFirst() {
-    let j = 0
-    for (; !this._model.get(j); ++j) {
-      if (j >= this._model.length) return
-    }
-    this.scrollToIndexIfNecessary(j)
-    this.select(j)
-    return this
-  }
-  selectAll() {
-    if (this.model.length) this.selectRange(0, this.model.length - 1)
-  }
-  toggleSelect(i) {
-    if (this._selection.has(i)) {
-      this.deselect(i)
-    } else {
-      this.select(i, true)
-    }
-    return this
-  }
-  deselect(i) {
-    this._selection.delete(i)
-    const item = this.itemAtIndex(i)
-    if (item) item.selected = false
-    return this
-  }
-  select(i, add) {return this.selectRange(i, i, add)}
-  selectRange(i, j, add) {
-    if (i > j) [i, j] = [j, i]
-    if (!add) this.clearSelection()
-    for (let k = i; k <= j; ++k) {
-      this._selection.add(k)
-      const item = this.itemAtIndex(k)
-      if (item) item.selected = true
-    }
-    return this
-  }
   scrollToIndexIfNecessary(i) {
     if (!this.isLive) return
     const y0 = Math.floor(i / this.itemsPerLine) * this._tileHeight
@@ -2975,32 +3037,6 @@ class Collection extends View {
     const y = this._scrollY, yh = y + this._bb.height
     if (y0 < y) this.el.scrollTop += y0 - y
     else if (y1 >= yh) this.el.scrollTop += y1 - yh
-  }
-  clearSelection() {
-    for (const i of this._selection) {
-      const item = this.itemAtIndex(i)
-      if (item) item.selected = false
-    }
-    this._selection.clear()
-    return this
-  }
-  itemAtIndex(i) {
-    const m = this.model.get(i)
-    if (!m) return null
-    return this._cache.get(m)
-  }
-
-  get selectedItems() {
-    return Array.from(this._selection).map(i => this._model.get(i))
-  }
-
-  resize() {
-    this._bb = this.el.getBoundingClientRect()
-    this._scroll()
-  }
-  _scroll() {
-    this._scrollY = this.el.scrollTop
-    this._reflow()
   }
 
   setTileSize(w, h) {
@@ -3015,6 +3051,7 @@ class Collection extends View {
       this._unused.push(...this._cache.values())
       this._cache.clear()
       for (const unused of this._unused) unused.visible = false
+      this._overflow.style.height = 0
       return
     }
     const perLine = this.itemsPerLine = Math.floor(this._bb.width / this._tileWidth)
@@ -3092,7 +3129,7 @@ Collection.Item = class Item extends View {
 
   setPosition(x, y) {
     if (this._x !== x || this._y !== y) {
-      this.el.style.transform = `translate3d(${this._x = x}px, ${this._y = y}px,0)`
+      this.el.style.transform = `translate3d(${this._x = x}px,${this._y = y}px,0)`
     }
   }
   setSize(width, height) {
@@ -3135,6 +3172,186 @@ Collection.Item = class Item extends View {
   _listen() {this._model.on('change', this._changed)}
   _changed() {this._update()}
   _update() {}
+}
+
+class Table extends ListBackedView {
+  // TODO headers
+  init() {
+    super.init()
+    this._itemSelector = '.v2-table-row'
+    this._rowHeight = 24
+    this.definitions = {}
+    this._columns = []
+    this._usedColumns = []
+    this.Row = this.constructor.Row
+  }
+  build() {
+    return h('.v2-view.v2-table', {tabIndex: 0, onscroll: '_scroll', onmousedown: '_mouseDown', ondblclick: '_dblclick'},
+      this._header = h('.v2-table-header'),
+      this.container = h('.v2-table-contents',
+        this._overflow = h('.v2-table-overflow')))
+  }
+
+  scrollToIndexIfNecessary(i) {
+    if (!this.isLive) return
+    const y0 = i * this._rowHeight
+    const y1 = y0 + this._rowHeight
+    const y = this._scrollY, yh = y + this._bb.height
+    if (y0 < y) this.el.scrollTop += y0 - y
+    else if (y1 >= yh) this.el.scrollTop += y1 - yh
+  }
+
+  get rowHeight() {return this._rowHeight}
+  set rowHeight(value) {
+    if (this._rowHeight === value) return
+    this._rowHeight = value
+    for (const v of this._cache.values()) v.height = value
+    for (const v of this._unused) v.height = value
+    if (this.isLive) this._reflow()
+  }
+
+  get columns() {return this._columns}
+  set columns(value) {
+    this._columns = value
+    this._usedColumns = value.map(id => this.definitions[id])
+    for (const v of this._cache.values()) v.columns = this._usedColumns
+    for (const v of this._unused) v.columns = this._usedColumns
+    h.removeChildren(this._header)
+    h.add(this._header, this._usedColumns.map(c =>
+      h('.v2-table-header-cell', c.name, {style: {width: `${c.width}px`}})))
+    this._reflow()
+  }
+
+  _reflow() {
+    if (!this._model) {
+      this._unused.push(...this._cache)
+      this._cache.clear()
+      for (const unused of this._unused) unused.visible = false
+      this._overflow.style.height = 0
+      return
+    }
+    const buffer = 4
+    const start = Math.max(0, Math.floor(this._scrollY / this._rowHeight) - buffer)
+    const end = Math.min(this._model.length, Math.floor((this._scrollY + this._bb.height) / this._rowHeight) + 1 + buffer)
+    const unused = new Map(this._cache)
+    for (let i = start; i < end; ++i) unused.delete(this._model.get(i))
+    for (const [k, v] of unused) {
+      this._cache.delete(k)
+      this._unused.push(v)
+    }
+    for (let i = start; i < end; ++i) {
+      const view = this._dequeue(i)
+      if (!view) continue
+      view.index = i
+      view.selected = this._selection.has(i)
+      view.y = i * this._rowHeight
+    }
+    for (const unused of this._unused) unused.visible = false
+    this._overflow.style.height = this._model.length * this._rowHeight + 'px'
+  }
+  _dequeue(i) {
+    const m = this._model.get(i)
+    if (!m) return null
+    const item = this._cache.get(m)
+    if (item) return item
+    let unused = this._unused.pop()
+    if (!unused) {
+      this.add(unused = new this.Row({columns: this._usedColumns}))
+      unused.height = this._rowHeight
+    } else {
+      unused.visible = true
+    }
+    unused.model = m
+    this._cache.set(m, unused)
+    return unused
+  }
+}
+Table.keyBindings = [
+  {key: 'ArrowUp', command: 'selectPrevious'},
+  {key: 'ArrowDown', command: 'selectNext'},
+]
+Table.Row = class Row extends View {
+  init() {
+    this.index = null
+    this._selected = false
+    this._visible = true
+    this._model = null
+    this._height = null
+    this._y = null
+    this._changed = this._changed.bind(this)
+    this._columns = []
+  }
+  build() {
+    return h('.v2-table-row')
+  }
+
+  get columns() {return this._columns}
+  set columns(value) {
+    this._columns = value
+    h.removeChildren(this.el)
+    h.add(this.el, this._cells = value.map(c =>
+      h('.v2-table-cell', {style: {width: `${c.width}px`}}, c.attrs || {})))
+  }
+
+  get selected() {return this._selected}
+  set selected(value) {
+    value = !!value
+    if (this._selected === value) return
+    this._selected = value
+    this.el.classList.toggle('v2-table-row--selected', value)
+  }
+
+  get y() {return this._y}
+  set y(value) {
+    if (this._y !== value) {
+      this.el.style.transform = `translate3d(0,${this._y = value}px,0)`
+    }
+  }
+  get height() {return this._height}
+  set height(value) {
+    if (this._height !== value) {
+      this.el.style.height = this.el.style.lineHeight = `${this._height = value}px`
+    }
+  }
+
+  get visible() {return this._visible}
+  set visible(value) {
+    value = !!value
+    if (this._visible === value) return
+    if (!(this._visible = value)) {
+      this.y = 0
+    }
+    this.el.style.visibility = value ? 'visible' : 'hidden'
+  }
+
+  _onActivate() {
+    if (this._model) {
+      this._update()
+      this._listen()
+    }
+  }
+  _onDeactivate() {if (this._model) this._unlisten()}
+
+  get model() {return this._model}
+  set model(value) {
+    if (this._model === value) return
+    if (this._model) this._unlisten()
+    if ((this._model = value) && this.isLive) {
+      this._update()
+      this._listen()
+    }
+  }
+  _unlisten() {this._model.unlisten('change', this._changed)}
+  _listen() {this._model.on('change', this._changed)}
+  _changed() {this._update()}
+  _update() {
+    for (let i = this._columns.length; i--;) {
+      const col = this._columns[i]
+      let value = this._model[col.key]
+      if (col.transform) value = col.transform(value)
+      this._cells[i].textContent = value
+    }
+  }
 }
 
 class Menu extends View {
@@ -3449,7 +3666,7 @@ class MenuItem extends View {
   }
 }
 
-Object.assign(v2, {Model, View, App, Split, List, FilteredList, CyNode, Node, DynamicTreeItem, DynamicTree, Tree, Collection, Menu, MenuBar, MenuItem})
+Object.assign(v2, {Model, View, App, Split, List, FilteredList, CyNode, Node, DynamicTreeItem, DynamicTree, Tree, Collection, Table, Menu, MenuBar, MenuItem})
 
 global.h = h
 global.v2 = v2

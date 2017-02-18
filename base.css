@@ -83,6 +83,64 @@ body {
   background: rgba(0,0,0,.1);
 }
 
+.v2-table {
+  outline: 0;
+  display: block;
+}
+.v2-table-header {
+  height: 20px;
+  line-height: 20px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(0,0,0,.05);
+  box-shadow: 0 1px rgba(0,0,0,.3);
+}
+.v2-table-header-cell {
+  display: inline-block;
+  vertical-align: top;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0 .5rem;
+  box-shadow: 1px 0 rgba(0,0,0,.3);
+  color: rgba(0,0,0,.6);
+}
+.v2-table-header-cell:hover {
+  background: rgba(0,0,0,.05);
+}
+.v2-table-header-cell:active {
+  background: rgba(0,0,0,.1);
+}
+.v2-table-contents {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  width: 100%;
+  bottom: 0;
+  overflow: scroll;
+}
+.v2-table-overflow {
+  width: 0;
+}
+.v2-table-row {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.v2-table-cell {
+  display: inline-block;
+  vertical-align: top;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0 .5rem;
+}
+.v2-table-row--selected {
+  background: rgba(0,0,0,.1);
+}
+
 .v2-tree {
   position: relative;
   overflow: auto;
