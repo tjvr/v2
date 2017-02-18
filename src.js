@@ -2942,6 +2942,32 @@ class ListBackedView extends View {
     return Array.from(this._selection).map(i => this._model.get(i))
   }
 
+  showMenu(items, x, y) {
+    if (!items) items = this.selectedItems
+    if (!Array.isArray(items)) items = [items]
+    const m = this.menu && this.menu(items)
+    if (!m) return
+    const done = m => {
+      if (x == null) {
+        for (const item of this._cache.values()) {
+          if (item.selected) {
+            const bb = item.el.getBoundingClientRect()
+            x = bb.left + 5
+            y = bb.top + 5
+            break
+          }
+        }
+        if (x == null) {
+          x = this._bb.left
+          y = this._bb.top
+        }
+      }
+      m.show(this.app, x, y)
+    }
+    if (m.then) return m.then(done)
+    else done(m)
+  }
+
   resize() {
     this._bb = this.container.getBoundingClientRect()
     this._scroll()
@@ -2967,32 +2993,6 @@ class Collection extends ListBackedView {
   build() {
     return h('.v2-view.v2-collection', {tabIndex: 0, onscroll: '_scroll', onmousedown: '_mouseDown', ondblclick: '_dblclick'},
       this._overflow = h('.v2-collection-overflow'))
-  }
-
-  showMenu(items, x, y) {
-    if (!items) items = this.selectedItems
-    if (!Array.isArray(items)) items = [items]
-    const m = this.menu && this.menu(items)
-    if (!m) return
-    const done = m => {
-      if (x == null) {
-        for (const item of this._cache.values()) {
-          if (item.selected) {
-            const bb = item.el.getBoundingClientRect()
-            x = bb.left + bb.width/2
-            y = bb.top + bb.height/2
-            break
-          }
-        }
-        if (x == null) {
-          x = this._bb.left
-          y = this._bb.top
-        }
-      }
-      m.show(this.app, x, y)
-    }
-    if (m.then) return m.then(done)
-    else done(m)
   }
 
   selectLeft(add) {
