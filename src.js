@@ -3192,6 +3192,27 @@ class Table extends ListBackedView {
         this._overflow = h('.v2-table-overflow')))
   }
 
+  _mouseDown(e) {
+    if (h.nearest('.v2-table-header', e.target)) {
+      if (e.button === 2) {
+        this.makeColumnMenu().show(this.app, e.clientX, e.clientY)
+      }
+      return
+    }
+    super._mouseDown(e)
+  }
+  makeColumnMenu() {
+    return new Menu({target: this.toggleColumn.bind(this), spec:
+      v2.iter.entries(this.definitions).map(([id, c]) =>
+        [c.name, id, {state: this._columns.includes(id) ? 'checked' : ''}]).array()})
+  }
+  toggleColumn(column) {
+    const i = this._columns.indexOf(column)
+    if (i !== -1) this._columns.splice(i, 1)
+    else this._columns.push(column)
+    this.columns = this._columns
+  }
+
   scrollToIndexIfNecessary(i) {
     if (!this.isLive) return
     const y0 = i * this._rowHeight
@@ -3291,6 +3312,7 @@ Table.Row = class Row extends View {
     h.removeChildren(this.el)
     h.add(this.el, this._cells = value.map(c =>
       h('.v2-table-cell', {style: {width: `${c.width}px`}}, c.attrs || {})))
+    if (this._model) this._update()
   }
 
   get selected() {return this._selected}
