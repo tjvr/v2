@@ -3316,7 +3316,7 @@ class Menu extends View {
     for (const x of value) if (x) {
       if (x === '-') {
         const last = this.el.lastElementChild
-        if (last && !last.classList.contains('v2-menu-separator')) {
+        if (last && last !== this._input && !last.classList.contains('v2-menu-separator')) {
           this.el.appendChild(h('.v2-menu-separator'))
         }
       } else if (Array.isArray(x)) {
