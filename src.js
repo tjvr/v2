@@ -3581,7 +3581,12 @@ class MenuBar extends Menu {
   _activateItem(v) {
     if (!v) return this.selectItem(null)
     if (v.menu) {
-      this.selectItem(this.selectedItem === v ? null : v, true)
+      if (this.selectedItem === v) {
+        this.selectItem(null, true)
+      } else {
+        this.app.hideMenus()
+        this.selectItem(v, true)
+      }
       return
     }
     super._activateItem(v)
