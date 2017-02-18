@@ -965,6 +965,7 @@ v2.iter = function() {
         this.derived[i] = new SplitIter(this)
       }
     }
+    [Symbol.iterator]() {return this.derived[Symbol.iterator]()}
     pull() {
       const {done, value} = this.iter.next()
       if (done) return
