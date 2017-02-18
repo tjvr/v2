@@ -102,6 +102,7 @@ body {
   position: absolute;
   top: 0;
   left: 0;
+  height: 100%;
 }
 .v2-table-header-cell {
   display: inline-block;
