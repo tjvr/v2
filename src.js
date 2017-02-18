@@ -3209,7 +3209,14 @@ class Table extends ListBackedView {
   toggleColumn(column) {
     const i = this._columns.indexOf(column)
     if (i !== -1) this._columns.splice(i, 1)
-    else this._columns.push(column)
+    else {
+      const keys = Object.keys(this.definitions)
+      const j = keys.indexOf(column)
+      const after = keys.slice(j + 1)
+      const k = this._columns.findIndex(c => after.includes(c))
+      if (k === -1) this._columns.push(column)
+      else this._columns.splice(k, 0, column)
+    }
     this.columns = this._columns
   }
 
