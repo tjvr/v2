@@ -2869,24 +2869,24 @@ class Collection extends View {
   _mouseDown(e) {
     const item = h.nearest('.v2-collection-item', e.target)
     const i = item && item.view.index
-    if (e.button === 2) {
-      const m = this.menu && this.menu(item ? this._selection.has(i) ? this.selectedItems : [this._model.get(i)] : [])
-      if (m) {
-        if (m.then) m.then(m => m.show(this.app, e.clientX, e.clientY))
-        else m.show(this.app, e.clientX, e.clientY)
-      }
-      return
-    }
     if (item) {
       if (e.metaKey || e.ctrlKey) {
         this.toggleSelect(i)
       } else if (e.shiftKey && this._selection.size) {
         this.selectRange(v2.iter.last(this._selection), i, true)
-      } else {
+      } else if (e.button !== 2 || !this._selection.has(i)) {
         this.select(i)
       }
     } else {
       this.clearSelection()
+    }
+    if (e.button === 2) {
+      const m = this.menu && this.menu(this.selectedItems)
+      if (m) {
+        if (m.then) m.then(m => m.show(this.app, e.clientX, e.clientY))
+        else m.show(this.app, e.clientX, e.clientY)
+      }
+      return
     }
   }
   _dblclick(e) {
