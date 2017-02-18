@@ -3321,7 +3321,7 @@ class Menu extends View {
         }
       } else if (Array.isArray(x)) {
         const [title, spec, opts] = x
-        this.add(new MenuItem(Object.assign({title, spec}, opts)))
+        if (!opts || !opts.hidden) this.add(new MenuItem(Object.assign({title, spec}, opts)))
       } else {
         h.pushView(this)
         h.add(this.el, x)
