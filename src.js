@@ -915,7 +915,7 @@ v2.iter = function() {
     enumerate() {return enumerate(this.inner)}
     map(fn) {return map(this.inner, fn)}
     filter(fn) {return filter(this.inner, fn)}
-    concat(...xs) {return concat(...[this.inner, ...xs])}
+    concat(...xs) {return concat(this.inner, ...xs)}
     push(...xs) {return push(this.inner, ...xs)}
     unshift(...xs) {return unshift(this.inner, ...xs)}
     flatten() {return flatten(this.inner)}
