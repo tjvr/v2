@@ -991,7 +991,8 @@ v2.iter = function() {
     is, from, generator,
     range, irange, replicate, forever, iterate,
     entries, keys, values,
-    array, intersperse, join,
+    array, toArray, toMap, toSet, toObject,
+    intersperse, join,
 
     split, cycle, enumerate,
     map, filter, concat, push, unshift, flatten, chunksOf,
