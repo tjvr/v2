@@ -1176,9 +1176,11 @@ v2.watchableProperty = function watchableProperty(o, name, get) {
 class Model {
   constructor(o) {if (o) Object.assign(this, o)}
   sendAllProperties(fn) {
-    for (const name of this.dataProperties) {
-      fn({target: this, name, value: this[name], oldValue: null})
-    }
+    for (const name of this.dataProperties) this.sendProperty(name, fn)
+    return this
+  }
+  sendProperty(name, fn) {
+    fn({target: this, name, value: this[name], oldValue: null})
     return this
   }
   toJSON() {
