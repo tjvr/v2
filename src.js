@@ -3312,7 +3312,10 @@ class Menu extends View {
   set spec(value) {
     for (const x of value) if (x) {
       if (x === '-') {
-        this.el.appendChild(h('.v2-menu-separator'))
+        const last = this.el.lastElementChild
+        if (!last || !last.classList.contains('v2-menu-separator')) {
+          this.el.appendChild(h('.v2-menu-separator'))
+        }
       } else if (Array.isArray(x)) {
         const [title, spec, opts] = x
         this.add(new MenuItem(Object.assign({title, spec}, opts)))
