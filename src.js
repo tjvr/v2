@@ -2871,7 +2871,7 @@ class ListBackedView extends View {
   }
   selectNext(add) {
     let i = v2.iter.last(this._selection)
-    const last = this.model.length - 1
+    const last = this.model.length
     if (i == null || i >= last) return this.selectFirst()
     while (!this._model.get(++i)) if (i >= last) return
     this.select(i, add)
