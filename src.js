@@ -1143,6 +1143,10 @@ v2.emitter = function emitter(o) {
       if (i !== -1) l.splice(i, 1)
       return this
     }},
+    toggleListener: {value: function toggleListener(e, fn, value) {
+      if (value) this.on(e, fn)
+      else this.unlisten(e, fn)
+    }},
     listeners: {value: function listeners(e) {
       const m = this._listeners
       return m ? m.get(e) || [] : []
