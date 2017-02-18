@@ -2833,6 +2833,7 @@ class ListBackedView extends View {
   }
 
   _mouseDown(e) {
+    if (!this.container.contains(e.target)) return
     const item = h.nearest(this._itemSelector, e.target)
     const i = item && item.view.index
     if (item) {
@@ -2856,7 +2857,7 @@ class ListBackedView extends View {
     }
   }
   _dblclick(e) {
-    if (e.metaKey || e.ctrlKey || e.shiftKey) return
+    if (e.metaKey || e.ctrlKey || e.shiftKey || !this.container.contains(e.target)) return
     this.dblclick(this.selectedItems)
   }
   focus() {this.el.focus()}
