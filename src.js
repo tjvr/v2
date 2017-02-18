@@ -1052,6 +1052,71 @@ v2.path = {
   },
 }
 
+const CSV_RE = /(?:\s*"((?:[^"]|"")*)"\s*|([^,\r\n]*))(?:(\r\n|[\r\n]|$)|,)/y
+const CSV_QUOTE_RE = /["\r\n,]/
+const TO_STRING = Object.prototype.toString
+v2.csv = {
+  parseRaw(str) {
+    const result = []
+    let record = []
+    let i = 0
+    while (i < str.length) {
+      CSV_RE.lastIndex = i
+      const m = CSV_RE.exec(str)
+      if (!m) break // impossible
+      if (m[1] != null || m[2] || m[2] === '' && m[3] == null) {
+        record.push(m[1] != null ? m[1].replace(/""/g, '"') : m[2])
+      }
+      if (m[3] != null) {
+        if (record.length) result.push(record)
+        record = []
+      }
+      i += m[0].length
+    }
+    if (record.length) result.push(record)
+    return result
+  },
+  parse(str, whitelist, asObject = false) {
+    const records = v2.csv.parseRaw(str)
+    if (!records.length) throw new Error('Missing header')
+    let names = records.shift()
+    if (whitelist) {
+      whitelist = new Set(whitelist)
+      names = names.map(n => whitelist.has(n) ? n : null)
+    }
+    const l = names.length
+    return records.map(record => {
+      const result = asObject ? {} : new Map
+      for (let i = 0; i < l; ++i) {
+        const n = names[i]
+        if (n == null) continue
+        if (asObject) result[names[i]] = record[i]
+        else result.set(names[i], record[i])
+      }
+      return result
+    })
+  },
+  stringifyRaw(rs) {
+    return rs.map(r => r.map(v => CSV_QUOTE_RE.test(v = String(v)) ? '"' + v.replace(/"/g, '""') + '"' : v).join(',')).join('\r\n')
+  },
+  stringify(rs) {
+    const isMap = []
+    const nameSet = new Set()
+    for (let i = 0; i < rs.length; ++i) {
+      const r = rs[i]
+      const ism = isMap[i] = TO_STRING.call(r) === '[object Map]'
+      for (const k of ism ? r.keys() : Object.keys(r)) nameSet.add(k)
+    }
+    const names = [...nameSet]
+    const result = rs.map((r, i) => names.map(n => {
+      const x = isMap[i] ? r.get(n) : r[n]
+      return x == null ? '' : x
+    }))
+    result.unshift(names)
+    return v2.csv.stringifyRaw(result)
+  },
+}
+
 v2.emitter = function emitter(o) {
   Object.defineProperties(o, {
     on: {value: function on(e, fn) {
