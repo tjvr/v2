@@ -824,7 +824,17 @@ v2.iter = function() {
     }
   })
 
-  function array(xs) {return Array.from(xs)}
+  function toArray(xs) {return Array.from(xs)}
+  const array = toArray
+  function toMap(xs) {return new Map(xs)}
+  function toSet(xs) {return new Set(xs)}
+  function toObject(xs, empty = false) {
+    const o = empty ? Object.create(null) : {}
+    for (const [k, v] of xs) {
+      o[k] = v
+    }
+    return o
+  }
   const intersperse = G(function*(sep, xs) {
     let use = false
     for (const x of xs) {
@@ -893,6 +903,10 @@ v2.iter = function() {
     [Symbol.iterator]() {return this.inner}
     next() {return this.inner.next()}
     array() {return Array.from(this.inner)}
+    toArray() {return Array.from(this.inner)}
+    toMap() {return new Map(this.inner)}
+    toSet() {return new Set(this.inner)}
+    toObject(empty = false) {return toObject(this.inner, empty)}
     join(sep) {return join(sep, this)}
     intersperse(sep) {return intersperse(sep, this)}
 
