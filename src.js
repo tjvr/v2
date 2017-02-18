@@ -3178,6 +3178,7 @@ class Table extends ListBackedView {
   // TODO headers
   init() {
     super.init()
+    this._scrollX = 0
     this._itemSelector = '.v2-table-row'
     this._rowHeight = 24
     this.definitions = {}
@@ -3186,10 +3187,22 @@ class Table extends ListBackedView {
     this.Row = this.constructor.Row
   }
   build() {
-    return h('.v2-view.v2-table', {tabIndex: 0, onscroll: '_scroll', onmousedown: '_mouseDown', ondblclick: '_dblclick'},
-      this._header = h('.v2-table-header'),
-      this.container = h('.v2-table-contents',
+    return h('.v2-view.v2-table', {tabIndex: 0, onmousedown: '_mouseDown', ondblclick: '_dblclick'},
+      h('.v2-table-header',
+        this._header = h('.v2-table-header-inner')),
+      this.container = h('.v2-table-contents', {onscroll: '_scroll'},
         this._overflow = h('.v2-table-overflow')))
+  }
+
+  _scroll() {
+    this.scrollX = this.container.scrollLeft
+    super._scroll()
+  }
+  get scrollX() {return this._scrollX}
+  set scrollX(value) {
+    if (this._scrollX === value) return
+    this._scrollX = value
+    this._header.style.transform = `translate(${-value}px,0)`
   }
 
   _mouseDown(e) {

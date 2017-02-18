@@ -86,6 +86,7 @@ body {
 .v2-table {
   outline: 0;
   display: block;
+  white-space: nowrap;
 }
 .v2-table-header {
   height: 20px;
@@ -96,6 +97,11 @@ body {
   width: 100%;
   background: rgba(0,0,0,.05);
   box-shadow: 0 1px rgba(0,0,0,.3);
+}
+.v2-table-header-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 .v2-table-header-cell {
   display: inline-block;
