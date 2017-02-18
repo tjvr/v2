@@ -3255,18 +3255,24 @@ class Table extends ListBackedView {
     e.preventDefault()
   }
   _dragMove(e) {
-    const c = this._headerCells[this._resize.index]
-    c.style.transform = `translate(${e.clientX + this._resize.offset}px,0)`
+    const i = this._resize.index
+    const c = this._headerCells[i]
+    const t = c.style.transform = `translate3d(${e.clientX + this._resize.offset}px,0,0)`
+    for (const v of this._cache.values()) v._dragging(i, t)
     e.preventDefault()
   }
   _dragUp(e) {
     const i = this._resize.index
     this._headerCells[i].style.transform = ''
+    for (const v of this._cache.values()) v._stopDragging(i)
+    for (const v of this._unused) v._stopDragging(i)
     const x = this._columns.slice(0, i)
       .reduce((a, c) => a + this.definitions[c].width, 0) +
+      this.definitions[this._columns[i]].width / 2 +
       e.clientX + this._resize.offset
     let z = 0, j = 0, w
     while (j < this._columns.length && x >= z + (w = this.definitions[this._columns[j]].width) / 2) z += w, ++j
+    if (j > i) --j
     this._columns.splice(j, 0, ...this._columns.splice(i, 1))
     this.columns = this._columns
     this._resize = null
@@ -3403,6 +3409,7 @@ Table.Row = class Row extends View {
     this._y = null
     this._changed = this._changed.bind(this)
     this._columns = []
+    this._isDragging = false
   }
   build() {
     return h('.v2-table-row')
@@ -3417,6 +3424,16 @@ Table.Row = class Row extends View {
     if (this._model) this._update()
   }
   updateColumnWidth(i, w) {this._cells[i].style.width = `${w}px`}
+  _dragging(i, t) {
+    this._cells[i].style.transform = t
+    if (!this._isDragging) this._cells[i].classList.add('v2-table-cell--dragging')
+    this._isDragging = true
+  }
+  _stopDragging(i) {
+    this._isDragging = false
+    this._cells[i].style.transform = ''
+    this._cells[i].classList.remove('v2-table-cell--dragging')
+  }
 
   get selected() {return this._selected}
   set selected(value) {

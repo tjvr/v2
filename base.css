@@ -158,6 +158,9 @@ body {
   text-overflow: ellipsis;
   overflow: hidden;
 }
+.v2-table-cell--dragging {
+  opacity: .5;
+}
 .v2-table-row--selected {
   background: rgba(0,0,0,.1);
 }
