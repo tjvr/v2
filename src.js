@@ -1507,11 +1507,11 @@ class App extends View {
   }
   _appKeyDown(e) {
     const t = e.target
-    const isGlobal = t === document.body
+    const tv = h.ownerView(t)
+    const isGlobal = !tv || t === document.body
     const key = v2.keyWithModifiers(e)
     const override = h.acceptsKeyboardInput(t, e)
     const cmd = key.includes('#')
-    const tv = h.ownerView(t)
     for (const v of isGlobal ? this.descendants() : tv.ancestors()) {
       if (!v.keyBindings) continue
       for (const b of v.keyBindings) {
