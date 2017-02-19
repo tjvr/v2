@@ -2857,7 +2857,7 @@ class ListBackedView extends View {
     }
   }
   _dblclick(e) {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || !this.container.contains(e.target)) return
+    if (e.metaKey || e.ctrlKey || e.shiftKey || !this.container.contains(e.target) || e.target.localName === 'input') return
     this.dblclick(this.selectedItems)
   }
   focus() {this.el.focus()}
@@ -3193,7 +3193,7 @@ class Table extends ListBackedView {
     this._dragUp = this._dragUp.bind(this)
   }
   build() {
-    return h('.v2-view.v2-table', {tabIndex: 0, onmousedown: '_mouseDown', ondblclick: '_dblclick'},
+    return h('.v2-view.v2-table', {tabIndex: 0, onmousedown: '_mouseDown', ondblclick: '_dblclick', onfocusout: '_blur'},
       h('.v2-table-header',
         this._header = h('.v2-table-header-inner')),
       this.container = h('.v2-table-contents', {onscroll: '_scroll'},
@@ -3211,6 +3211,12 @@ class Table extends ListBackedView {
     this._header.style.transform = `translate(${-value}px,0)`
   }
 
+  _blur(e) {
+    if (e.target.classList.contains('v2-table-cell-editor')) {
+      const r = h.nearest('.v2-table-row', e.target)
+      if (r) r.view.cancelEdit()
+    }
+  }
   _mouseDown(e) {
     if (h.nearest('.v2-table-header', e.target)) {
       if (e.button === 2) {
@@ -3237,6 +3243,12 @@ class Table extends ListBackedView {
       }
       return
     }
+    const c = e.button === 0 && e.detail === 1 && !e.metaKey && !e.shiftKey && !e.altKey && !e.ctrlKey && h.nearest('.v2-table-cell', e.target)
+    if (c) {
+      const r = c.parentElement.view
+      if (r && r.selected) r.editCell([].indexOf.call(r.el.children, c))
+    }
+    if (h.nearest('.v2-table-cell-editor', e.target)) return
     super._mouseDown(e)
   }
   _resizeMove(e) {
@@ -3258,7 +3270,7 @@ class Table extends ListBackedView {
     const i = this._resize.index
     const c = this._headerCells[i]
     const t = c.style.transform = `translate3d(${e.clientX + this._resize.offset}px,0,0)`
-    for (const v of this._cache.values()) v._dragging(i, t)
+    for (const v of this._cache.values()) v._isDragging(i, t)
     e.preventDefault()
   }
   _dragUp(e) {
@@ -3409,7 +3421,9 @@ Table.Row = class Row extends View {
     this._y = null
     this._changed = this._changed.bind(this)
     this._columns = []
-    this._isDragging = false
+    this._dragging = false
+    this._editing = -1
+    this._editor = null
   }
   build() {
     return h('.v2-table-row')
@@ -3424,15 +3438,57 @@ Table.Row = class Row extends View {
     if (this._model) this._update()
   }
   updateColumnWidth(i, w) {this._cells[i].style.width = `${w}px`}
-  _dragging(i, t) {
+  _isDragging(i, t) {
     this._cells[i].style.transform = t
-    if (!this._isDragging) this._cells[i].classList.add('v2-table-cell--dragging')
-    this._isDragging = true
+    if (!this._dragging) this._cells[i].classList.add('v2-table-cell--dragging')
+    this._dragging = true
   }
   _stopDragging(i) {
-    this._isDragging = false
+    this._dragging = false
     this._cells[i].style.transform = ''
     this._cells[i].classList.remove('v2-table-cell--dragging')
+  }
+  editCell(i) {
+    if (!this._columns[i].editable) return
+    this.cancelEdit()
+    this._cells[this._editing = i].style.visibility = 'hidden'
+    let x = 0
+    for (let j = 0; j < i; ++j) x += this._columns[j].width
+    const c = this._columns[i]
+    this._editor = h('input.v2-table-cell-editor'+(c.cellClass ? '.' + c.cellClass : ''), {
+      style: {transform: `translate3d(${x}px,0,0)`, width: c.width+'px'},
+      onkeydown: e => {
+        if (e.key === 'Enter' || e.key === 'Escape') {
+          if (e.key === 'Enter') this.acceptEdit()
+          else this.cancelEdit()
+          e.preventDefault()
+          e.stopPropagation()
+        }
+      },
+    })
+    this._editor.value = this._cells[i].textContent
+    this.el.appendChild(this._editor)
+    setTimeout(() => this._editor.select())
+  }
+  acceptEdit() {
+    const i = this._editing
+    if (i !== -1) {
+      const c = this._columns[i]
+      const t = this._editor.value
+      if (typeof c.editable === 'function') c.editable(this.model, c.key, t)
+      else this.model[c.key] = t
+    }
+    this.cancelEdit()
+  }
+  cancelEdit() {
+    if (this._editing !== -1) {
+      this._cells[this._editing].style.visibility = 'visible'
+      this._editing = -1
+      if (this._editor) {
+        this._editor.remove()
+        this._editor = null
+      }
+    }
   }
 
   get selected() {return this._selected}
