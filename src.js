@@ -3215,7 +3215,7 @@ class Table extends ListBackedView {
   _blur(e) {
     if (e.target.classList.contains('v2-table-cell-editor')) {
       const r = h.nearest('.v2-table-row', e.target)
-      if (r) r.view.cancelEdit()
+      if (r) r.view.acceptEdit()
     }
   }
   _mouseDown(e) {
