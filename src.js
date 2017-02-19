@@ -3179,6 +3179,7 @@ class Table extends ListBackedView {
   // TODO headers
   init() {
     super.init()
+    this._eligibleForEdit = false
     this._resize = null
     this._scrollX = 0
     this._itemSelector = '.v2-table-row'
@@ -3193,7 +3194,7 @@ class Table extends ListBackedView {
     this._dragUp = this._dragUp.bind(this)
   }
   build() {
-    return h('.v2-view.v2-table', {tabIndex: 0, onmousedown: '_mouseDown', ondblclick: '_dblclick', onfocusout: '_blur'},
+    return h('.v2-view.v2-table', {tabIndex: 0, onmousedown: '_mouseDown', onclick: '_click', ondblclick: '_dblclick', onfocusout: '_blur'},
       h('.v2-table-header',
         this._header = h('.v2-table-header-inner')),
       this.container = h('.v2-table-contents', {onscroll: '_scroll'},
@@ -3245,6 +3246,13 @@ class Table extends ListBackedView {
     }
     clearTimeout(this._editTimeout)
     const c = e.button === 0 && e.detail === 1 && !e.metaKey && !e.shiftKey && !e.altKey && !e.ctrlKey && h.nearest('.v2-table-cell', e.target)
+    const r = c && c.parentElement.view
+    this._eligibleForEdit = r && r.selected && r._editing === -1 && this._selection.size === 1
+    if (h.nearest('.v2-table-cell-editor', e.target)) return
+    super._mouseDown(e)
+  }
+  _click(e) {
+    const c = this._eligibleForEdit && h.nearest('.v2-table-cell', e.target)
     if (c) {
       const r = c.parentElement.view
       if (r && r.selected && r._editing === -1 && this._selection.size === 1) {
@@ -3252,8 +3260,6 @@ class Table extends ListBackedView {
         this._editTimeout = setTimeout(() => r.editCell(i), 500)
       }
     }
-    if (h.nearest('.v2-table-cell-editor', e.target)) return
-    super._mouseDown(e)
   }
   _resizeMove(e) {
     const i = this._resize.index
