@@ -3243,10 +3243,14 @@ class Table extends ListBackedView {
       }
       return
     }
+    clearTimeout(this._editTimeout)
     const c = e.button === 0 && e.detail === 1 && !e.metaKey && !e.shiftKey && !e.altKey && !e.ctrlKey && h.nearest('.v2-table-cell', e.target)
     if (c) {
       const r = c.parentElement.view
-      if (r && r.selected && this._selection.size === 1) r.editCell([].indexOf.call(r.el.children, c))
+      if (r && r.selected && r._editing === -1 && this._selection.size === 1) {
+        const i = [].indexOf.call(r.el.children, c)
+        this._editTimeout = setTimeout(() => r.editCell(i), 500)
+      }
     }
     if (h.nearest('.v2-table-cell-editor', e.target)) return
     super._mouseDown(e)
