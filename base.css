@@ -148,6 +148,7 @@ body {
   left: 0;
   min-width: 100%;
   box-sizing: border-box;
+  contain: content;
 }
 .v2-table-cell {
   display: inline-block;
