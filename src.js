@@ -616,8 +616,10 @@ v2.rt = {
     /Windows/.test(navigator.userAgent) ? 'win' :
     /like Mac OS X/i.test(navigator.userAgent) ? 'iOS' :
     /Android/i.test(navigator.userAgent) ? 'android' : 'other',
-  types: ['chrome', 'web'],
-  type: global.chrome && chrome.app && chrome.app.runtime ? 'chrome' : 'web',
+  types: ['electron', 'chrome', 'web'],
+  type:
+    process && process.versions && process.versions.electron ? 'electron' :
+    global.chrome && chrome.app && chrome.app.runtime ? 'chrome' : 'web',
 }
 v2.rt.web = {
   chooseFile(accept, options) {
