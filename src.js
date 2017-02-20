@@ -3257,7 +3257,8 @@ class Table extends ListBackedView {
       const r = c.parentElement.view
       if (r && r.selected && r._editing === -1 && this._selection.size === 1) {
         const i = [].indexOf.call(r.el.children, c)
-        this._editTimeout = setTimeout(() => r.editCell(i), 500)
+        const m = r.model
+        this._editTimeout = setTimeout(() => r.visible && r.model === m && r.editCell(i), 500)
       }
     }
   }
@@ -3492,7 +3493,7 @@ Table.Row = class Row extends View {
   }
   cancelEdit() {
     if (this._editing !== -1) {
-      this._cells[this._editing].style.visibility = 'visible'
+      this._cells[this._editing].style.visibility = ''
       this._editing = -1
       if (this._editor) {
         this._editor.remove()
@@ -3543,6 +3544,7 @@ Table.Row = class Row extends View {
   get model() {return this._model}
   set model(value) {
     if (this._model === value) return
+    this.cancelEdit()
     if (this._model) this._unlisten()
     if ((this._model = value) && this.isLive) {
       this._update()
