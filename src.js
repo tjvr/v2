@@ -618,7 +618,7 @@ v2.rt = {
     /Android/i.test(navigator.userAgent) ? 'android' : 'other',
   types: ['electron', 'chrome', 'web'],
   type:
-    process && process.versions && process.versions.electron ? 'electron' :
+    global.process && process.versions && process.versions.electron ? 'electron' :
     global.chrome && chrome.app && chrome.app.runtime ? 'chrome' : 'web',
 }
 v2.rt.web = {
