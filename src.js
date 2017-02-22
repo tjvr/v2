@@ -1476,7 +1476,11 @@ v2.emitter(View.prototype)
 
 class App extends View {
   get title() {return this._title}
-  set title(value) {document.title = this._title = value}
+  set title(value) {
+    const oldValue = this._title
+    document.title = this._title = value
+    this.emit('title change', {target: this, name: 'title', oldValue, value})
+  }
 
   get isApp() {return true}
 
