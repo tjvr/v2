@@ -3455,7 +3455,10 @@ Table.Row = class Row extends View {
       h('.v2-table-cell' + (c.cellClass ? '.'+c.cellClass : ''), {style: {width: `${c.width}px`}})))
     if (this._model) this._update()
   }
-  updateColumnWidth(i, w) {this._cells[i].style.width = `${w}px`}
+  updateColumnWidth(i, w) {
+    this._cells[i].style.width = `${w}px`
+    if (this._editing === i) this._editor.style.width = `${w}px`
+  }
   _isDragging(i, t) {
     this._cells[i].style.transform = t
     if (!this._dragging) this._cells[i].classList.add('v2-table-cell--dragging')
