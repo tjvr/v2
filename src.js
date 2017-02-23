@@ -3584,7 +3584,7 @@ Table.Row = class Row extends View {
     for (let i = this._columns.length; i--;) {
       const col = this._columns[i]
       let value = this._model[col.key]
-      if (col.transform) value = col.transform(value)
+      if (col.transform) value = col.transform(value, this._model, col.key, this._cells[i])
       this._cells[i].textContent = value
     }
   }
