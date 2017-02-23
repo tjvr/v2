@@ -3229,6 +3229,7 @@ class Table extends ListBackedView {
       if (e.button === 2) {
         this.makeColumnMenu().show(this.app, e.clientX, e.clientY)
       }
+      if (e.button !== 0) return
       const r = h.nearest('.v2-table-header-cell-resizer', e.target)
       if (r) {
         e.preventDefault()
