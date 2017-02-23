@@ -2864,8 +2864,9 @@ class ListBackedView extends View {
   }
   _dblclick(e) {
     if (e.metaKey || e.ctrlKey || e.shiftKey || !this.container.contains(e.target) || e.target.localName === 'input') return
-    this.dblclick(this.selectedItems)
+    this.activateSelection()
   }
+  activateSelection() {this.dblclick(this.selectedItems)}
   focus() {this.el.focus()}
 
   selectPrevious(add) {
@@ -2985,6 +2986,9 @@ class ListBackedView extends View {
 
   _reflow() {}
 }
+ListBackedView.keyBindings = [
+  {key: 'Enter', command: 'activateSelection'},
+]
 
 class Collection extends ListBackedView {
   init() {
@@ -3104,12 +3108,12 @@ class Collection extends ListBackedView {
     return unused
   }
 }
-Collection.keyBindings = [
+Collection.keyBindings = Collection.keyBindings.concat([
   {key: 'ArrowLeft', command: 'selectLeft'},
   {key: 'ArrowRight', command: 'selectRight'},
   {key: 'ArrowUp', command: 'selectUp'},
   {key: 'ArrowDown', command: 'selectDown'},
-]
+])
 Collection.Item = class Item extends View {
   init() {
     this.index = null
@@ -3425,10 +3429,10 @@ class Table extends ListBackedView {
     return unused
   }
 }
-Table.keyBindings = [
+Table.keyBindings = Table.keyBindings.concat([
   {key: 'ArrowUp', command: 'selectPrevious'},
   {key: 'ArrowDown', command: 'selectNext'},
-]
+])
 Table.Row = class Row extends View {
   init() {
     this.index = null
