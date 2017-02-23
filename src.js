@@ -2945,9 +2945,8 @@ class ListBackedView extends View {
     return this._cache.get(m)
   }
 
-  get selectedItems() {
-    return Array.from(this._selection).map(i => this._model.get(i))
-  }
+  get selectedItems() {return Array.from(this._selection).map(i => this._model.get(i))}
+  get selectedRows() {return Array.from(this._selection)}
 
   showMenu(items, x, y) {
     if (!items) items = this.selectedItems
