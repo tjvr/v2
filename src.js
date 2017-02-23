@@ -3482,11 +3482,11 @@ Table.Row = class Row extends View {
     this._cells[i].style.transform = ''
     this._cells[i].classList.remove('v2-table-cell--dragging')
   }
-  editColumn(name) {
-    const i = this._columns.indexOf(this.parent.definitions[name])
-    if (i !== -1) this.editCell(i)
-  }
   editCell(i) {
+    if (typeof i === 'string') {
+      i = this._columns.indexOf(this.parent.definitions[i])
+      if (i === -1) return
+    }
     if (!this._columns[i].editable) return
     this.cancelEdit()
     this._cells[this._editing = i].style.visibility = 'hidden'
