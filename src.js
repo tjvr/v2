@@ -3337,6 +3337,15 @@ class Table extends ListBackedView {
     }
     this.columns = this._columns
   }
+  editCell(row, col) {
+    if (typeof col === 'string') {
+      col = this._usedColumns.indexOf(this.definitions[col])
+      if (col === -1) return
+    }
+    this.scrollToIndexIfNecessary(row)
+    const r = this._cache.get(this.model.get(row))
+    if (r) r.editCell(col)
+  }
 
   scrollToIndexIfNecessary(i) {
     if (!this.isLive) return
