@@ -3268,7 +3268,7 @@ class Table extends ListBackedView {
       if (r && r.selected && r._editing === -1 && this._selection.size === 1) {
         const i = [].indexOf.call(r.el.children, c)
         const m = r.model
-        this._editTimeout = setTimeout(() => r.visible && r.model === m && r.editCell(i), 500)
+        this._editTimeout = setTimeout(() => document.activeElement === this.el && r.visible && r.model === m && r.editCell(i), 500)
       }
     }
   }
