@@ -311,6 +311,9 @@ body {
 .v2-menu-item--selected {
   background: #555;
 }
+.v2-menu-item-key {
+  margin-left: 1rem;
+}
 .v2-menu-item--has-submenu > .v2-menu-item-key {
   align-self: center;
   height: 0;
