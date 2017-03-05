@@ -1885,7 +1885,8 @@ class FilteredList {
   unshift() {throw new Error('Immutable')}
   shift() {throw new Error('Immutable')}
   splice() {throw new Error('Immutable')}
-  reverse() {
+  reverse() {throw new Error('Immutable')}
+  invert() {
     const f = this._include
     this.include = x => !f(x)
   }
