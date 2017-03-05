@@ -380,8 +380,8 @@ v2.format = {
     const t = z < 0 ? -z : z
     return (z > 0 ? '-' : '+') + (Math.floor(t / 60) + '').padStart(2, '0') + sep + (t % 60 + '').padStart(2, '0')
   },
-  list(items) {
-    return items.length <= 2 ? items.join(' and ') : items.slice(0, -1).join(', ') + ', and ' + items[items.length - 1]
+  list(items, last = ' and ', oxford = true) {
+    return items.length <= 2 ? items.join(last) : items.slice(0, -1).join(', ') + (oxford ? ',' : '') + last + items[items.length - 1]
   },
   bytes(b, opts) {
     if (!opts) opts = {}
