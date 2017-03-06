@@ -258,6 +258,9 @@ body {
   position: absolute;
   top: 0;
   left: 0;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
   z-index: 100;
   flex-direction: column;
   background: #333;
@@ -265,6 +268,7 @@ body {
   padding: .5rem 0;
   min-width: 200px;
   outline: 0;
+  box-sizing: border-box;
 }
 .v2-menu-input {
   position: absolute;
@@ -283,6 +287,7 @@ body {
   position: relative;
   display: flex;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .v2-menu-item-title {
   flex: 1;
