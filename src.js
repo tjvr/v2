@@ -1475,6 +1475,10 @@ class View {
 v2.emitter(View.prototype)
 
 class App extends View {
+  init() {
+    super.init()
+    this.hadMenus = false
+  }
   get title() {return this._title}
   set title(value) {
     const oldValue = this._title
@@ -1501,11 +1505,13 @@ class App extends View {
   _onActivate() {
     document.addEventListener('contextmenu', this._contextMenu)
     document.addEventListener('mousedown', this._appMouseDown, true)
+    document.addEventListener('mousedown', this._appMouseDownOut)
     document.addEventListener('keydown', this._appKeyDown)
   }
   _onDeactivate() {
     document.removeEventListener('contextmenu', this._contextMenu)
     document.removeEventListener('mousedown', this._appMouseDown, true)
+    document.removeEventListener('mousedown', this._appMouseDownOut)
     document.removeEventListener('keydown', this._appKeyDown)
   }
   _contextMenu(e) {
@@ -1539,9 +1545,13 @@ class App extends View {
     }
   }
   _appMouseDown(e) {
+    this.hadMenus = this.hasMenus
     const m = h.nearest('.v2-menu', e.target)
     if (m) return
     else this.hideMenus()
+  }
+  _appMouseDownOut() {
+    this.hadMenus = false
   }
 
   get hasMenus() {return this._menus.size > 0}
@@ -3262,7 +3272,8 @@ class Table extends ListBackedView {
     clearTimeout(this._editTimeout)
     const c = e.button === 0 && e.detail === 1 && !e.metaKey && !e.shiftKey && !e.altKey && !e.ctrlKey && h.nearest('.v2-table-cell', e.target)
     const r = c && c.parentElement.view
-    this._eligibleForEdit = r && r.selected && r._editing === -1 && this._selection.size === 1
+    const a = this.app
+    this._eligibleForEdit = (!a || !a.hadMenus) && r && r.selected && r._editing === -1 && this._selection.size === 1
     if (h.nearest('.v2-table-cell-editor', e.target)) return
     super._mouseDown(e)
   }
