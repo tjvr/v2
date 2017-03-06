@@ -3456,6 +3456,8 @@ class Table extends ListBackedView {
 Table.keyBindings = Table.keyBindings.concat([
   {key: 'ArrowUp', command: 'selectPrevious'},
   {key: 'ArrowDown', command: 'selectNext'},
+  {key: '^ArrowUp', command: 'selectPrevious', args: [true]},
+  {key: '^ArrowDown', command: 'selectNext', args: [true]},
 ])
 Table.Row = class Row extends View {
   init() {
