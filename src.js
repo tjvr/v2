@@ -3186,7 +3186,6 @@ Collection.Item = class Item extends View {
 }
 
 class Table extends ListBackedView {
-  // TODO headers
   init() {
     super.init()
     this._eligibleForEdit = false
