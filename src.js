@@ -3204,12 +3204,17 @@ class Table extends ListBackedView {
   }
   build() {
     return h('.v2-view.v2-table', {tabIndex: 0, onmousedown: '_mouseDown', onclick: '_click', ondblclick: '_dblclick', onfocusout: '_blur'},
-      h('.v2-table-header',
+      h('.v2-table-header', {onwheel: '_wheel'},
         this._header = h('.v2-table-header-inner')),
       this.container = h('.v2-table-contents', {onscroll: '_scroll'},
         this._overflow = h('.v2-table-overflow')))
   }
 
+  _wheel(e) {
+    e.preventDefault()
+    this.container.scrollTop += e.deltaY * (e.deltaMode === 1 ? this._rowHeight : e.deltaMode === 2 ? e.deltaY * this.container.offsetHeight : 1)
+    this.container.scrollLeft += e.deltaX * (e.deltaMode === 1 ? this._rowHeight : e.deltaMode === 2 ? this.container.offsetWidth : 1)
+  }
   _scroll() {
     this.scrollX = this.container.scrollLeft
     super._scroll()
