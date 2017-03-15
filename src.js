@@ -2,14 +2,14 @@
 'use strict'
 
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991
-function toLength(len) {
+function ToLength(len) {
   len = +len
   return len != len || len <= 0 ? 0 : len > MAX_SAFE_INTEGER ? MAX_SAFE_INTEGER : len
 }
 if (!String.prototype.padStart) String.prototype.padStart = function padStart(max, fill = ' ') {
   if (this == null) throw new TypeError('"this" value cannot be null or undefined')
   const s = '' + this
-  max = toLength(max)
+  max = ToLength(max)
   fill = '' + fill
   const len = s.length
   if (len >= max || !fill) return s
@@ -23,7 +23,7 @@ if (!String.prototype.padStart) String.prototype.padStart = function padStart(ma
 if (!String.prototype.padEnd) String.prototype.padEnd = function padEnd(max, fill = ' ') {
   if (this == null) throw new TypeError('"this" value cannot be null or undefined')
   const s = '' + this
-  max = toLength(max)
+  max = ToLength(max)
   fill = '' + fill
   const len = s.length
   if (len >= max || !fill) return s
