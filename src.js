@@ -1,7 +1,7 @@
 !function(global) {
 'use strict'
 
-const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || Math.pow(2, 53) - 1
+const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991
 function toLength(len) {
   len = +len
   return len != len || len <= 0 ? 0 : len > MAX_SAFE_INTEGER ? MAX_SAFE_INTEGER : len
