@@ -8,25 +8,6 @@ const {ucfirst, immediate, escapeRegExp} = require('./util')
 
 const v2 = {}
 
-v2.enum = function enum_(o) {
-  class Enum {
-    constructor(name, props) {
-      this.name = name
-      Object.assign(this, props)
-    }
-    toJSON() {return this.name}
-  }
-  if (typeof o === 'string') o = o.split(/\s*,\s*/)
-  if (Array.isArray(o)) {
-    for (const k of o) Enum[k] = new Enum(k)
-  } else {
-    for (const k of Object.keys(o)) {
-      Enum[k] = new Enum(k, o[k])
-    }
-  }
-  return Enum
-}
-
 const watchableProperty = require('./watchable-property')
 class Model {
   constructor(o) {if (o) Object.assign(this, o)}
