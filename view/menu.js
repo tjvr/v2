@@ -1,6 +1,7 @@
 'use strict'
 const h = require('../h')
 const format = require('../format')
+const {escapeRegExp} = require('../util')
 const View = require('./view')
 
 class Menu extends View {
