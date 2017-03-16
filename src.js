@@ -2,6 +2,9 @@
 require('./polyfill')
 const h = require('./h')
 const itt = require('itt')
+const emitter = require('./emitter')
+const rt = require('./rt')
+const {ucfirst, immediate, escapeRegExp} = require('./util')
 
 const v2 = {}
 
@@ -22,67 +25,6 @@ v2.enum = function enum_(o) {
     }
   }
   return Enum
-}
-
-v2.immediate = function immediate(fn) {return v2._nextPromise.then(fn)}
-v2._nextPromise = Promise.resolve()
-
-v2.toJSON = function toJSON(o, inPlace) {
-  if (!o || typeof o !== 'object') return o
-  if (o.toJSON) return v2.toJSON(o.toJSON(), true)
-  const result = inPlace ? o : Array.isArray(o) ? [] : {}
-  for (const k in o) {
-    const v = toJSON(o[k])
-    if (v !== undefined) result[k] = v
-    else if (inPlace) delete result[k]
-  }
-  return result
-}
-
-v2.debounce = function debounce(ms, fn) {
-  let timeout
-  return (...args) => {
-    clearTimeout(timeout)
-    timeout = setTimeout(() => fn(...args), ms)
-  }
-}
-v2.throttleImmediate = function throttleImmediate(fn) {
-  let set
-  return () => {
-    if (set) return
-    set = true
-    v2.immediate(() => {
-      set = false
-      fn()
-    })
-  }
-}
-
-v2.keyWithModifiers = function keyWithModifiers(e) {
-  return (v2.rt.isApple && e.ctrlKey ? '`' : '') + (e.shiftKey ? '^' : '') + (e.altKey ? '/' : '') + ((v2.rt.isApple ? e.metaKey : e.ctrlKey) ? '#' : '') + e.key
-}
-
-const ENTITY_RE = /[&<>"'/]/g
-v2.escapeEntities = function escapeEntities(s) {
-  return String(s).replace(ENTITY_RE, s =>
-    s === '&' ? '&amp;' :
-    s === '<' ? '&lt;' :
-    s === '>' ? '&gt;' :
-    s === '"' ? '&quot;' :
-    s === '\'' ? '&#x27;' :
-    s === '/' ? '&#x2f;' : '')
-}
-const SPECIAL_RE = /[\[\]{}()?*+.^$\\\/|-]/g
-v2.escapeRegExp = function escapeRegExp(s) {
-  return String(s).replace(SPECIAL_RE, '\\$&')
-}
-v2.ucfirst = function ucfirst(x) {return x.charAt(0).toUpperCase() + x.slice(1)}
-v2.foldSpace = function foldSpace(x) {return x.trim().replace(/\s+/g, ' ')}
-v2.stripHTML = function stripHTML(x) {
-  // this is why we can't have nice things
-  return x.replace(/<(?:\/|[a-z])[^ \t\f\n\/\>]*(?:[ \t\f\n]+(?:=?[^ \t\f\n\/>=]*(?:=(?:"[^"]*(?:"|$)|'[^']*(?:'|$)|[^ \t\f\n>]+)?)?)?|\/)*?\/?(?:>|$)|<!--[^]*?(?:(?:-?-)?>|(?:-?-!?)?$|<!--)|<!doctype[^>]*(?:>|$)|<[\/?!].*?(?:>|$)/gi, '')
-  // <!doctype[ \t\f\n]*[^ \t\f\n]*[ \t\f\n]*(?:(?:public[ \t\f\n]*(?:'[^'>]*(?:'|$)|"[^">]*(?:"|$))|system)[ \t\f\n]*(?:'[^'>]*(?:'|$)|"[^">]*(?:"|$)))?[^>]*(?:>|$)
-  // return new DOMParser().parseFromString(x, 'text/html').documentElement.textContent
 }
 
 v2.monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -217,12 +159,12 @@ v2.format = {
     const x = /^([\/#^]+)./.exec(s)
     if (x) s = s.slice(x[1].length)
     return (x ? v2.format.modifiers(x[1]) : '') + (
-      v2.rt.isApple && v2.format._appleKeyNames[s] ||
+      rt.isApple && v2.format._appleKeyNames[s] ||
       v2.format._keyNames[s] ||
-      v2.ucfirst(s))
+      ucfirst(s))
   },
   modifiers(s) {
-    const a = v2.rt.isApple
+    const a = rt.isApple
     return (s.includes(a ? '##' : '#') ? a ? v2.format._appleKeyNames.Control : 'Ctrl+' : '') +
       (s.includes('/') ? a ? v2.format._appleKeyNames.Alt : 'Alt+' : '') +
       (s.includes('^') ? a ? v2.format._appleKeyNames.Shift : 'Shift+' : '') +
@@ -246,239 +188,8 @@ v2.wrapBlob = function wrapBlob(blob, options) {
     else r.readAsText(blob)
   })
 }
-v2.asBlob = function asBlob(data, options) {
-  if (!options) options = {}
-  if (typeof data === 'string' || data.byteLength != null) return new Blob([data], {type: options.type || ''})
-  return data
-}
 
-v2.fs = {
-  readDirectory(dir, fn) {
-    const r = dir.createReader()
-    const promises = []
-    return new Promise(function loop(resolve, reject) {
-      r.readEntries(es => {
-        if (!es.length) return resolve(Promise.all(promises))
-        promises.push(...es.map(fn))
-        loop(resolve, reject)
-      }, e => reject(e))
-    })
-  },
-  recurse(dir, fn) {
-    return function loop(entry) {
-      const r = fn(entry)
-      return entry.isDirectory ? Promise.all([r, v2.fs.readDirectory(entry, loop)]) : r
-    }(dir)
-  },
-  createWriter(entry) {return new Promise((r, j) => entry.createWriter(r, j))},
-
-  file(entry) {return v2.fs._file(entry).then(v2.fs._adoptFile)},
-  _file(entry) {return new Promise((r, j) => entry.file(r, j))},
-  _adoptFile(f) {return f instanceof File ? f : new File([f], f.name, f)},
-
-  getFile(entry, path, options) {return new Promise((r, j) => entry.getFile(path, options || {}, r, j))},
-  getDirectory(entry, path, options) {return new Promise((r, j) => entry.getDirectory(path, options || {}, r, j))},
-}
-if (global.JSZip) v2.fs.zip = function zip(root) {
-  if (!root.isDirectory) throw new Error('Root zip entry must be a directory')
-  const i = root.fullPath.length + 1
-  const zip = new JSZip()
-  return v2.fs.recurse(root, e =>
-    e.isFile && v2.fs.file(e).then(f => zip.file(e.fullPath.slice(i), f)))
-  .then(() => zip)
-}
-
-v2.rt = {
-  platforms: ['mac', 'win', 'iOS', 'android', 'other'],
-  platform:
-    /Macintosh/.test(navigator.userAgent) ? 'mac' :
-    /Windows/.test(navigator.userAgent) ? 'win' :
-    /like Mac OS X/i.test(navigator.userAgent) ? 'iOS' :
-    /Android/i.test(navigator.userAgent) ? 'android' : 'other',
-  types: ['electron', 'chrome', 'web'],
-  type:
-    typeof process !== 'undefined' && process.versions && process.versions.electron ? 'electron' :
-    typeof chrome !== 'undefined' && chrome.app && chrome.app.runtime ? 'chrome' : 'web',
-}
-v2.rt.web = {
-  chooseFile(accept, options) {
-    if (!options) options = {}
-    const i = h('input', {type: 'file', accept, multiple: !!options.multiple})
-    return new Promise((resolve, reject) => {
-      i.onchange = e =>
-        i.files.length === 0 ? reject(new Error('No files selected')) :
-        resolve(options.multiple ? Array.from(i.files) : i.files[0])
-      i.click()
-    })
-  },
-  saveFile(data, name, options) {
-    if (!options) options = {}
-    data = v2.asBlob(data, options)
-    const a = h('a', {
-      download: name || '',
-      type: data.type || options.type || '',
-      href: URL.createObjectURL(data),
-    })
-    a.click()
-    requestIdleCallback(() => URL.revokeObjectURL(a.href))
-  },
-}
-v2.rt.chrome = {
-  _callback(fn, ...args) {
-    return new Promise((r, j) => fn(...args, x => chrome.runtime.lastError ? j(chrome.runtime.lastError) : r(x)))
-  },
-  hasPermission(info) {return v2.rt.chrome._callback(chrome.permissions.contains, info)},
-  restoreEntry(id) {return v2.rt.chrome._callback(chrome.fileSystem.restoreEntry, id)},
-  chooseEntry(options) {return v2.rt.chrome._callback(chrome.fileSystem.chooseEntry, options)},
-  chooseFile(type, options) {
-    if (!options) options = {}
-    return v2.rt.chrome.chooseEntry({
-      type: 'openFile',
-      acceptsMultiple: !!options.multiple,
-      accepts: options.accepts && [v2.rt.chrome._parseAccepts(options.accepts)],
-    }).then(entry => Array.isArray(entry) ?
-      Promise.all(entry.map(v2.fs.file)) : v2.fs.file(entry))
-  },
-  _parseAccepts(str) {
-    const mimeTypes = [], extensions = []
-    for (const part of str.split(',')) {
-      if (part[0] === '.') extensions.push(part.slice(1))
-      else mimeTypes.push(part)
-    }
-    return {mimeTypes, extensions}
-  },
-  saveFile(data, name, options) {
-    if (!options) options = {}
-    data = v2.asBlob(data, options)
-    return v2.rt.chrome.hasPermission({permissions: ['fileSystem.write']}).then(r => !r ? v2.rt.web.saveFile(data, name, options) : v2.rt.chrome.chooseEntry({
-      type: 'saveFile',
-      suggestedName: name,
-      accepts: [{
-        mimeTypes: [options.type || data.type],
-        extensions: [v2.path.ext(name)],
-      }],
-    }).then(e => v2.fs.createWriter(e)).then(w => new Promise((r, j) => {
-      w.onwrite = r
-      w.onerror = j
-      w.write(data)
-    })))
-  },
-}
-for (const t of v2.rt.types) {
-  v2.rt[`is${v2.ucfirst(t)}`] = v2.rt.type === t
-}
-for (const p of v2.rt.platforms) {
-  v2.rt[`is${v2.ucfirst(p)}`] = v2.rt.platform === p
-}
-v2.rt.isApple = v2.rt.isMac || v2.rt.isIOS
-v2.rt.current = v2.rt[v2.rt.type] || {}
-
-v2.chooseFile = v2.rt.current.chooseFile || v2.rt.web.chooseFile
-v2.saveFile = v2.rt.current.saveFile || v2.rt.web.saveFile
-
-v2.path = {
-  dirname(x) {
-    const p = /^(?:\w+:)?\//.exec(x)
-    const prefix = p ? p[0] : ''
-    const rx = x.slice(prefix.length)
-    const i = rx.lastIndexOf('/')
-    if (i === -1) return prefix
-    return prefix + rx.slice(0, i)
-  },
-  basename(x) {
-    const i = x.lastIndexOf('/')
-    if (i === -1) return x
-    return x.slice(i + 1)
-  },
-  sanitize(x) {
-    return v2.path.resolve('', x)
-  },
-  join(...parts) {
-    return parts.filter(p => p).join('/')
-  },
-  resolve(x, ...then) {
-    const p = /^(?:\w+:)?\//.exec(x)
-    const prefix = p ? p[0] : ''
-    const rx = x.slice(prefix.length)
-    const parts = rx ? rx.split('/') : []
-    for (const y of then) {
-      if (y[0] === '/') parts.length = 0
-      for (const t of y.split('/')) {
-        if (t === '.') continue
-        else if (t === '..') parts.pop()
-        else if (t) parts.push(t)
-      }
-    }
-    return prefix + parts.join('/')
-  },
-  ext(s) {
-    const i = s.lastIndexOf('/')
-    if (i !== -1) s = s.slice(i + 1)
-    const j = s.lastIndexOf('.')
-    return j === -1 ? '' : s.slice(j + 1)
-  },
-}
-
-v2.emitter = function emitter(o) {
-  Object.defineProperties(o, {
-    on: {value: function on(e, fn) {
-      const m = this._listeners || (this._listeners = new Map)
-      const l = m.get(e)
-      if (l) !l.includes(fn) && l.push(fn)
-      else m.set(e, [fn])
-      return this
-    }},
-    once: {value: function once(e, fn) {
-      const bound = x => {
-        fn(x)
-        this.unlisten(e, bound)
-      }
-      this.on(e, bound)
-      return this
-    }},
-    unlisten: {value: function unlisten(e, fn) {
-      const m = this._listeners
-      if (!m) return this
-      const l = m.get(e)
-      if (!l) return this
-      const i = l.indexOf(fn)
-      if (i !== -1) l.splice(i, 1)
-      return this
-    }},
-    toggleListener: {value: function toggleListener(e, fn, value) {
-      if (value) this.on(e, fn)
-      else this.unlisten(e, fn)
-    }},
-    listeners: {value: function listeners(e) {
-      const m = this._listeners
-      return m ? m.get(e) || [] : []
-    }},
-    emit: {value: function emit(e, arg) {
-      const m = this._listeners
-      if (!m) return
-      const l = m.get(e)
-      if (!l) return
-      for (let i = l.length; i--;) l[i](arg)
-      return this
-    }},
-  })
-}
-v2.watchableProperty = function watchableProperty(o, name, get) {
-  const _name = `_${name}`
-  const event = `${name} change`
-  Object.defineProperty(o, name, {
-    enumerable: true,
-    get: get || function get() {return this[_name]},
-    set(value) {
-      const oldValue = this[_name]
-      if (oldValue === value) return
-      this[_name] = value
-      const e = {target: this, name, value, oldValue}
-      this.emit(event, e)
-      this.emit('change', e)
-    },
-  })
-}
+const watchableProperty = require('./watchable-property')
 class Model {
   constructor(o) {if (o) Object.assign(this, o)}
   sendAllProperties(fn) {
@@ -497,7 +208,7 @@ class Model {
 
   static _property(name, opts) {
     this.dataProperties.push(name)
-    v2.watchableProperty(this.prototype, name, opts)
+    watchableProperty(this.prototype, name, opts)
   }
   static properties(...args) {
     for (const a of args) {
@@ -518,7 +229,7 @@ class Model {
   }
 }
 Model.prototype.dataProperties = []
-v2.emitter(Model.prototype)
+emitter(Model.prototype)
 
 v2.bind = function bind(a, aPath, b, bPath) {
   if (typeof aPath === 'string') aPath = aPath.split('.')
@@ -654,125 +365,7 @@ v2.request.post = function post(url, options) {
   return v2.request('POST', url, options)
 }
 
-class View {
-  get isView() {return true}
-  get isRoot() {return this.isLive && !this.parent}
-
-  get root() {return this.parent ? this.parent.root : this}
-  get app() {
-    const r = this.root
-    return r.isApp && r
-  }
-
-  *descendants() {
-    yield this
-    for (const c of this.children) yield* c.descendants()
-  }
-  *ancestors() {
-    for (let v = this; v; v = v.parent) yield v
-  }
-
-  constructor(p) {
-    this._listeners = null
-    this.children = new Set
-    this.parent = null
-    this.isLive = false
-
-    if (!p) p = {}
-    h.pushView(this)
-    this.el = this.build(p)
-    if (!this.container) this.container = this.el
-    this.el.view = this
-    this.init()
-    h.popView()
-    Object.assign(this, p)
-  }
-  init() {}
-  build() {
-    return h('.v2-view')
-  }
-  assemble(fn) {
-    h.pushView(this)
-    const result = fn()
-    h.popView()
-    return result
-  }
-  hasContext(c) {
-    return c.startsWith('!') ? !this._hasContext(c.slice(1)) : this._hasContext(c)
-  }
-  _hasContext(c) {
-    return c.startsWith('rt-') ? v2.rt.type === c.slice(3) :
-      c === 'pf-apple' ? v2.rt.isApple :
-      c.startsWith('pf-') ? v2.rt.platform === c.slice(3) : false
-  }
-
-  set(p) {
-    Object.assign(this, p)
-    return this
-  }
-  doCommand(name, args) {
-    this[name](...(args || []))
-  }
-
-  mount(mp, before) {
-    if (before) mp.insertBefore(this.el, before)
-    else mp.appendChild(this.el)
-    this._activate()
-    return this
-  }
-  unmount() {
-    if (this.parent) throw new Error("Can't unmount non-root view")
-    this.el.parentNode.removeChild(this.el)
-    this._deactivate()
-    return this
-  }
-  add(child, mount, before) {
-    if (child.parent) child._removeStructural()
-
-    if (!mount) mount = this.container
-    if (before) mount.insertBefore(child.el, before)
-    else mount.appendChild(child.el)
-
-    this.children.add(child)
-    child.parent = this
-    if (this.isLive) child._activate()
-    return this
-  }
-  _removeStructural() {
-    const p = this.parent
-    if (!p) return
-    p.children.delete(this)
-    this.parent = null
-    if (p._childRemoved) p._childRemoved(this)
-  }
-  remove() {
-    if (this.parent) this._removeStructural()
-    const parent = this.el.parentNode
-    if (parent) parent.removeChild(this.el)
-    this._deactivate()
-    return this
-  }
-  removeChildren() {
-    for (const c of this.children) c.remove()
-    return this
-  }
-
-  _deactivate() {
-    if (!this.isLive) return
-    this.isLive = false
-    for (const c of this.children) c._deactivate()
-    if (this._onDeactivate) this._onDeactivate()
-    this.emit('deactivate', {target: this})
-  }
-  _activate() {
-    if (this.isLive) return
-    this.isLive = true
-    for (const c of this.children) c._activate()
-    if (this._onActivate) this._onActivate()
-    this.emit('activate', {target: this})
-  }
-}
-v2.emitter(View.prototype)
+const View = require('./view/view')
 
 class App extends View {
   init() {
@@ -821,7 +414,7 @@ class App extends View {
     const t = e.target
     const tv = h.ownerView(t)
     const isGlobal = !tv || t === document.body
-    const key = v2.keyWithModifiers(e)
+    const key = rt.keyWithModifiers(e)
     const override = h.acceptsKeyboardInput(t, e)
     const cmd = key.includes('#')
     for (const v of isGlobal ? this.descendants() : tv.ancestors()) {
@@ -838,7 +431,7 @@ class App extends View {
         return
       }
     }
-    if (v2.rt.isMac && v2.rt.isChrome && key === '`#f') {
+    if (rt.isMac && rt.isChrome && key === '`#f') {
       const win = chrome.app.window.current()
       if (win.isFullscreen()) win.restore()
       else win.fullscreen()
@@ -1130,7 +723,7 @@ class List {
   _replaced(i, oldValues) {this._splice(i, oldValues.length, oldValues)}
   _changed(data) {
     if (!this._immediate) {
-      v2.immediate(this._sendChanges)
+      immediate(this._sendChanges)
       this._immediate = true
     }
     this._changes.push(data)
@@ -1168,7 +761,7 @@ class List {
   toString() {return this._data.toString()}
   toJSON() {return this._data}
 }
-v2.emitter(List.prototype)
+emitter(List.prototype)
 
 class FilteredList {
   constructor(o) {
@@ -1328,7 +921,7 @@ class FilteredList {
     this._sendChanges()
   }
 }
-v2.emitter(FilteredList.prototype)
+emitter(FilteredList.prototype)
 for (const k of '_splice _rawSplice _replaced _index get entries values keys forEach map filter some every reduce reduceRight includes indexOf lastIndexOf find findIndex join toLocaleString toString'.split(' ').concat(Symbol.iterator)) {
   FilteredList.prototype[k] = List.prototype[k]
 }
@@ -3025,7 +2618,7 @@ class Menu extends View {
   }
   selectByTitle(title) {
     if (!title) return
-    const re = new RegExp('^' + v2.escapeRegExp(title.trim()).replace(/\s+/, '\\s+'), 'i')
+    const re = new RegExp('^' + escapeRegExp(title.trim()).replace(/\s+/, '\\s+'), 'i')
     for (const v of this.children) {
       if (re.test(v.title)) return this.selectItem(v)
     }

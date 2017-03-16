@@ -1,5 +1,6 @@
 'use strict'
 const itt = require('itt')
+const rt = require('./rt')
 
 function h(sel, ...args) {
   const el = h.createElement(sel)
@@ -104,7 +105,7 @@ Object.assign(module.exports = h, {
     return e.key !== 'Escape' && (
       (x.localName === 'input' && (['text', 'search', 'tel', 'url', 'email', 'password', 'date', 'month', 'week', 'time', 'datetime-local', 'number', 'color'].includes(x.type) || ['radio', 'range'].includes(x.type) && arrow || ['checkbox', 'button', 'radio'].includes(x.type) && space) || x.localName === 'textarea' || x.localName === 'select') && !x.disabled ||
       x.isContentEditable ||
-      (x.localName === 'html' || x.localName === 'body') && x.ownerDocument.designMode === 'on') && (x.dataset.nativeKeybindings !== 'false' || e.key.length === 1 && !(e.ctrlKey || e.metaKey || !v2.rt.isApple && e.altKey))
+      (x.localName === 'html' || x.localName === 'body') && x.ownerDocument.designMode === 'on') && (x.dataset.nativeKeybindings !== 'false' || e.key.length === 1 && !(e.ctrlKey || e.metaKey || !rt.isApple && e.altKey))
   },
   // acceptsClick(x) {return h.isLink(x) || h.isFormElement(x)},
 
