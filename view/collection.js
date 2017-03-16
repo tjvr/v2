@@ -1,4 +1,5 @@
 'use strict'
+const itt = require('itt')
 const h = require('../h')
 const View = require('./view')
 const ListBackedView = require('./list-backed-view')
