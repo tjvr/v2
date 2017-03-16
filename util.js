@@ -57,4 +57,21 @@ function stripHTML(x) {
   // return new DOMParser().parseFromString(x, 'text/html').documentElement.textContent
 }
 
-module.exports = {immediate, debounce, throttleImmediate, toJSON, escapeEntities, escapeRegExp, ucfirst, foldSpace, stripHTML}
+function wrapBlob(blob, options) {
+  if (!options) options = {}
+  if (!blob) return Promise.reject(new Error('Not found'))
+  const type = options.as === 'xml' ? 'text/xml' : options.type || blob.type
+  const as = options.as === 'xml' ? 'document' : options.as || 'text'
+  if (as === 'blob') return Promise.resolve(options.type ? new Blob([blob], {type}) : blob)
+  return new Promise((resolve, reject) => {
+    const r = new FileReader
+    r.onerror = () => reject(r.error)
+    r.onload = () => resolve(
+      as === 'document' ? new DOMParser().parseFromString(r.result, type) :
+      as === 'json' ? JSON.parse(r.result) : r.result)
+    if (as === 'arraybuffer') r.readAsArrayBuffer(blob)
+    else r.readAsText(blob)
+  })
+}
+
+module.exports = {immediate, debounce, throttleImmediate, toJSON, escapeEntities, escapeRegExp, ucfirst, foldSpace, stripHTML, wrapBlob}

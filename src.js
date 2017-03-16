@@ -27,23 +27,6 @@ v2.enum = function enum_(o) {
   return Enum
 }
 
-v2.wrapBlob = function wrapBlob(blob, options) {
-  if (!options) options = {}
-  if (!blob) return Promise.reject(new Error('Not found'))
-  const type = options.as === 'xml' ? 'text/xml' : options.type || blob.type
-  const as = options.as === 'xml' ? 'document' : options.as || 'text'
-  if (as === 'blob') return Promise.resolve(options.type ? new Blob([blob], {type}) : blob)
-  return new Promise((resolve, reject) => {
-    const r = new FileReader
-    r.onerror = () => reject(r.error)
-    r.onload = () => resolve(
-      as === 'document' ? new DOMParser().parseFromString(r.result, type) :
-      as === 'json' ? JSON.parse(r.result) : r.result)
-    if (as === 'arraybuffer') r.readAsArrayBuffer(blob)
-    else r.readAsText(blob)
-  })
-}
-
 const watchableProperty = require('./watchable-property')
 class Model {
   constructor(o) {if (o) Object.assign(this, o)}
