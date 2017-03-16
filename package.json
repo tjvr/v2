@@ -1,0 +1,6 @@
+{
+  "main": "src.js",
+  "dependencies": {
+    "itt": "^0.1.2"
+  }
+}

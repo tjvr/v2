@@ -1,211 +1,7 @@
-!function(global) {
 'use strict'
-
-const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991
-function ToLength(len) {
-  len = +len
-  return len != len || len <= 0 ? 0 : len > MAX_SAFE_INTEGER ? MAX_SAFE_INTEGER : len
-}
-if (!String.prototype.padStart) String.prototype.padStart = function padStart(max, fill = ' ') {
-  if (this == null) throw new TypeError('"this" value cannot be null or undefined')
-  const s = '' + this
-  max = ToLength(max)
-  fill = '' + fill
-  const len = s.length
-  if (len >= max || !fill) return s
-  const toFill = max - len
-  let r, l
-  while ((r = toFill - (l = fill.length)) > 0) {
-    fill += r < l ? fill.slice(0, r) : fill
-  }
-  return fill.slice(0, toFill) + s
-}
-if (!String.prototype.padEnd) String.prototype.padEnd = function padEnd(max, fill = ' ') {
-  if (this == null) throw new TypeError('"this" value cannot be null or undefined')
-  const s = '' + this
-  max = ToLength(max)
-  fill = '' + fill
-  const len = s.length
-  if (len >= max || !fill) return s
-  const toFill = max - len
-  let r, l
-  while ((r = toFill - (l = fill.length)) > 0) {
-    fill += r < l ? fill.slice(0, r) : fill
-  }
-  return s + fill.slice(0, toFill)
-}
-
-function h(sel, ...args) {
-  const el = h.createElement(sel)
-  h.add(el, args)
-  return el
-}
-Object.assign(h, {
-  _views: [],
-  _view: null,
-
-  html(s) {
-    // TODO tr etc.
-    const d = document.createElement('div')
-    d.innerHTML = s
-    const f = document.createDocumentFragment()
-    while (d.firstChild) f.appendChild(d.firstChild)
-    return f
-  },
-
-  pushView(v) {
-    if (h._view) h._views.push(h._view)
-    h._view = v
-  },
-  popView(v) {h._view = h._views.pop()},
-
-  ownerView(v) {
-    for (; v; v = v.parentElement) if (v.view) return v.view
-  },
-
-  nearest(sel, el, stop) {
-    for (; el && el.nodeType === 1 && el !== stop; el = el.parentNode) {
-      if (el.matches(sel)) return el
-    }
-  },
-  nextMatching(sel, el, stop) {
-    for (; el && el !== stop; el = el.nextElementSibling) {
-      if (el.matches(sel)) return el
-    }
-  },
-  nextDescendantMatching(sel, el, stop) {
-    if (el === stop) return
-    for (; el; el = h.next(el, stop)) {
-      if (el.nodeType === 1 && el.matches(sel)) return el
-    }
-  },
-  previousMatching(sel, el, stop) {
-    for (; el && el !== stop; el = el.previousElementSibling) {
-      if (el.matches(sel)) return el
-    }
-  },
-  previousDescendantMatching(sel, el, stop) {
-    for (; el && el !== stop; el = h.previous(el, stop)) {
-      if (el.nodeType === 1 && el.matches(sel)) return el
-    }
-  },
-  next(x, stop) {return x.firstChild || h.nextSkippingChildren(x, stop)},
-  nextSkippingChildren(x, stop) {
-    for (; x && x !== stop; x = x.parentNode) {
-      if (x.nextSibling) return x.nextSibling
-    }
-  },
-  previous(x, stop) {return x === stop ? null : x.previousSibling ? h.lastDescendant(x.previousSibling, stop) : x.parentNode},
-  lastDescendant(x, stop) {
-    for (; x && x !== stop; x = x.lastChild) {
-      if (!x.lastChild) return x
-    }
-  },
-
-  constrainTab(e, root) {
-    if (e.key !== 'Tab' || e.metaKey || e.ctrlKey) return
-    const advance = e.shiftKey ? h.previous : h.next
-    let t = e.target
-    const name = t.localName === 'input' && t.type === 'radio' && t.name
-    for (t = advance(t, root); t; t = advance(t, root)) {
-      if (t.nodeType === 1 && h.isFocusable(t) && (!name || t.localName !== 'input' || t.type !== 'radio' || t.name !== name)) return true
-    }
-    const f = (e.shiftKey ? h.lastFocusable : h.firstFocusable)(root)
-    if (f) f.focus()
-    e.preventDefault()
-    e.stopPropagation()
-    return true
-  },
-  firstFocusable(root) {
-    for (let t = root; t; t = h.next(t, root)) {
-      if (t.nodeType === 1 && h.isFocusable(t)) return t
-    }
-  },
-  lastFocusable(root) {
-    for (let t = h.lastDescendant(root); t; t = h.previous(t, root)) {
-      if (t.nodeType === 1 && h.isFocusable(t)) return t
-    }
-  },
-
-  isLink(x) {return (x.localName === 'a' || x.localName === 'area') && x.hasAttribute('href')},
-  isFormElement(x) {return (x.localName === 'input' && x.type !== 'hidden' || x.localName === 'textarea' || x.localName === 'select' || x.localName === 'button')},
-  // isFocusable(x) {return h.isLink(x) || h.isFormElement(x) && !x.disabled || x.localName === 'iframe' || x.localName === 'object' || x.localName === 'embed' || x.tabIndex != null || x.localName === 'html' && x.ownerDocument.designMode === 'on' || x.isContentEditable}
-  isFocusable(x) {return (x.tabIndex > -1 || x.hasAttribute('tabindex')) && !x.disabled},
-  acceptsKeyboardInput(x, e) {
-    const arrow = ['ArrowLeft', 'ArrowUp', 'ArrowDown', 'ArrowRight'].includes(e.key)
-    const space = e.key === ' '
-    return e.key !== 'Escape' && (
-      (x.localName === 'input' && (['text', 'search', 'tel', 'url', 'email', 'password', 'date', 'month', 'week', 'time', 'datetime-local', 'number', 'color'].includes(x.type) || ['radio', 'range'].includes(x.type) && arrow || ['checkbox', 'button', 'radio'].includes(x.type) && space) || x.localName === 'textarea' || x.localName === 'select') && !x.disabled ||
-      x.isContentEditable ||
-      (x.localName === 'html' || x.localName === 'body') && x.ownerDocument.designMode === 'on') && (x.dataset.nativeKeybindings !== 'false' || e.key.length === 1 && !(e.ctrlKey || e.metaKey || !v2.rt.isApple && e.altKey))
-  },
-  // acceptsClick(x) {return h.isLink(x) || h.isFormElement(x)},
-
-  isFullscreen(d = document) {return !!h.fullscreenElement(d)},
-  fullscreenElement(d = document) {return d.webkitFullscreenElement || d.webkitFullScreenElement || d.mozFullscreenElement || d.mozFullScreenElement || d.msFullScreenElement || d.msFullscreenElement},
-  enterFullscreen(e) {
-    const fn = e.requestFullscreen || e.webkitRequestFullScreen || e.webkitRequestFullscreen || e.mozRequestFullScreen || e.mozRequestFullscreen || e.msRequestFullScreen || e.msRequestFullscreen
-    if (fn) fn.call(e, Element.ALLOW_KEYBOARD_INPUT)
-  },
-  exitFullscreen(d = document) {
-    const fn = d.exitFullscreen || d.webkitExitFullscreen || d.webkitCancelFullScreen || d.mozExitFullscreen || d.mozCancelFullScreen || d.msExitFullscreen || d.msCancelFullScreen
-    if (fn) fn.call(d)
-  },
-
-  createElement(sel) {
-    const parts = (sel || '').split(/([#.])/)
-    const el = document.createElement(parts[0] || 'div')
-    const l = parts.length
-    if (l > 1) {
-      const classes = []
-      for (let i = 1; i < l; i += 2) {
-        if (parts[i] === '#') el.id = parts[i + 1]
-        else classes.push(parts[i + 1])
-      }
-      el.className = classes.join(' ')
-    }
-    return el
-  },
-  add(el, a) {
-    if (a && typeof a === 'object') {
-      if (a.isView) h._view.add(a, el)
-      else if (a.nodeType) el.appendChild(a)
-      // else if (a.then) h.addPromise(el, a)
-      else if (Array.isArray(a) || v2.iter.is(a)) {
-        for (const c of a) h.add(el, c)
-      } else h.attrs(el, a)
-    } else {
-      el.appendChild(document.createTextNode(String(a)))
-    }
-  },
-  // addPromise(el, a) {
-  //   function replace(a) {
-  //     if (Array.isArray(a)) {
-  //       for (const c of a) h.add(f, c)
-  //     } else if (typeof a === 'object' && a) {
-  //       if (a.isView) h._view.add(a, el)
-  //       else if (a.nodeType) el.appendChild(a)
-  //       else if (a.then) h.addPromise(el, a)
-  //       else h.attrs(el, a)
-  //     } else {
-  //       el.appendChild(document.createTextNode(String(a)))
-  //     }
-  //   }
-  //   const tn = document.createTextNode('')
-  //   el.appendChild(tn)
-  //   a.then(replace)
-  // },
-  attrs(el, a) {
-    for (const k in a) {
-      const v = a[k]
-      if (typeof v === 'object') h.attrs(el[k], v)
-      else if (k.startsWith('on')) el.addEventListener(k.slice(2), typeof v === 'string' ? h._view[v].bind(h._view) : v)
-      else el[k] = v
-    }
-  },
-
-  removeChildren(el) {while (el.firstChild) el.removeChild(el.lastChild)},
-})
+require('./polyfill')
+const h = require('./h')
+const itt = require('itt')
 
 const v2 = {}
 
@@ -618,8 +414,8 @@ v2.rt = {
     /Android/i.test(navigator.userAgent) ? 'android' : 'other',
   types: ['electron', 'chrome', 'web'],
   type:
-    global.process && process.versions && process.versions.electron ? 'electron' :
-    global.chrome && chrome.app && chrome.app.runtime ? 'chrome' : 'web',
+    typeof process !== 'undefined' && process.versions && process.versions.electron ? 'electron' :
+    typeof chrome !== 'undefined' && chrome.app && chrome.app.runtime ? 'chrome' : 'web',
 }
 v2.rt.web = {
   chooseFile(accept, options) {
@@ -697,320 +493,6 @@ v2.rt.current = v2.rt[v2.rt.type] || {}
 v2.chooseFile = v2.rt.current.chooseFile || v2.rt.web.chooseFile
 v2.saveFile = v2.rt.current.saveFile || v2.rt.web.saveFile
 
-v2.iter = function() {
-  function is(xs) {return typeof xs[Symbol.iterator] === 'function' || typeof xs.next === 'function'}
-  function from(xs) {return new Iter(typeof xs[Symbol.iterator] === 'function' ? xs[Symbol.iterator]() : xs)}
-  function generator(gen) {return (...args) => new Iter(gen(...args))}
-  const G = generator
-
-  const range = G(function*(start, end, skip = 1) {
-    if (end === undefined) [start, end] = [0, start]
-    if (skip > 0) for (let i = start; i < end; i += skip) yield i
-    else for (let i = start; i > end; i += skip) yield i
-  })
-  const irange = G(function*(start = 0, skip = 1) {
-    for (let i = start; ; i += skip) yield i
-  })
-  const replicate = G(function*(n, x) {for (let i = 0; i < n; ++i) yield x})
-  const forever = G(function*(x) {for (;;) yield x})
-  const iterate = G(function*(x, fn) {for (;; x = fn(x)) yield x})
-
-  const entries = G(function*(o) {for (const k of Object.keys(o)) yield [k, o[k]]})
-  function keys(o) {return new Iter(Object.keys(o)[Symbol.iterator]())}
-  const values = G(function*(o) {for (const k of Object.keys(o)) yield o[k]})
-
-  function split(xs, n = 2) {return new SplitSource(xs, n).derived}
-  const cycle = G(function*(xs) {
-    const cache = []
-    for (const x of xs) {
-      cache.push(xs)
-      yield x
-    }
-    for (;;) yield* cache
-  })
-  const enumerate = G(function*(xs) {let i = 0; for (const x of xs) yield [i++, x]})
-  const map = G(function*(xs, fn) {for (const x of xs) yield fn(x)})
-  const filter = G(function*(xs, fn) {for (const x of xs) if (fn(x)) yield x})
-  const concat = G(function*(...xss) {for (const xs of xss) yield* xs})
-  const push = G(function*(xs, ...ys) {yield* xs; yield* ys})
-  const unshift = G(function*(xs, ...ys) {yield* ys; yield* xs})
-  const flatten = G(function*(xss) {for (const xs of xss) yield* xs})
-  const chunksOf = G(function*(n, xs) {
-    let list = []
-    for (const x of xs) {
-      if (list.length >= n) {yield list; list = []}
-      list.push(x)
-    }
-    if (list.length) yield list
-  })
-  const drop = G(function*(n, xs) {for (const x of xs) if (n <= 0) yield x; else --n})
-  const dropWhile = G(function*(xs, fn) {let init = true; for (const x of xs) if (!init || !fn(x)) {init = false; yield x}})
-  const dropLast = G(function*(n, xs) {
-    if (n === 0) yield* xs; else {
-      const list = []
-      let i = 0
-      for (const x of xs) {
-        if (i >= n) yield list[i % n]
-        list[i++ % n] = x
-      }
-    }
-  })
-  const take = G(function*(n, xs) {for (const x of xs) if (n-- > 0) yield x; else return})
-  const takeWhile = G(function*(fn, xs) {for (const x of xs) if (fn(x)) yield x; else return})
-  const takeLast = G(function*(n, xs) {
-    const list = []
-    let i = 0
-    for (const x of xs) list[i++ % n] = x
-    if (n > list.length) n = list.length
-    for (let j = 0; j < n; j++) yield list[(i + j) % n]
-  })
-  const zip = G(function*(...xss) {
-    const its = map(xs => xs[Symbol.iterator](), xss)
-    for (;;) {
-      const rs = its.map(it => it.next())
-      if (some(r => r.done, rs)) return
-      yield rs.map(r => r.value)
-    }
-  })
-
-  function every(fn, xs) {for (const x of xs) if (!fn(x)) return false; return true}
-  function some(fn, xs) {for (const x of xs) if (fn(x)) return true; return false}
-  function find(fn, xs) {for (const x of xs) if (fn(x)) return x}
-  // function findIndex(fn, xs) {for (const [i, x] of enumerate(xs)) if (fn(x)) return i}
-  function findIndex(fn, xs) {let i = 0; for (const x of xs) {if (fn(x)) return i; ++i} return -1}
-  function findLastIndex(fn, xs) {let i = 0, j = -1; for (const x of xs) {if (fn(x)) j = i; ++i} return j}
-  //function indexOf(y, xs) {return findIndex(x => x === y, xs)}
-  function indexOf(y, xs) {let i = 0; for (const x of xs) {if (x === y) return i; ++i} return -1}
-  function lastIndexOf(y, xs) {let i = 0, j = -1; for (const x of xs) {if (x === y) j = i; ++i} return j}
-  function includes(y, xs) {
-    for (const x of xs) if (x === y) return true
-    return false
-  }
-  function reduce(a, fn, xs) {for (const x of xs) a = fn(a, x); return a}
-  function inject(a, fn, xs) {for (const x of xs) fn(a, x); return a}
-
-  function first(xs) {
-    if (Array.isArray(xs)) return xs[0]
-    for (const x of xs) return x
-  }
-  const head = first
-  function last(xs) {
-    if (Array.isArray(xs)) return xs[xs.length - 1]
-    let z
-    for (const x of xs) z = x
-    return z
-  }
-  function tail(xs) {return drop(1, xs)}
-  function init(xs) {return dropLast(1, xs)}
-
-  function count(xs) {if (Array.isArray(xs)) return xs.length; let i = 0; for (const x of xs) ++i; return i}
-  function pick(i, xs) {if (Array.isArray(xs)) return xs[i]; for (const x of xs) if (i-- <= 0) return x}
-
-  function sum(xs) {return reduce(0, (x, y) => x + y, xs)}
-  function product(xs) {return reduce(1, (x, y) => x * y, xs)}
-  function max(xs) {return reduce(-Infinity, Math.max, xs)}
-  function min(xs) {return reduce(Infinity, Math.min, xs)}
-  function groupBy(fn, xs) {return inject(new Map, (m, x) => {
-    const k = fn(x), l = m.get(k)
-    if (l) l.push(x)
-    else m.set(k, [x])
-  }, xs)}
-
-  const unique = G(function*(xs) {
-    const used = new Set
-    for (const x of xs) {
-      if (!used.has(x)) {
-        yield x
-        used.add(x)
-      }
-    }
-  })
-
-  function toArray(xs) {return Array.from(xs)}
-  const array = toArray
-  function toMap(xs) {return new Map(xs)}
-  function toSet(xs) {return new Set(xs)}
-  function toObject(xs, empty = false) {
-    const o = empty ? Object.create(null) : {}
-    for (const [k, v] of xs) {
-      o[k] = v
-    }
-    return o
-  }
-  const intersperse = G(function*(sep, xs) {
-    let use = false
-    for (const x of xs) {
-      if (use) yield sep
-      yield x
-      use = true
-    }
-  })
-  function join(sep, xs) {
-    let s = ''
-    if (sep) {
-      let use = false
-      for (const x of xs) {
-        if (use) s += sep
-        s += x
-        use = true
-      }
-    } else {
-      for (const x of xs) s += x
-    }
-    return s
-  }
-
-  const slice = G(function*(xs, start = 0, end) {
-    if (Array.isArray(xs)) {
-      if (start < 0) start += array.length
-      if (end === undefined) end = array.length
-      else if (end < 0) end += array.length
-      for (let i = start; i < end; ++i) yield array[i]
-    } else if (end === undefined) {
-      yield* start < 0 ? takeLast(-start, xs) : drop(start, xs)
-    } else if (start >= 0) {
-      let i = 0
-      if (end === 0) return
-      else if (end > 0) {
-        for (const x of xs) {
-          if (i >= start) yield x
-          if (++i >= end) return
-        }
-      } else {
-        // yield* dropLast(-end, drop(start, xs))
-        const list = []
-        const n = -end
-        for (const x of xs) {
-          if (i >= start) {
-            const k = (i - start) % n
-            if (i - start >= n) yield list[k]
-            list[k] = x
-          }
-          ++i
-        }
-      }
-    } else {
-      // yield* dropLast(-end, takeLast(-start, xs))
-      const list = []
-      let n = -start
-      let i = 0
-      for (const x of xs) list[i++ % n] = x
-      if (n > list.length) n = list.length
-      for (let j = 0; j < n + end; j++) yield list[(i + j) % n]
-    }
-  })
-
-  class Iter {
-    constructor(inner) {this.inner = inner}
-    [Symbol.iterator]() {return this.inner}
-    next() {return this.inner.next()}
-    array() {return Array.from(this.inner)}
-    toArray() {return Array.from(this.inner)}
-    toMap() {return new Map(this.inner)}
-    toSet() {return new Set(this.inner)}
-    toObject(empty = false) {return toObject(this.inner, empty)}
-    join(sep) {return join(sep, this)}
-    intersperse(sep) {return intersperse(sep, this)}
-
-    split() {return split(this.inner)}
-    cycle() {return cycle(this.inner)}
-    enumerate() {return enumerate(this.inner)}
-    map(fn) {return map(this.inner, fn)}
-    filter(fn) {return filter(this.inner, fn)}
-    concat(...xs) {return concat(this.inner, ...xs)}
-    push(...xs) {return push(this.inner, ...xs)}
-    unshift(...xs) {return unshift(this.inner, ...xs)}
-    flatten() {return flatten(this.inner)}
-    chunksOf(n) {return chunksOf(n, this.inner)}
-    drop(n) {return drop(n, this.inner)}
-    dropWhile(fn) {return dropWhile(this.inner, fn)}
-    dropLast(n) {return dropLast(n, this.inner)}
-    take(n) {return take(n, this.inner)}
-    takeWhile(fn) {return takeWhile(this.inner, fn)}
-    takeLast(n) {return takeLast(n, this.inner)}
-    zip(...xs) {return zip(...[this.inner, ...xs])}
-
-    every(fn) {return every(fn, this.inner)}
-    some(fn) {return some(fn, this.inner)}
-    find(fn) {return find(fn, this.inner)}
-    findIndex(fn) {return findIndex(fn, this.inner)}
-    findLastIndex(fn) {return findLastIndex(fn, this.inner)}
-    indexOf(x) {return indexOf(x, this.inner)}
-    lastIndexOf(x) {return lastIndexOf(x, this.inner)}
-    includes(x) {return includes(x, this.inner)}
-    reduce(x, fn) {return reduce(x, fn, this.inner)}
-    inject(x, fn) {return inject(x, fn, this.inner)}
-
-    first() {return first(this.inner)}
-    head() {return first(this.inner)}
-    last() {return last(this.inner)}
-    tail() {return tail(this.inner)}
-    init() {return init(this.inner)}
-    count() {return count(this.inner)}
-    pick(i) {return pick(i, this.inner)}
-
-    sum() {return sum(this.inner)}
-    product() {return product(this.inner)}
-    max() {return max(this.inner)}
-    min() {return min(this.inner)}
-
-    groupBy(fn) {return groupBy(fn, this.inner)}
-    unique() {return unique(this.inner)}
-
-    slice(start, end) {return slice(this.inner, start, end)}
-  }
-  class SplitSource {
-    constructor(iter, n) {
-      this.iter = iter
-      this.derived = Array(n)
-      for (let i = this.derived.length; i--;) {
-        this.derived[i] = new SplitIter(this)
-      }
-    }
-    [Symbol.iterator]() {return this.derived[Symbol.iterator]()}
-    pull() {
-      const {done, value} = this.iter.next()
-      if (done) return
-      for (const b of this.derived) b.push(value)
-    }
-  }
-  class SplitIter extends Iter {
-    constructor(source) {
-      super(this)
-      this.inner = this
-      this.buffer = []
-      this.source = source
-    }
-    [Symbol.iterator]() {return this}
-    push(v) {this.buffer.push(v)}
-    next() {
-      if (!this.buffer.length) this.source.pull()
-      return this.buffer.length ? {done: false, value: this.buffer.shift()} : {done: true}
-    }
-  }
-
-  Object.assign(from, {
-    is, from, generator,
-    range, irange, replicate, forever, iterate,
-    entries, keys, values,
-    array, toArray, toMap, toSet, toObject,
-    intersperse, join,
-
-    split, cycle, enumerate,
-    map, filter, concat, push, unshift, flatten, chunksOf,
-    drop, dropWhile, dropLast,
-    take, takeWhile, takeLast,
-    zip,
-    every, some, find, findIndex, findLastIndex, indexOf, lastIndexOf, includes, reduce, inject,
-    first, head, last, tail, init,
-    count, pick,
-    sum, product, max, min,
-    groupBy, unique,
-    slice,
-  })
-  return from
-}()
-
 v2.path = {
   dirname(x) {
     const p = /^(?:\w+:)?\//.exec(x)
@@ -1051,71 +533,6 @@ v2.path = {
     if (i !== -1) s = s.slice(i + 1)
     const j = s.lastIndexOf('.')
     return j === -1 ? '' : s.slice(j + 1)
-  },
-}
-
-const CSV_RE = /(?:\s*"((?:[^"]|"")*)"\s*|([^,\r\n]*))(?:(\r\n|[\r\n]|$)|,)/y
-const CSV_QUOTE_RE = /["\r\n,]/
-const TO_STRING = Object.prototype.toString
-v2.csv = {
-  parseRaw(str) {
-    const result = []
-    let record = []
-    let i = 0
-    while (i < str.length) {
-      CSV_RE.lastIndex = i
-      const m = CSV_RE.exec(str)
-      if (!m) break // impossible
-      if (m[1] != null || m[2] || m[2] === '' && m[3] == null) {
-        record.push(m[1] != null ? m[1].replace(/""/g, '"') : m[2])
-      }
-      if (m[3] != null) {
-        if (record.length) result.push(record)
-        record = []
-      }
-      i += m[0].length
-    }
-    if (record.length) result.push(record)
-    return result
-  },
-  parse(str, whitelist, asObject = false) {
-    const records = v2.csv.parseRaw(str)
-    if (!records.length) throw new Error('Missing header')
-    let names = records.shift()
-    if (whitelist) {
-      whitelist = new Set(whitelist)
-      names = names.map(n => whitelist.has(n) ? n : null)
-    }
-    const l = names.length
-    return records.map(record => {
-      const result = asObject ? {} : new Map
-      for (let i = 0; i < l; ++i) {
-        const n = names[i]
-        if (n == null) continue
-        if (asObject) result[names[i]] = record[i]
-        else result.set(names[i], record[i])
-      }
-      return result
-    })
-  },
-  stringifyRaw(rs) {
-    return rs.map(r => r.map(v => CSV_QUOTE_RE.test(v = String(v)) ? '"' + v.replace(/"/g, '""') + '"' : v).join(',')).join('\r\n')
-  },
-  stringify(rs) {
-    const isMap = []
-    const nameSet = new Set()
-    for (let i = 0; i < rs.length; ++i) {
-      const r = rs[i]
-      const ism = isMap[i] = TO_STRING.call(r) === '[object Map]'
-      for (const k of ism ? r.keys() : Object.keys(r)) nameSet.add(k)
-    }
-    const names = [...nameSet]
-    const result = rs.map((r, i) => names.map(n => {
-      const x = isMap[i] ? r.get(n) : r[n]
-      return x == null ? '' : x
-    }))
-    result.unshift(names)
-    return v2.csv.stringifyRaw(result)
   },
 }
 
@@ -1270,19 +687,19 @@ v2.bind.Side = class Side {
 
   get value() {
     if (this.isIncomplete) return null
-    return v2.iter.last(this.intermediates)[v2.iter.last(this.path)]
+    return itt.last(this.intermediates)[itt.last(this.path)]
   }
   set value(value) {
     if (this.isIncomplete) return
-    v2.iter.last(this.intermediates)[v2.iter.last(this.path)] = value
+    itt.last(this.intermediates)[itt.last(this.path)] = value
   }
 
   update() {
     if (this.isIncomplete) return
     const value = this.other.value
     if (!value) return
-    const object = v2.iter.last(this.intermediates)
-    const name = v2.iter.last(this.path)
+    const object = itt.last(this.intermediates)
+    const name = itt.last(this.path)
     if (object[name] !== value) object[name] = value
   }
 
@@ -2857,7 +2274,7 @@ class ListBackedView extends View {
       if (e.metaKey || e.ctrlKey) {
         this.toggleSelect(i)
       } else if (e.shiftKey && this._selection.size) {
-        this.selectRange(v2.iter.last(this._selection), i, true)
+        this.selectRange(itt.last(this._selection), i, true)
       } else if (e.button !== 2 || !this._selection.has(i)) {
         this.select(i)
       }
@@ -2881,14 +2298,14 @@ class ListBackedView extends View {
   focus() {this.el.focus()}
 
   selectPrevious(add) {
-    let i = v2.iter.last(this._selection)
+    let i = itt.last(this._selection)
     if (i == null || i === 0) return this.selectFirst()
     while (!this._model.get(--i)) if (i <= 0) return
     this.select(i, add)
     this.scrollToIndexIfNecessary(i)
   }
   selectNext(add) {
-    let i = v2.iter.last(this._selection)
+    let i = itt.last(this._selection)
     const last = this.model.length
     if (i == null || i >= last) return this.selectFirst()
     while (!this._model.get(++i)) if (i >= last) return
@@ -3016,7 +2433,7 @@ class Collection extends ListBackedView {
   }
 
   selectLeft(add) {
-    let i = v2.iter.last(this._selection)
+    let i = itt.last(this._selection)
     if (i == null) return this.selectFirst()
     const first = (i / this.itemsPerLine | 0) * this.itemsPerLine
     if (i === first) return
@@ -3025,7 +2442,7 @@ class Collection extends ListBackedView {
     this.scrollToIndexIfNecessary(i)
   }
   selectRight(add) {
-    let i = v2.iter.last(this._selection)
+    let i = itt.last(this._selection)
     if (i == null) return this.selectFirst()
     const last = (i / this.itemsPerLine + 1 | 0) * this.itemsPerLine - 1
     if (i === last) return
@@ -3034,7 +2451,7 @@ class Collection extends ListBackedView {
     this.scrollToIndexIfNecessary(i)
   }
   selectUp(add) {
-    let i = v2.iter.last(this._selection)
+    let i = itt.last(this._selection)
     if (i == null) return this.selectFirst()
     const start = i % this.itemsPerLine
     if (i === start) return
@@ -3043,7 +2460,7 @@ class Collection extends ListBackedView {
     this.scrollToIndexIfNecessary(i)
   }
   selectDown(add) {
-    let i = v2.iter.last(this._selection)
+    let i = itt.last(this._selection)
     if (i == null) return this.selectFirst()
     const end = this._model.length - (this._model.length - i) % this.itemsPerLine
     if (i === end) return
@@ -3336,7 +2753,7 @@ class Table extends ListBackedView {
   }
   makeColumnMenu() {
     return new Menu({target: this.toggleColumn.bind(this), spec:
-      v2.iter.entries(this.definitions).map(([id, c]) =>
+      itt.entries(this.definitions).map(([id, c]) =>
         [c.name, id, {state: this._columns.includes(id) ? 'checked' : ''}]).array()})
   }
   toggleColumn(column) {
@@ -3397,13 +2814,13 @@ class Table extends ListBackedView {
   }
   get columnUserData() {
     return {
-      sizes: v2.iter.entries(this.definitions).map(([k, o]) => [k, o.width]).toObject(),
+      sizes: itt.entries(this.definitions).map(([k, o]) => [k, o.width]).toObject(),
       visible: this._columns,
     }
   }
   set columnUserData(data) {
     if (!data) return
-    if (data.sizes) for (const [k, w] of v2.iter.entries(data.sizes)) {
+    if (data.sizes) for (const [k, w] of itt.entries(data.sizes)) {
       this.definitions[k].width = w
     }
     if (data.visible) this.columns = data.visible
@@ -3925,9 +3342,6 @@ class MenuItem extends View {
   }
 }
 
-Object.assign(v2, {Model, View, App, Split, List, FilteredList, CyNode, Node, DynamicTreeItem, DynamicTree, Tree, Collection, Table, Menu, MenuBar, MenuItem})
+Object.assign(v2, {h, Model, View, App, Split, List, FilteredList, CyNode, Node, DynamicTreeItem, DynamicTree, Tree, Collection, Table, Menu, MenuBar, MenuItem})
 
-global.h = h
-global.v2 = v2
-
-}(this)
+module.exports = v2
