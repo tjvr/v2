@@ -242,48 +242,8 @@ class App extends View {
   }
 }
 
-const Model = require('./model/model')
-class CyNode extends Model {
-  constructor(data, children) {
-    super({data})
-    this.children = children || []
-  }
-
-  clear() {
-    for (const c of this.children) c._removed()
-    let index = this.children.length
-    this.children.length = 0
-    while (index--) this.emit('child removed', {target: this, index})
-  }
-  add(node) {
-    node._moveTo(this)
-    const index = this.children.length
-    this.children.push(node)
-    this.emit('child inserted', {target: this, node, index})
-  }
-  insert(node, index) {
-    node._moveTo(this)
-    this.children.splice(index, 0, node)
-    this.emit('child inserted', {target: this, node, index})
-  }
-  removeAt(index) {
-    const child = this.children[index]
-    if (!child) return
-    this.children.splice(index, 1)
-    child._removed()
-    this.emit('child removed', {target: this, index})
-  }
-  _moveTo(parent) {}
-  _removed() {}
-
-  get firstChild() {return this.children[0]}
-  get lastChild() {return this.children[this.children.length - 1]}
-
-  [Symbol.iterator]() {return this.children[Symbol.iterator]()}
-}
-CyNode.properties('data')
-
-class Node extends CyNode {
+const CyclicNode = require('./model/cyclic-node')
+class Node extends CyclicNode {
   constructor(data, children) {
     super(data, children)
     this.parent = null
@@ -307,6 +267,6 @@ class Node extends CyNode {
   *parents() {for (let p = this; p; p = p.parent) yield p}
 }
 
-Object.assign(v2, {App, CyNode, Node})
+Object.assign(v2, {App, Node})
 
 module.exports = v2
