@@ -2,6 +2,7 @@
 const itt = require('itt')
 const h = require('../h')
 const View = require('./view')
+const Menu = require('./menu')
 const ListBackedView = require('./list-backed-view')
 
 class Table extends ListBackedView {
