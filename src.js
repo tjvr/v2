@@ -4,7 +4,6 @@ const h = require('./h')
 const itt = require('itt')
 const emitter = require('./emitter')
 const rt = require('./rt')
-const {ucfirst, immediate, escapeRegExp} = require('./util')
 
 const v2 = {}
 
