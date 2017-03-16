@@ -12,7 +12,7 @@ function ToLength(len) {
   return len != len || len <= 0 ? 0 : len > Number.MAX_SAFE_INTEGER ? Number.MAX_SAFE_INTEGER : len
 }
 
-if (!String.prototype.padStart) String.prototype.padStart = function padStart(max, fill = ' ') {
+if (!String.prototype.padStart) def(String.prototype, 'padStart', function padStart(max, fill = ' ') {
   if (this == null) throw new TypeError('"this" value cannot be null or undefined')
   const s = '' + this
   max = ToLength(max)
@@ -25,9 +25,9 @@ if (!String.prototype.padStart) String.prototype.padStart = function padStart(ma
     fill += r < l ? fill.slice(0, r) : fill
   }
   return fill.slice(0, toFill) + s
-}
+})
 
-if (!String.prototype.padEnd) String.prototype.padEnd = function padEnd(max, fill = ' ') {
+if (!String.prototype.padEnd) def(String.prototype, 'padEnd', function padEnd(max, fill = ' ') {
   if (this == null) throw new TypeError('"this" value cannot be null or undefined')
   const s = '' + this
   max = ToLength(max)
@@ -40,4 +40,4 @@ if (!String.prototype.padEnd) String.prototype.padEnd = function padEnd(max, fil
     fill += r < l ? fill.slice(0, r) : fill
   }
   return s + fill.slice(0, toFill)
-}
+})
