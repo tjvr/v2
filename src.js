@@ -2638,6 +2638,6 @@ class MenuItem extends View {
   }
 }
 
-Object.assign(v2, {h, Model, View, App, Split, List, FilteredList, CyNode, Node, DynamicTreeItem, DynamicTree, Tree, Collection, Table, Menu, MenuBar, MenuItem})
+Object.assign(v2, {Model, View, App, Split, List, FilteredList, CyNode, Node, DynamicTreeItem, DynamicTree, Tree, Collection, Table, Menu, MenuBar, MenuItem})
 
 module.exports = v2
