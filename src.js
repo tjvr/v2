@@ -1,6 +1,5 @@
 'use strict'
 require('./polyfill')
-const itt = require('itt')
 
 const v2 = {}
 
