@@ -103,3 +103,5 @@ rt.keyWithModifiers = function keyWithModifiers(e) {
 
 rt.chooseFile = rt.current.chooseFile || rt.web.chooseFile
 rt.saveFile = rt.current.saveFile || rt.web.saveFile
+
+const h = require('./h')

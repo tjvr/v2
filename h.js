@@ -1,6 +1,5 @@
 'use strict'
 const itt = require('itt')
-const rt = require('./rt')
 
 function h(sel, ...args) {
   const el = h.createElement(sel)
@@ -174,3 +173,4 @@ Object.assign(module.exports = h, {
 
   removeChildren(el) {while (el.firstChild) el.removeChild(el.lastChild)},
 })
+const rt = require('./rt')
