@@ -809,6 +809,6 @@ class Node extends CyNode {
   *parents() {for (let p = this; p; p = p.parent) yield p}
 }
 
-Object.assign(v2, {Model, View, App, Split, List, FilteredList, CyNode, Node})
+Object.assign(v2, {Model, App, Split, List, FilteredList, CyNode, Node})
 
 module.exports = v2
