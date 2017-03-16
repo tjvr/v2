@@ -1,4 +1,5 @@
 'use strict'
+require('./polyfill-pad')
 const rt = require('./rt')
 const {ucfirst} = require('./util')
 
