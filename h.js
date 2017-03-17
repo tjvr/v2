@@ -98,13 +98,13 @@ function constrainTab(e, root) {
   return true
 }
 function firstFocusable(root) {
-  for (let t = root; t; t = next(t, root)) {
-    if (t.nodeType === 1 && isFocusable(t)) return t
+  for (let t = root; t; t = nextElement(t, root)) {
+    if (isFocusable(t)) return t
   }
 }
 function lastFocusable(root) {
-  for (let t = lastDescendant(root); t; t = previous(t, root)) {
-    if (t.nodeType === 1 && isFocusable(t)) return t
+  for (let t = lastElementDescendant(root); t; t = previousElement(t, root)) {
+    if (isFocusable(t)) return t
   }
 }
 
