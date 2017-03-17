@@ -119,17 +119,9 @@ function exitFullscreen(d = document) {
 }
 
 function createElement(sel) {
-  const parts = (sel || '').split(/([#.])/)
+  const parts = sel.split('.')
   const el = document.createElement(parts[0] || 'div')
-  const l = parts.length
-  if (l > 1) {
-    const classes = []
-    for (let i = 1; i < l; i += 2) {
-      if (parts[i] === '#') el.id = parts[i + 1]
-      else classes.push(parts[i + 1])
-    }
-    el.className = classes.join(' ')
-  }
+  if (parts.length > 1) el.className = parts.slice(1).join(' ')
   return el
 }
 function add(el, a) {
