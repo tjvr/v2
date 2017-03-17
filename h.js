@@ -36,37 +36,51 @@ function nearest(sel, el, stop) {
   }
 }
 function nextMatching(sel, el, stop) {
-  for (; el && el !== stop; el = el.nextElementSibling) {
+  for (; el; el = el.nextElementSibling) {
     if (el.matches(sel)) return el
+    if (el === stop) return
   }
 }
 function nextDescendantMatching(sel, el, stop) {
-  if (el === stop) return
-  for (; el; el = next(el, stop)) {
-    if (el.nodeType === 1 && el.matches(sel)) return el
-  }
-}
-function previousMatching(sel, el, stop) {
-  for (; el && el !== stop; el = el.previousElementSibling) {
+  for (; el; el = nextElement(el, stop)) {
     if (el.matches(sel)) return el
   }
 }
+function previousMatching(sel, el, stop) {
+  for (; el; el = el.previousElementSibling) {
+    if (el.matches(sel)) return el
+    if (el === stop) return
+  }
+}
 function previousDescendantMatching(sel, el, stop) {
-  for (; el && el !== stop; el = previous(el, stop)) {
-    if (el.nodeType === 1 && el.matches(sel)) return el
+  for (; el; el = previousElement(el, stop)) {
+    if (el.matches(sel)) return el
   }
 }
-function next(x, stop) {return x.firstChild || nextSkippingChildren(x, stop)}
+
+function next(x, stop) {
+  return x.firstChild || nextSkippingChildren(x, stop)
+}
+function nextElement(x, stop) {
+  return x.firstElementChild || nextElementSkippingChildren(x, stop)
+}
 function nextSkippingChildren(x, stop) {
-  for (; x && x !== stop; x = x.parentNode) {
-    if (x.nextSibling) return x.nextSibling
-  }
+  for (; x && x !== stop; x = x.parentNode) if (x.nextSibling) return x.nextSibling
 }
-function previous(x, stop) {return x === stop ? null : x.previousSibling ? lastDescendant(x.previousSibling, stop) : x.parentNode}
+function nextElementSkippingChildren(x, stop) {
+  for (; x && x !== stop; x = x.parentElement) if (x.nextElementSibling) return x.nextElementSibling
+}
+function previous(x, stop) {
+  return x === stop ? null : x.previousSibling ? lastDescendant(x.previousSibling, stop) : x.parentNode
+}
+function previousElement(x, stop) {
+  return x === stop ? null : x.previousElementSibling ? lastElementDescendant(x.previousElementSibling, stop) : x.parentElement
+}
 function lastDescendant(x, stop) {
-  for (; x && x !== stop; x = x.lastChild) {
-    if (!x.lastChild) return x
-  }
+  for (; x && x !== stop; x = x.lastChild) if (!x.lastChild) return x
+}
+function lastElementDescendant(x, stop) {
+  for (; x && x !== stop; x = x.lastElementChild) if (!x.lastElementChild) return x
 }
 
 function constrainTab(e, root) {
@@ -167,6 +181,6 @@ function attrs(el, a) {
 
 function removeChildren(el) {while (el.firstChild) el.removeChild(el.lastChild)}
 
-Object.assign(h, {html, pushView, popView, ownerView, nearest, nextMatching, nextDescendantMatching, previousMatching, previousDescendantMatching, next, nextSkippingChildren, previous, lastDescendant, constrainTab, firstFocusable, lastFocusable, isLink, isFormElement, isFocusable, acceptsKeyboardInput, isFullscreen, fullscreenElement, enterFullscreen, exitFullscreen, createElement, add, attrs, removeChildren})
+Object.assign(h, {html, pushView, popView, ownerView, nearest, nextMatching, nextDescendantMatching, previousMatching, previousDescendantMatching, next, nextElement, nextSkippingChildren, nextElementSkippingChildren, previous, previousElement, lastDescendant, lastElementDescendant, constrainTab, firstFocusable, lastFocusable, isLink, isFormElement, isFocusable, acceptsKeyboardInput, isFullscreen, fullscreenElement, enterFullscreen, exitFullscreen, createElement, add, attrs, removeChildren})
 module.exports = h
 const rt = require('./rt')
