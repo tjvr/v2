@@ -162,7 +162,9 @@ function add(el, a) {
 //   a.then(replace)
 // },
 function attrs(el, a) {
-  for (const k in a) {
+  const keys = Object.keys(a), l = keys.length
+  for (let i = 0; i < l; ++i) {
+    const k = keys[i]
     const v = a[k]
     if (typeof v === 'object') attrs(el[k], v)
     else if (k.startsWith('on')) el.addEventListener(k.slice(2), typeof v === 'string' ? VIEW[v].bind(VIEW) : v)
