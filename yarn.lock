@@ -2,6 +2,6 @@
 # yarn lockfile v1
 
 
-itt@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/itt/-/itt-0.1.2.tgz#3fa2daf5e5ce347057020cd2d772f6248c2a8212"
+itt@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/itt/-/itt-0.2.1.tgz#1ae9fcee50d9c7ec497e22f0ea7a4acca3fdebe5"
