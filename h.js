@@ -30,7 +30,8 @@ function ownerView(v) {
 }
 
 function nearest(sel, el, stop) {
-  for (; el && el.nodeType === 1 && el !== stop; el = el.parentNode) {
+  if (el.nodeType !== 1) el = el.parentElement
+  for (; el && el !== stop; el = el.parentElement) {
     if (el.matches(sel)) return el
   }
 }
