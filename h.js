@@ -1,6 +1,9 @@
 'use strict'
 const itt = require('itt')
 
+const VIEWS = []
+let VIEW = null
+
 function h(sel, ...args) {
   const el = h.createElement(sel)
   h.add(el, args)
@@ -8,9 +11,6 @@ function h(sel, ...args) {
 }
 
 Object.assign(module.exports = h, {
-  _views: [],
-  _view: null,
-
   html(s) {
     // TODO tr etc.
     const d = document.createElement('div')
@@ -21,10 +21,10 @@ Object.assign(module.exports = h, {
   },
 
   pushView(v) {
-    if (h._view) h._views.push(h._view)
-    h._view = v
+    if (VIEW) VIEWS.push(VIEW)
+    VIEW = v
   },
-  popView(v) {h._view = h._views.pop()},
+  popView(v) {VIEW = VIEWS.pop()},
 
   ownerView(v) {
     for (; v; v = v.parentElement) if (v.view) return v.view
@@ -135,7 +135,7 @@ Object.assign(module.exports = h, {
   },
   add(el, a) {
     if (a && typeof a === 'object') {
-      if (a.isView) h._view.add(a, el)
+      if (a.isView) VIEW.add(a, el)
       else if (a.nodeType) el.appendChild(a)
       // else if (a.then) h.addPromise(el, a)
       else if (Array.isArray(a) || itt.is(a)) {
@@ -150,7 +150,7 @@ Object.assign(module.exports = h, {
   //     if (Array.isArray(a)) {
   //       for (const c of a) h.add(f, c)
   //     } else if (typeof a === 'object' && a) {
-  //       if (a.isView) h._view.add(a, el)
+  //       if (a.isView) VIEW.add(a, el)
   //       else if (a.nodeType) el.appendChild(a)
   //       else if (a.then) h.addPromise(el, a)
   //       else h.attrs(el, a)
@@ -166,7 +166,7 @@ Object.assign(module.exports = h, {
     for (const k in a) {
       const v = a[k]
       if (typeof v === 'object') h.attrs(el[k], v)
-      else if (k.startsWith('on')) el.addEventListener(k.slice(2), typeof v === 'string' ? h._view[v].bind(h._view) : v)
+      else if (k.startsWith('on')) el.addEventListener(k.slice(2), typeof v === 'string' ? VIEW[v].bind(VIEW) : v)
       else el[k] = v
     }
   },
