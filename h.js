@@ -11,7 +11,7 @@ function h(sel, ...args) {
 }
 
 function html(s) {
-  // TODO tr etc.
+  // TODO <tr> etc.
   const d = document.createElement('div')
   d.innerHTML = s
   const f = document.createDocumentFragment()
@@ -105,7 +105,7 @@ function acceptsKeyboardInput(x, e) {
     x.isContentEditable ||
     (x.localName === 'html' || x.localName === 'body') && x.ownerDocument.designMode === 'on') && (x.dataset.nativeKeybindings !== 'false' || e.key.length === 1 && !(e.ctrlKey || e.metaKey || !rt.isApple && e.altKey))
 }
-// acceptsClick(x) {return isLink(x) || isFormElement(x)},
+// acceptsClick(x) {return isLink(x) || isFormElement(x)}
 
 function isFullscreen(d = document) {return !!fullscreenElement(d)}
 function fullscreenElement(d = document) {return d.webkitFullscreenElement || d.webkitFullScreenElement || d.mozFullscreenElement || d.mozFullScreenElement || d.msFullScreenElement || d.msFullscreenElement}
@@ -152,7 +152,7 @@ function add(el, a) {
 //   const tn = document.createTextNode('')
 //   el.appendChild(tn)
 //   a.then(replace)
-// },
+// }
 function attrs(el, a) {
   const keys = Object.keys(a), l = keys.length
   for (let i = 0; i < l; ++i) {
