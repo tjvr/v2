@@ -23,7 +23,7 @@ class View {
 
   constructor(p) {
     this._listeners = null
-    this.children = new Set
+    this.children = []
     this.parent = null
     this.isLive = false
 
@@ -82,7 +82,7 @@ class View {
     if (before) mount.insertBefore(child.el, before)
     else mount.appendChild(child.el)
 
-    this.children.add(child)
+    this.children.push(child)
     child.parent = this
     if (this.isLive) child._activate()
     return this
@@ -90,7 +90,8 @@ class View {
   _removeStructural() {
     const p = this.parent
     if (!p) return
-    p.children.delete(this)
+    const i = p.children.indexOf(this)
+    if (i !== -1) p.children.splice(i, 1)
     this.parent = null
     if (p._childRemoved) p._childRemoved(this)
   }
